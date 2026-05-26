@@ -1,0 +1,118 @@
+<HTML xmlns:MSMNYVWR>
+	<HEAD>
+		<TITLE>BrokerKnow© Online</TITLE> 
+		<LINK REL="stylesheet" TYPE="text/css" HREF="style/default.css">
+	</HEAD>
+	<BODY OnLoad="JavaScript: document.all.item('username').focus();" oncontextmenu="return false;" onbeforeunload="document.body.innerHTML='';" OnKeyPress="if (event.keyCode==13) validate(frmLogin, true);">
+		<?IMPORT namespace = MSMNYVWR implementation = "controls/CmdBtnCls.htc" >
+		<script language="JavaScript">  <!-- 
+ 			function validate(f, toSubmit) { 
+   				  var msg = ''; 
+   			   	  if (f.username.value == '') msg = 'You must enter your username to log in.'; 
+			      else if (f.password.value == '') msg = 'You must enter your password to log in.'; 
+			      
+			      if (msg != '') { 
+   					alert(msg); 
+   					return false; 
+   					}
+   				 else{ 
+   					if (toSubmit==true) f.submit();
+					else return true; 
+					}
+			 }   
+			 --> 
+		</script>
+		
+		<form method="post" action="WebvalidateLog.asp" onsubmit="return validate(this)" id="frmLogin">
+			
+			<Script Language="JavaScript">
+				document.writeln ('<input type="hidden" name="screenHeight" value="' + screen.height + '">')
+			</Script>
+			<table border="0" width="100%" cellspacing="0" cellpadding="0" height="100%" style="FONT-SIZE: x-small; FONT-FAMILY: Tahoma">				
+				<tr>
+					<td width="33%">
+						
+					</td>
+					<td width="33%">
+						<table border="0" cellspacing="0" cellpadding="0" width="100%">
+							<tr>
+								<td align=center valign="top" width="100%"></td>
+							</tr>
+							<tr>
+								<td>
+									<table cellSpacing="0" cellPadding="0" width="200" border="0">
+										<tbody>
+											<tr>
+												<td colspan="3"></td>
+											</tr>
+											<tr>
+											<td colspan="3" align=center valign="top" width="100%"><IMG Src="Images/copyrightlogo.JPG" TITLE="BrokerKnow" ALT="BrokerKnow" height="40px"></td>
+											</tr>
+							
+											<tr>
+												<td >
+													<br>
+													&nbsp;
+												</td>
+												<td >&nbsp;
+													<div align="right">
+														<table width="75%" border="0" cellspacing="2" cellpadding="0">
+															<TBODY>
+																<tr>
+																	<td><b><FONT face="Tahoma" color="indigo" size="2">Username:</FONT></b></td>
+																	<td>
+                                                                    <input name="username" style="WIDTH: 156px; HEIGHT: 22px;" size="20"></td>
+																</tr>
+																<center>
+																	<tr>
+																		<td><b><FONT face="Tahoma" color="indigo" size="2">Password:</FONT></b></td>
+																		<td><input type="password" size="21" name="password" style="WIDTH: 155px; HEIGHT: 22px;"></FONT></td>
+																	</tr>
+																	<tr>
+																		<td align="right">
+																			<p></p>
+																		</td>
+																</center>
+																<td align="right">
+																	<P align="Right">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<MSMNYVWR:CommandButton id="cmdLogin" type="submit" width="48px" height="15px" caption="Login" onclick="vbscript: frmLogin.submit" /></P>
+																</td>								
+																<center>
+																</tr>
+
+																<tr>																
+																<td colspan="2" align="Right">
+																<a class=small href="Web/WebAddClient.asp" target=""><big>New Users Online Registration</a>																	
+																</td>															
+																</tr>
+																<tr>
+																							
+																<td colspan="2" align="Right">
+																<a class=small href="Web/WebAuthentication.asp" target=""><big>Existing Users Online Registration</a>															
+																</td>																
+																</tr>
+																
+																<tr>															
+																<td colspan="2" align="Right"><a href="" target="" > <big>African Alliance website</a>																	
+																										
+																</td>																	
+																</tr>			
+										</tbody>
+									</table>
+									</CENTER></DIV>
+								</td>
+								<td >&nbsp;
+								</td>
+							</tr>
+							<tr>
+								<td colspan="3"></td>
+							</tr>
+						</table>
+					</td>
+				</tr>
+			</table>
+			</td>
+			<td width="34%">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
+			</TR></TABLE>
+		</form>
+	</BODY>
+</HTML>

@@ -1,0 +1,750 @@
+SET QUOTED_IDENTIFIER ON 
+GO
+SET ANSI_NULLS ON 
+GO
+
+CREATE proc cont_CreateManualContract
+
+--/*
+@OrdDetail_DPA_ int,
+@Broker_DPA_ int,
+@LotPrice money,
+@LotQty money,
+@LotSlipNo varchar(20),
+@LotTDateDesc varchar(20),
+@ContractSettlementDateDesc varchar(20),
+@ChangedBy int
+--*/
+
+as
+
+/* Start Variables For Testings
+
+Declare @ChangedBy int
+set @ChangedBy = 12
+
+Declare @OrdDetail_DPA_ int
+set @OrdDetail_DPA_ = 15269 -- 39816 15269
+
+Declare @Broker_DPA_ int
+set @Broker_DPA_ = 3
+
+Declare @LotPrice money
+set @LotPrice = 17.35
+
+Declare @LotQty money
+set @LotQty = 67
+
+Declare @LotSlipNo varchar(20)
+set @LotSlipNo = left((SELECT     NEWID() AS uniqueID), 6)
+
+Declare @LotTDateDesc varchar(20)
+set @LotTDateDesc = '7-August-2008'
+
+Declare @ContractSettlementDateDesc varchar(20)
+set @ContractSettlementDateDesc = '13-August-2008'
+
+--End Variables For Testing */
+
+
+Declare @SecType varchar(20)
+set @SecType = (
+	SELECT     OrderSecType.OrderSecTypeDisplayName
+	FROM         OrdDetail INNER JOIN
+	                      tbOrder ON OrdDetail.Order_DPA_ = tbOrder.Order_DPA_ INNER JOIN
+	                      OrderSecType ON tbOrder.OrderSecType_DPA_ = OrderSecType.OrderSecType_DPA_
+	WHERE     (OrdDetail.OrdDetail_DPA_ = @OrdDetail_DPA_)
+)
+
+if @SecType = 'Security'
+Begin
+execute cont_CreateEquityContract @OrdDetail_DPA_, @Broker_DPA_, @LotPrice, @LotQty, @LotSlipNo, @LotTDateDesc, @ContractSettlementDateDesc, @ChangedBy
+--Select 'Security'
+End
+
+if @SecType = 'Fixed'
+Begin
+execute cont_CreateBondContract @OrdDetail_DPA_, @Broker_DPA_, @LotPrice, @LotQty, @LotSlipNo, @LotTDateDesc, @ContractSettlementDateDesc, @ChangedBy
+--Select 'Fixed'
+End
+
+
+GO
+SET QUOTED_IDENTIFIER OFF 
+GO
+SET ANSI_NULLS ON 
+GO
+
+SET QUOTED_IDENTIFIER OFF 
+GO
+SET ANSI_NULLS ON 
+GO
+
+
+
+
+CREATE proc cont_CreateBondContract
+
+--/*
+@OrdDetail_DPA_ int,
+@Broker_DPA_ int,
+@LotPrice money,
+@LotQty money,
+@LotSlipNo varchar(20),
+@LotTDateDesc varchar(20),
+@ContractSettlementDateDesc varchar(20),
+@ChangedBy int
+--*/
+
+as
+
+/* Start Variables For Testings
+
+Declare @ChangedBy int
+set @ChangedBy = 12
+
+Declare @OrdDetail_DPA_ int
+set @OrdDetail_DPA_ = 39816
+
+Declare @Broker_DPA_ int
+set @Broker_DPA_ = 3
+
+Declare @LotPrice money
+set @LotPrice = 17.35
+
+Declare @LotQty money
+set @LotQty = 67
+
+Declare @LotSlipNo varchar(20)
+set @LotSlipNo = left((SELECT     NEWID() AS uniqueID), 6)
+
+Declare @LotTDateDesc varchar(20)
+set @LotTDateDesc = '7-August-2008'
+
+Declare @ContractSettlementDateDesc varchar(20)
+set @ContractSettlementDateDesc = '13-August-2008'
+
+End Variables For Testing */
+
+
+Declare @LotTDate datetime
+set @LotTDate = convert(datetime, @LotTDateDesc)
+
+Declare @ContractSettlementDate datetime
+set @ContractSettlementDate = convert(datetime, @ContractSettlementDateDesc)
+
+Declare @UniqueID uniqueidentifier
+set @UniqueID = (SELECT     NEWID() AS uniqueID)
+
+
+INSERT INTO Contract
+                      (Contract_EIT_, ContractSettlementDate, Status_DPA_)
+SELECT     
+@UniqueID AS Contract_EIT_, 
+@ContractSettlementDate AS ContractSettlementDate,
+1 as Status_DPA_
+
+Declare @Contract_DPA_ int
+set @Contract_DPA_ = (SELECT Contract_DPA_ FROM  Contract WHERE (Contract_EIT_ = @UniqueID))
+
+Declare @Side as char
+set @Side = (SELECT     LEFT(OrderType.OrderTypeDescription, 1) AS Side FROM OrdDetail INNER JOIN tbOrder ON OrdDetail.Order_DPA_ = tbOrder.Order_DPA_ INNER JOIN OrderType ON tbOrder.OrderType_DPA_ = OrderType.OrderType_DPA_ WHERE (OrdDetail.OrdDetail_DPA_ = @OrdDetail_DPA_))
+
+Declare @ContractNumber as varchar(30)
+set @ContractNumber = @Side + convert(varchar(20), @Contract_DPA_)
+
+Declare @LotGross as money
+set @LotGross = round(@LotQty * @LotPrice / 100,2)
+
+Declare @CDSImport_DPA_ as int
+set @CDSImport_DPA_ = isnull((SELECT MIN(CDSImport_DPA_) AS MinCDSImport_DPA_ FROM Lot),0) - 1
+
+Declare @CDSTransaction as tinyint
+set @CDSTransaction = 0
+
+Declare @UniqueSlip as varchar(30)
+set @UniqueSlip = @Side + convert(varchar(20), @LotSlipNo)
+
+INSERT INTO Lot
+(Contract_DPA_, OrdDetail_DPA_, LotPrice, LotQty, LotSlipNo, LotTDate, Broker_DPA_, ContractNumber, LotGrossAmount, ChangedBy, 
+ContractSettlementDate, TimeChanged, CDSImport_DPA_, CDSTransaction, UniqueSlip)
+SELECT     
+@Contract_DPA_ as Contract_DPA_, 
+@OrdDetail_DPA_ as OrdDetail_DPA_, 
+@LotPrice as LotPrice, 
+@LotQty as LotQty, 
+@LotSlipNo as LotSlipNo, 
+@LotTDate as LotTDate, 
+@Broker_DPA_ as Broker_DPA_, 
+@ContractNumber as ContractNumber, 
+@LotGross as LotGrossAmount, 
+@ChangedBy as ChangedBy, 
+@ContractSettlementDate as ContractSettlementDate, 
+getdate() as TimeChanged,
+@CDSImport_DPA_ as CDSImport_DPA_,
+@CDSTransaction as CDSTransaction,
+@UniqueSlip as UniqueSlip
+
+
+-- Declarations for LevyContract inserting
+Declare @SystemMaintained int
+Declare @LevyDescription varchar(30)
+Declare @LevyRate float
+Declare @LevyShortName varchar(30)
+Declare @LevyAmount money
+Declare @TotalCharges money
+Declare @LowerRate float
+Declare @UpperRate float
+Declare @GrossBoundary float
+Declare @BrokerCommission float
+Declare @LevyBlock float
+Declare @StatementGross money
+Declare @StatementNet money
+
+set @TotalCharges = 0
+
+
+-- Insert Broker Commission
+set @SystemMaintained = 11
+set @LevyDescription = 'Broker Commission'
+set @LevyShortName = 'Commission'
+set @LowerRate = (
+SELECT     Commission.BondCommission
+FROM         tbOrder INNER JOIN
+                      OrdDetail ON tbOrder.Order_DPA_ = OrdDetail.Order_DPA_ INNER JOIN
+                      Client ON tbOrder.Client_DPA_ = Client.Client_DPA_ INNER JOIN
+                      Commission ON Client.Commission_DPA_ = Commission.Commission_DPA_
+WHERE     (OrdDetail.OrdDetail_DPA_ = @OrdDetail_DPA_)
+)
+set @UpperRate = (
+SELECT     Commission.UpperBondCommission
+FROM         tbOrder INNER JOIN
+                      OrdDetail ON tbOrder.Order_DPA_ = OrdDetail.Order_DPA_ INNER JOIN
+                      Client ON tbOrder.Client_DPA_ = Client.Client_DPA_ INNER JOIN
+                      Commission ON Client.Commission_DPA_ = Commission.Commission_DPA_
+WHERE     (OrdDetail.OrdDetail_DPA_ = @OrdDetail_DPA_)
+)
+set @GrossBoundary = (
+SELECT     Commission.BondBoundary
+FROM         tbOrder INNER JOIN
+                      OrdDetail ON tbOrder.Order_DPA_ = OrdDetail.Order_DPA_ INNER JOIN
+                      Client ON tbOrder.Client_DPA_ = Client.Client_DPA_ INNER JOIN
+                      Commission ON Client.Commission_DPA_ = Commission.Commission_DPA_
+WHERE     (OrdDetail.OrdDetail_DPA_ = @OrdDetail_DPA_)
+)
+set @LevyRate = (case when @LotGross < @GrossBoundary then @LowerRate else @UpperRate end)
+set @LevyAmount = dbo.cont_Round05 (@LevyRate * @LotGross / 100)
+set @TotalCharges = @TotalCharges + @LevyAmount 
+set @BrokerCommission = @LevyAmount 
+
+INSERT INTO LevyContract
+(Contract_DPA_, LevyAmount, LevyName, LevyRate, LevyBlock, LevyShortName, LevyRatePercentage, SystemMaintained, 
+ChangedBy, TimeChanged)
+SELECT     
+@Contract_DPA_ as Contract_DPA_, 
+@LevyAmount as LevyAmount, 
+@LevyDescription as LevyName, 
+@LevyRate as LevyRate, 
+0 as LevyBlock, 
+@LevyShortName as LevyShortName, 
+convert(varchar(10),@LevyRate) + '%' as LevyRatePercentage, 
+@SystemMaintained as SystemMaintained, 
+@ChangedBy as ChangedBy, 
+getdate() as TimeChanged
+
+
+-- Insert Agent Commission
+set @SystemMaintained = 12
+set @LevyDescription = 'Agent Commission'
+set @LevyShortName = 'Agent'
+set @LevyRate = isnull((
+SELECT     Commission.CommissionRate
+FROM         OrdDetail INNER JOIN
+                      tbOrder ON OrdDetail.Order_DPA_ = tbOrder.Order_DPA_ INNER JOIN
+                      Client ON tbOrder.Client_DPA_ = Client.Client_DPA_ INNER JOIN
+                      Agent ON Client.Agent_DPA_ = Agent.Agent_DPA_ INNER JOIN
+                      Commission ON Agent.Commission_DPA_ = Commission.Commission_DPA_
+WHERE     (OrdDetail.OrdDetail_DPA_ = @OrdDetail_DPA_)
+),0)
+set @LevyAmount = dbo.cont_Round05 (@LevyRate * @BrokerCommission / 100)
+
+INSERT INTO LevyContract
+(Contract_DPA_, LevyAmount, LevyName, LevyRate, LevyBlock, LevyShortName, LevyRatePercentage, SystemMaintained, 
+ChangedBy, TimeChanged)
+SELECT     
+@Contract_DPA_ as Contract_DPA_, 
+@LevyAmount as LevyAmount, 
+@LevyDescription as LevyName, 
+@LevyRate as LevyRate, 
+0 as LevyBlock, 
+@LevyShortName as LevyShortName, 
+convert(varchar(10),@LevyRate) + '%' as LevyRatePercentage, 
+@SystemMaintained as SystemMaintained, 
+@ChangedBy as ChangedBy, 
+getdate() as TimeChanged
+
+
+
+--Update Cash Balance
+Declare @Client_DPA_ int
+set @Client_DPA_ = (SELECT tbOrder.Client_DPA_ FROM  OrdDetail INNER JOIN tbOrder ON OrdDetail.Order_DPA_ = tbOrder.Order_DPA_ WHERE (OrdDetail.OrdDetail_DPA_ = @OrdDetail_DPA_))
+set @StatementGross = @LotGross
+set @StatementNet = (case when @Side = 'P' then -(@StatementGross + @TotalCharges) else (@StatementGross - @TotalCharges) end)
+
+UPDATE    ClientBalances
+SET              CurrentBal = CurrentBal + @StatementNet
+WHERE     (client_DPA_ = @Client_DPA_)
+
+
+/*
+
+
+
+*/
+
+
+
+
+
+GO
+SET QUOTED_IDENTIFIER OFF 
+GO
+SET ANSI_NULLS ON 
+GO
+
+SET QUOTED_IDENTIFIER OFF 
+GO
+SET ANSI_NULLS ON 
+GO
+
+
+
+
+CREATE proc cont_CreateEquityContract
+
+--/*
+@OrdDetail_DPA_ int,
+@Broker_DPA_ int,
+@LotPrice money,
+@LotQty money,
+@LotSlipNo varchar(20),
+@LotTDateDesc varchar(20),
+@ContractSettlementDateDesc varchar(20),
+@ChangedBy int
+--*/
+
+as
+
+/* Start Variables For Testings
+
+Declare @ChangedBy int
+set @ChangedBy = 12
+
+Declare @OrdDetail_DPA_ int
+set @OrdDetail_DPA_ = 39816
+
+Declare @Broker_DPA_ int
+set @Broker_DPA_ = 3
+
+Declare @LotPrice money
+set @LotPrice = 17.35
+
+Declare @LotQty money
+set @LotQty = 67
+
+Declare @LotSlipNo varchar(20)
+set @LotSlipNo = left((SELECT     NEWID() AS uniqueID), 6)
+
+Declare @LotTDateDesc varchar(20)
+set @LotTDateDesc = '7-August-2008'
+
+Declare @ContractSettlementDateDesc varchar(20)
+set @ContractSettlementDateDesc = '13-August-2008'
+
+End Variables For Testing */
+
+
+Declare @LotTDate datetime
+set @LotTDate = convert(datetime, @LotTDateDesc)
+
+Declare @ContractSettlementDate datetime
+set @ContractSettlementDate = convert(datetime, @ContractSettlementDateDesc)
+
+Declare @UniqueID uniqueidentifier
+set @UniqueID = (SELECT     NEWID() AS uniqueID)
+
+
+INSERT INTO Contract
+                      (Contract_EIT_, ContractSettlementDate, Status_DPA_)
+SELECT     
+@UniqueID AS Contract_EIT_, 
+@ContractSettlementDate AS ContractSettlementDate,
+1 as Status_DPA_
+
+Declare @Contract_DPA_ int
+set @Contract_DPA_ = (SELECT Contract_DPA_ FROM  Contract WHERE (Contract_EIT_ = @UniqueID))
+
+Declare @Side as char
+set @Side = (SELECT     LEFT(OrderType.OrderTypeDescription, 1) AS Side FROM OrdDetail INNER JOIN tbOrder ON OrdDetail.Order_DPA_ = tbOrder.Order_DPA_ INNER JOIN OrderType ON tbOrder.OrderType_DPA_ = OrderType.OrderType_DPA_ WHERE (OrdDetail.OrdDetail_DPA_ = @OrdDetail_DPA_))
+
+Declare @ContractNumber as varchar(30)
+set @ContractNumber = @Side + convert(varchar(20), @Contract_DPA_)
+
+Declare @LotGross as money
+set @LotGross = round(@LotQty * @LotPrice,2)
+
+Declare @CDSImport_DPA_ as int
+set @CDSImport_DPA_ = isnull((SELECT MIN(CDSImport_DPA_) AS MinCDSImport_DPA_ FROM Lot),0) - 1
+
+Declare @CDSTransaction as tinyint
+set @CDSTransaction = 0
+
+Declare @UniqueSlip as varchar(30)
+set @UniqueSlip = @Side + convert(varchar(20), @LotSlipNo)
+
+INSERT INTO Lot
+(Contract_DPA_, OrdDetail_DPA_, LotPrice, LotQty, LotSlipNo, LotTDate, Broker_DPA_, ContractNumber, LotGrossAmount, ChangedBy, 
+ContractSettlementDate, TimeChanged, CDSImport_DPA_, CDSTransaction, UniqueSlip)
+SELECT     
+@Contract_DPA_ as Contract_DPA_, 
+@OrdDetail_DPA_ as OrdDetail_DPA_, 
+@LotPrice as LotPrice, 
+@LotQty as LotQty, 
+@LotSlipNo as LotSlipNo, 
+@LotTDate as LotTDate, 
+@Broker_DPA_ as Broker_DPA_, 
+@ContractNumber as ContractNumber, 
+@LotGross as LotGrossAmount, 
+@ChangedBy as ChangedBy, 
+@ContractSettlementDate as ContractSettlementDate, 
+getdate() as TimeChanged,
+@CDSImport_DPA_ as CDSImport_DPA_,
+@CDSTransaction as CDSTransaction,
+@UniqueSlip as UniqueSlip
+
+
+-- Declarations for LevyContract inserting
+Declare @SystemMaintained int
+Declare @LevyDescription varchar(30)
+Declare @LevyRate float
+Declare @LevyShortName varchar(30)
+Declare @LevyAmount money
+Declare @TotalCharges money
+Declare @LowerRate float
+Declare @UpperRate float
+Declare @GrossBoundary float
+Declare @BrokerCommission float
+Declare @LevyBlock float
+Declare @StatementGross money
+Declare @StatementNet money
+
+set @TotalCharges = 0
+
+
+-- Insert Broker Commission
+set @SystemMaintained = 11
+set @LevyDescription = 'Broker Commission'
+set @LevyShortName = 'Commission'
+set @LowerRate = (
+SELECT     Commission.CommissionRate
+FROM         tbOrder INNER JOIN
+                      OrdDetail ON tbOrder.Order_DPA_ = OrdDetail.Order_DPA_ INNER JOIN
+                      Client ON tbOrder.Client_DPA_ = Client.Client_DPA_ INNER JOIN
+                      Commission ON Client.Commission_DPA_ = Commission.Commission_DPA_
+WHERE     (OrdDetail.OrdDetail_DPA_ = @OrdDetail_DPA_)
+)
+set @UpperRate = (
+SELECT     Commission.UpperSecurityCommission
+FROM         tbOrder INNER JOIN
+                      OrdDetail ON tbOrder.Order_DPA_ = OrdDetail.Order_DPA_ INNER JOIN
+                      Client ON tbOrder.Client_DPA_ = Client.Client_DPA_ INNER JOIN
+                      Commission ON Client.Commission_DPA_ = Commission.Commission_DPA_
+WHERE     (OrdDetail.OrdDetail_DPA_ = @OrdDetail_DPA_)
+)
+set @GrossBoundary = (
+SELECT     Commission.SecurityBoundary
+FROM         tbOrder INNER JOIN
+                      OrdDetail ON tbOrder.Order_DPA_ = OrdDetail.Order_DPA_ INNER JOIN
+                      Client ON tbOrder.Client_DPA_ = Client.Client_DPA_ INNER JOIN
+                      Commission ON Client.Commission_DPA_ = Commission.Commission_DPA_
+WHERE     (OrdDetail.OrdDetail_DPA_ = @OrdDetail_DPA_)
+)
+set @LevyRate = (case when @LotGross < @GrossBoundary then @LowerRate else @UpperRate end)
+set @LevyAmount = dbo.cont_Round05 (@LevyRate * @LotGross / 100)
+set @TotalCharges = @TotalCharges + @LevyAmount 
+set @BrokerCommission = @LevyAmount 
+
+INSERT INTO LevyContract
+(Contract_DPA_, LevyAmount, LevyName, LevyRate, LevyBlock, LevyShortName, LevyRatePercentage, SystemMaintained, 
+ChangedBy, TimeChanged)
+SELECT     
+@Contract_DPA_ as Contract_DPA_, 
+@LevyAmount as LevyAmount, 
+@LevyDescription as LevyName, 
+@LevyRate as LevyRate, 
+0 as LevyBlock, 
+@LevyShortName as LevyShortName, 
+convert(varchar(10),@LevyRate) + '%' as LevyRatePercentage, 
+@SystemMaintained as SystemMaintained, 
+@ChangedBy as ChangedBy, 
+getdate() as TimeChanged
+
+
+-- Insert Agent Commission
+set @SystemMaintained = 12
+set @LevyDescription = 'Agent Commission'
+set @LevyShortName = 'Agent'
+set @LevyRate = isnull((
+SELECT     Commission.CommissionRate
+FROM         OrdDetail INNER JOIN
+                      tbOrder ON OrdDetail.Order_DPA_ = tbOrder.Order_DPA_ INNER JOIN
+                      Client ON tbOrder.Client_DPA_ = Client.Client_DPA_ INNER JOIN
+                      Agent ON Client.Agent_DPA_ = Agent.Agent_DPA_ INNER JOIN
+                      Commission ON Agent.Commission_DPA_ = Commission.Commission_DPA_
+WHERE     (OrdDetail.OrdDetail_DPA_ = @OrdDetail_DPA_)
+),0)
+set @LevyAmount = dbo.cont_Round05 (@LevyRate * @BrokerCommission / 100)
+
+INSERT INTO LevyContract
+(Contract_DPA_, LevyAmount, LevyName, LevyRate, LevyBlock, LevyShortName, LevyRatePercentage, SystemMaintained, 
+ChangedBy, TimeChanged)
+SELECT     
+@Contract_DPA_ as Contract_DPA_, 
+@LevyAmount as LevyAmount, 
+@LevyDescription as LevyName, 
+@LevyRate as LevyRate, 
+0 as LevyBlock, 
+@LevyShortName as LevyShortName, 
+convert(varchar(10),@LevyRate) + '%' as LevyRatePercentage, 
+@SystemMaintained as SystemMaintained, 
+@ChangedBy as ChangedBy, 
+getdate() as TimeChanged
+
+
+-- Insert NSE Levy
+set @SystemMaintained = 15
+set @LevyDescription = LTRIM(RTRIM((SELECT TOP 1 LevyDescription FROM Levy WHERE (SystemMaintained = @SystemMaintained))))
+set @LevyShortName = LTRIM(RTRIM(UPPER((SELECT TOP 1 LevyShortName FROM Levy WHERE (SystemMaintained = @SystemMaintained)))))
+set @LevyRate = round(isnull(
+	(
+		SELECT   TOP 1  (SELECT     LevyAmount  FROM Levy WHERE  (SystemMaintained = @SystemMaintained)) AS CDSLevyRate
+	),0),4)
+set @LevyAmount = dbo.cont_Round05 (@LevyRate * @LotGross / 100)
+set @TotalCharges = @TotalCharges + @LevyAmount 
+
+INSERT INTO LevyContract
+(Contract_DPA_, LevyAmount, LevyName, LevyRate, LevyBlock, LevyShortName, LevyRatePercentage, SystemMaintained, 
+ChangedBy, TimeChanged)
+SELECT     
+@Contract_DPA_ as Contract_DPA_, 
+@LevyAmount as LevyAmount, 
+@LevyDescription as LevyName, 
+@LevyRate as LevyRate, 
+0 as LevyBlock, 
+@LevyShortName as LevyShortName, 
+convert(varchar(10),@LevyRate) + '%' as LevyRatePercentage, 
+@SystemMaintained as SystemMaintained, 
+@ChangedBy as ChangedBy, 
+getdate() as TimeChanged
+
+
+-- Insert CMA Levy
+set @SystemMaintained = 14
+set @LevyDescription = LTRIM(RTRIM((SELECT TOP 1 LevyDescription FROM Levy WHERE (SystemMaintained = @SystemMaintained))))
+set @LevyShortName = LTRIM(RTRIM(UPPER((SELECT TOP 1 LevyShortName FROM Levy WHERE (SystemMaintained = @SystemMaintained)))))
+set @LevyRate = round(isnull(
+	(
+		SELECT   TOP 1  (SELECT     LevyAmount  FROM Levy WHERE  (SystemMaintained = @SystemMaintained)) AS CDSLevyRate
+	),0),4)
+set @LevyAmount = dbo.cont_Round05 (@LevyRate * @LotGross / 100)
+set @TotalCharges = @TotalCharges + @LevyAmount 
+
+INSERT INTO LevyContract
+(Contract_DPA_, LevyAmount, LevyName, LevyRate, LevyBlock, LevyShortName, LevyRatePercentage, SystemMaintained, 
+ChangedBy, TimeChanged)
+SELECT     
+@Contract_DPA_ as Contract_DPA_, 
+@LevyAmount as LevyAmount, 
+@LevyDescription as LevyName, 
+@LevyRate as LevyRate, 
+0 as LevyBlock, 
+@LevyShortName as LevyShortName, 
+convert(varchar(10),@LevyRate) + '%' as LevyRatePercentage, 
+@SystemMaintained as SystemMaintained, 
+@ChangedBy as ChangedBy, 
+getdate() as TimeChanged
+
+
+-- Insert CDSC Levy (There should be two levies)
+set @SystemMaintained = 16
+set @LevyDescription = LTRIM(RTRIM((SELECT TOP 1 LevyDescription FROM Levy WHERE (SystemMaintained = @SystemMaintained))))
+set @LevyShortName = LTRIM(RTRIM(UPPER((SELECT TOP 1 LevyShortName FROM Levy WHERE (SystemMaintained = @SystemMaintained)))))
+set @LevyRate = round(isnull(
+	(
+		SELECT   TOP 1  (SELECT     LevyAmount  FROM Levy WHERE  (SystemMaintained = @SystemMaintained)) AS CDSLevyRate
+	),0),4)
+set @LevyAmount = dbo.cont_Round05 (@LevyRate * @LotGross / 100)
+set @TotalCharges = @TotalCharges + @LevyAmount 
+
+INSERT INTO LevyContract
+(Contract_DPA_, LevyAmount, LevyName, LevyRate, LevyBlock, LevyShortName, LevyRatePercentage, SystemMaintained, 
+ChangedBy, TimeChanged)
+SELECT     
+@Contract_DPA_ as Contract_DPA_, 
+@LevyAmount as LevyAmount, 
+@LevyDescription as LevyName, 
+@LevyRate as LevyRate, 
+0 as LevyBlock, 
+@LevyShortName as LevyShortName, 
+convert(varchar(10),@LevyRate) + '%' as LevyRatePercentage, 
+@SystemMaintained as SystemMaintained, 
+@ChangedBy as ChangedBy, 
+getdate() as TimeChanged
+
+
+-- Insert Compensation Fund Levy
+set @SystemMaintained = 7
+set @LevyDescription = LTRIM(RTRIM((SELECT TOP 1 LevyDescription FROM Levy WHERE (SystemMaintained = @SystemMaintained))))
+set @LevyShortName = LTRIM(RTRIM(UPPER((SELECT TOP 1 LevyShortName FROM Levy WHERE (SystemMaintained = @SystemMaintained)))))
+set @LevyRate = round(isnull(
+	(
+		SELECT   TOP 1  (SELECT     LevyAmount  FROM Levy WHERE  (SystemMaintained = @SystemMaintained)) AS CDSLevyRate
+	),0),4)
+set @LevyAmount = dbo.cont_Round05 (@LevyRate * @LotGross / 100)
+set @TotalCharges = @TotalCharges + @LevyAmount 
+
+INSERT INTO LevyContract
+(Contract_DPA_, LevyAmount, LevyName, LevyRate, LevyBlock, LevyShortName, LevyRatePercentage, SystemMaintained, 
+ChangedBy, TimeChanged)
+SELECT     
+@Contract_DPA_ as Contract_DPA_, 
+@LevyAmount as LevyAmount, 
+@LevyDescription as LevyName, 
+@LevyRate as LevyRate, 
+0 as LevyBlock, 
+@LevyShortName as LevyShortName, 
+convert(varchar(10),@LevyRate) + '%' as LevyRatePercentage, 
+@SystemMaintained as SystemMaintained, 
+@ChangedBy as ChangedBy, 
+getdate() as TimeChanged
+
+
+-- Insert AKS Levy
+set @SystemMaintained = 17
+set @LevyDescription = LTRIM(RTRIM((SELECT TOP 1 LevyDescription FROM Levy WHERE (SystemMaintained = @SystemMaintained))))
+set @LevyShortName = LTRIM(RTRIM(UPPER((SELECT TOP 1 LevyShortName FROM Levy WHERE (SystemMaintained = @SystemMaintained)))))
+set @LevyRate = round(isnull(
+	(
+		SELECT   TOP 1  (SELECT     LevyAmount  FROM Levy WHERE  (SystemMaintained = @SystemMaintained)) AS CDSLevyRate
+	),0),4)
+set @LevyAmount = dbo.cont_Round05 (@LevyRate * @LotGross / 100)
+set @TotalCharges = @TotalCharges + @LevyAmount 
+
+INSERT INTO LevyContract
+(Contract_DPA_, LevyAmount, LevyName, LevyRate, LevyBlock, LevyShortName, LevyRatePercentage, SystemMaintained, 
+ChangedBy, TimeChanged)
+SELECT     
+@Contract_DPA_ as Contract_DPA_, 
+@LevyAmount as LevyAmount, 
+@LevyDescription as LevyName, 
+@LevyRate as LevyRate, 
+0 as LevyBlock, 
+@LevyShortName as LevyShortName, 
+convert(varchar(10),@LevyRate) + '%' as LevyRatePercentage, 
+@SystemMaintained as SystemMaintained, 
+@ChangedBy as ChangedBy, 
+getdate() as TimeChanged
+
+
+-- Insert Revenue Stamp Levy
+set @SystemMaintained = 10
+set @LevyDescription = LTRIM(RTRIM((SELECT TOP 1 LevyDescription FROM Levy WHERE (SystemMaintained = @SystemMaintained))))
+set @LevyShortName = LTRIM(RTRIM(UPPER((SELECT TOP 1 LevyShortName FROM Levy WHERE (SystemMaintained = @SystemMaintained)))))
+set @LevyRate = round(isnull(
+	(
+		SELECT   TOP 1  (SELECT     LevyAmount  FROM Levy WHERE  (SystemMaintained = @SystemMaintained)) AS CDSLevyRate
+	),0),4)
+set @LevyBlock = round(isnull(
+	(
+		SELECT   TOP 1  (SELECT     LevyBlock  FROM Levy WHERE  (SystemMaintained = @SystemMaintained)) AS CDSLevyRate
+	),0),4)
+set @LevyAmount = dbo.cont_Round05 ((
+	SELECT CASE 
+	WHEN round(@LotGross / @LevyBlock - floor(@LotGross / @LevyBlock), 2) > 0 
+	THEN (floor(@LotGross / @LevyBlock) + 1) * @LevyRate 
+	ELSE (floor(@LotGross / @LevyBlock) + 0) * @LevyRate 
+	END AS Levy
+))
+set @TotalCharges = @TotalCharges + @LevyAmount 
+
+INSERT INTO LevyContract
+(Contract_DPA_, LevyAmount, LevyName, LevyRate, LevyBlock, LevyShortName, LevyRatePercentage, SystemMaintained, 
+ChangedBy, TimeChanged)
+SELECT     
+@Contract_DPA_ as Contract_DPA_, 
+@LevyAmount as LevyAmount, 
+@LevyDescription as LevyName, 
+@LevyRate as LevyRate, 
+0 as LevyBlock, 
+@LevyShortName as LevyShortName, 
+convert(varchar(10),@LevyRate) + '/' + convert(varchar(10),@LevyBlock) as LevyRatePercentage, 
+@SystemMaintained as SystemMaintained, 
+@ChangedBy as ChangedBy, 
+getdate() as TimeChanged
+
+
+
+--Insert into InterTransfer for CDAs
+Declare @Client_DPA_ int
+Declare @isCustodian int
+
+set @Client_DPA_ = (SELECT tbOrder.Client_DPA_ FROM  OrdDetail INNER JOIN tbOrder ON OrdDetail.Order_DPA_ = tbOrder.Order_DPA_ WHERE (OrdDetail.OrdDetail_DPA_ = @OrdDetail_DPA_))
+set @isCustodian = isnull((SELECT IsCustodian FROM Client WHERE (Client_DPA_ = @Client_DPA_)), 0)
+
+if @isCustodian <> 0
+
+Begin
+
+	INSERT INTO InterTransfer
+	                      (SourceEntityType_DPA_, SourceEntity_DPA_, TargetEntityType_DPA_, TargetEntity_DPA_, TransferAmount, TransferDate, ChangedBy, TimeChanged, 
+	                      InterTransferType_DPA_, Contract_DPA_, Deleted)
+	SELECT     
+	CASE WHEN (@Side = 'S') THEN 8 ELSE 1 END AS SourceEntityType_DPA_, 
+	CASE WHEN (@Side = 'S') THEN 14 ELSE @Client_DPA_ END AS SourceEntity_DPA_, 
+	CASE WHEN (@Side = 'S') THEN 1 ELSE 8 END AS TargetEntityType_DPA_, 
+	CASE WHEN (@Side = 'S') THEN @Client_DPA_ ELSE 14 END AS TargetEntity_DPA_, 
+	@LotGross AS TransferAmount, 
+	@ContractSettlementDate AS TransferDate, 
+	@ChangedBy AS ChangedBy, 
+	GETDATE() AS TimeChanged, 
+	2 AS InterTransferType_DPA_, 
+	@Contract_DPA_ AS Contract_DPA_, 
+	0 AS Deleted
+	
+End
+
+--Update Cash Balance
+set @StatementGross = (case when @isCustodian = 1 then 0 else @LotGross end)
+set @StatementNet = (case when @Side = 'P' then -(@StatementGross + @TotalCharges) else (@StatementGross - @TotalCharges) end)
+
+UPDATE    ClientBalances
+SET              CurrentBal = CurrentBal + @StatementNet
+WHERE     (client_DPA_ = @Client_DPA_)
+
+
+/*
+
+
+
+*/
+
+
+
+
+
+GO
+SET QUOTED_IDENTIFIER OFF 
+GO
+SET ANSI_NULLS ON 
+GO
+

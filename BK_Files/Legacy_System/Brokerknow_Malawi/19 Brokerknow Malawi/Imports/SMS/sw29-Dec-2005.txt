@@ -1,0 +1,1 @@
+api-id: 1127740user: african alliancepassword: alliance1text: #field1#Delimiter :CSV: 254722787302|ARM 39.5 BAMB 140CSV: 254722242982|OCH 14.7 BOC 152 FIREST 19.9 MARSH 24.5

@@ -1,0 +1,5 @@
+<%
+Dim ASPLightningcFilter
+Set ASPLightningcFilter = Server.CreateObject("BrokerKnow.cFilter")
+ASPLightningcFilter.ExeccFilter
+%>

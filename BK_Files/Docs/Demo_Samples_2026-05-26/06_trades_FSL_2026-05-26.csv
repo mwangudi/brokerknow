@@ -1,0 +1,9 @@
+Exchange:,MSE
+Market:,Equity
+Participant:,FSL
+From:,26/05/2026
+To:,26/05/2026
+
+Client Code,Symbol,Sell Volume,Buy Volume,Price,Sett. Amount
+CEDAXXX0000000000000662,NBM,5000,0,56.25,281250.00
+CEDAXXX0000000000001461,NICO,0,10000,15.00,150000.00

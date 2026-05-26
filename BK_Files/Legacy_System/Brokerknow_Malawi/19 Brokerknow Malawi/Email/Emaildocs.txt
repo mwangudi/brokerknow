@@ -1,0 +1,13 @@
+if exists (select * from dbo.sysobjects where id = object_id(N'[dbo].[EmailedDocs]') and OBJECTPROPERTY(id, N'IsUserTable') = 1)
+drop table [dbo].[EmailedDocs]
+GO
+
+CREATE TABLE [dbo].[EmailedDocs] (
+	[EmailID] [int] IDENTITY (1, 1) NOT NULL ,
+	[DocumentName] [varchar] (50) COLLATE SQL_Latin1_General_CP1_CI_AS NULL ,
+	[DateCreated] [datetime] NULL ,
+	[EmailedTime] [datetime] NULL ,
+	[Emailed] [bit] NULL 
+) ON [PRIMARY]
+GO
+

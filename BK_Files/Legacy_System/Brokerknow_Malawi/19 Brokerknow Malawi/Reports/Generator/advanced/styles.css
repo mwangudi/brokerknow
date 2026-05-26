@@ -1,0 +1,161 @@
+A:link
+{
+    TEXT-DECORATION: none
+}
+A:visited
+{
+    TEXT-DECORATION: none
+}
+A:active
+{
+    TEXT-DECORATION: none
+}
+A:hover
+{
+    TEXT-DECORATION: underline
+}
+HR
+{
+    COLOR: #666699
+}
+TH
+{
+    FONT-SIZE: 13px;
+    FONT-FAMILY: arial
+}
+TD.report_title
+{
+    FONT-WEIGHT: bold;
+    FONT-SIZE: 13px;
+    COLOR: gray;
+    FONT-FAMILY: arial
+}
+.grid
+{
+    BACKGROUND-COLOR: gray
+}
+.header
+{
+    BACKGROUND-COLOR: #666699
+}
+.header_link
+{
+    FONT-SIZE: 8pt;
+    COLOR: white;
+    FONT-FAMILY: verdana
+}
+.item
+{
+    FONT-SIZE: 8pt;
+    COLOR: #000000;
+    FONT-FAMILY: verdana;
+    BACKGROUND-COLOR: #d2d1de
+}
+.alt_item
+{
+    FONT-SIZE: 8pt;
+    COLOR: #000000;
+    FONT-FAMILY: verdana;
+    BACKGROUND-COLOR: #f5f5f5
+}
+.footer
+{
+    FONT-SIZE: 8pt;
+    FONT-FAMILY: verdana
+}
+.paging_link
+{
+    FONT-SIZE: 8pt;
+    COLOR: blue;
+    FONT-FAMILY: verdana
+}
+A.paging_link:hover
+{
+    FONT-SIZE: 8pt;
+    COLOR: #990033;
+    FONT-FAMILY: verdana
+}
+.link_button
+{
+    FONT-SIZE: 8pt;
+    COLOR: blue;
+    FONT-FAMILY: verdana
+}
+A.link_button:hover
+{
+    FONT-SIZE: 8pt;
+    COLOR: #990033;
+    FONT-FAMILY: verdana
+}
+A.item_link
+{
+    FONT-SIZE: 8pt;
+    COLOR: navy;
+    FONT-FAMILY: verdana
+}
+A.report_title
+{
+    FONT-SIZE: 8pt;
+    COLOR: blue;
+    FONT-FAMILY: verdana
+}
+A.report_title:hover
+{
+    FONT-SIZE: 8pt;
+    COLOR: green;
+    FONT-FAMILY: verdana
+}
+.group_title
+{
+    FONT-SIZE: 10pt;
+    COLOR: #666699;
+    FONT-FAMILY: arial,verdana
+}
+.delete
+{
+    FONT-WEIGHT: bold;
+    FONT-SIZE: 8pt;
+    COLOR: red;
+    FONT-FAMILY: verdana
+}
+.report_desc
+{
+    PADDING-LEFT: 10px;
+    FONT-SIZE: 8pt;
+    FONT-FAMILY: verdana
+}
+.report_title
+{
+    FONT-SIZE: 8pt;
+    FONT-FAMILY: verdana
+}
+.graph_title
+{
+    FONT-SIZE: 13px;
+    FONT-FAMILY: arial
+}
+.xlabel
+{
+    FONT-SIZE: 12px;
+    FONT-FAMILY: arial
+}
+.ylabel
+{
+    FONT-SIZE: 12px;
+    FONT-FAMILY: arial
+}
+TD.col_footer
+{
+    FONT-WEIGHT: bold;
+    BACKGROUND-COLOR: #ccccff
+}
+TD.row_footer
+{
+    FONT-WEIGHT: bold;
+    BACKGROUND-COLOR: #ccccff
+}
+TD.col_footerLabel
+{
+    FONT-WEIGHT: bold;
+    BACKGROUND-COLOR: #9999cc
+}

@@ -1,0 +1,129 @@
+.SrchCatalogOuterTable {
+	WIDTH: 100%
+}
+.SrchCatalogLabel {
+	FONT-WEIGHT: bold; FONT-SIZE: 11px
+}
+.SrchCatalogSelect {
+	WIDTH: 160px
+}
+.SrchQueryOuterTable {
+	WIDTH: 100%
+}
+.SrchQueryLabel {
+	FONT-WEIGHT: bold; FONT-SIZE: 11px
+}
+.SrchQueryInput {
+	WIDTH: 100%
+}
+.SrchProductOuterTable {
+	WIDTH: 100%
+}
+.SrchProductLabel {
+	FONT-WEIGHT: bold; FONT-SIZE: 11px
+}
+.SrchProductSelect {
+	WIDTH: 100%
+}
+.Srchother .SrchProductSelect {
+	WIDTH: 180px
+}
+.SrchnumDaysOuterTable {
+	WIDTH: 100%
+}
+.SrchnumDaysLabel {
+	FONT-WEIGHT: bold; FONT-SIZE: 11px
+}
+.SrchnumDaysSelect {
+	WIDTH: 100%
+}
+.SrchKeywordTypeOuterTable {
+	WIDTH: 100%
+}
+.SrchKeywordTypeLabel {
+	FONT-WEIGHT: bold; FONT-SIZE: 11px
+}
+.SrchKeywordTypeSelect {
+	WIDTH: 100%
+}
+.SrchmaxResultsOuterTable {
+	WIDTH: 100%
+}
+.SrchmaxResultsLabel {
+	FONT-WEIGHT: bold; FONT-SIZE: 11px
+}
+.SrchmaxResultsSelect {
+	WIDTH: 100%
+}
+.SrchTitlesOuterTable {
+	WIDTH: 100%
+}
+.SrchTitlesLabel {
+	FONT-WEIGHT: bold; FONT-SIZE: 11px
+}
+.SrchTitlesInput {
+	FONT-SIZE: 11px
+}
+.SrchOptionText A {
+	FONT-SIZE: 11px; COLOR: blue
+}
+.SrchOptionText A:visited {
+	FONT-SIZE: 11px; COLOR: blue
+}
+.SrchOptionText A:hover {
+	FONT-SIZE: 11px; COLOR: blue
+}
+.SrchOptionText A:active {
+	FONT-SIZE: 11px; COLOR: blue
+}
+.srch_wipt {
+	WIDTH: 95%
+}
+.srch_bg {
+	BACKGROUND-COLOR: #f2f2f2
+}
+.srch_mnpbg {
+	BACKGROUND-COLOR: #003399
+}
+.srch_showhide {
+	FONT-WEIGHT: bold; FONT-SIZE: 11px; COLOR: blue
+}
+.srch_showhide A {
+	FONT-SIZE: 11px; COLOR: blue
+}
+.srch_showhide A:visited {
+	FONT-SIZE: 11px; COLOR: blue
+}
+.srch_showhide A:active {
+	FONT-SIZE: 11px; COLOR: blue
+}
+.srch_showhide A:hover {
+	FONT-SIZE: 11px; COLOR: red
+}
+.srch_label {
+	FONT-WEIGHT: bold; FONT-SIZE: 11px; COLOR: #000000; TEXT-DECORATION: none
+}
+.srch_option {
+	FONT-SIZE: 11px; COLOR: #000000; TEXT-DECORATION: none
+}
+.srch_mnplabel {
+	FONT-SIZE: 11px; COLOR: #ffffff
+}
+.srch_mnpoption {
+	FONT-SIZE: 11px; COLOR: blue
+}
+.srch_mnpoption:visited {
+	FONT-SIZE: 11px; COLOR: blue
+}
+.srch_mnpheader {
+	FONT-SIZE: 11px; COLOR: #ffffff; TEXT-DECORATION: none
+}
+.srch_submit {
+	FONT-SIZE: 11px
+}
+.srch_tipt {
+	WIDTH: 125px
+}
+.srch_mnp {
+	WIDTH: 177px
+}

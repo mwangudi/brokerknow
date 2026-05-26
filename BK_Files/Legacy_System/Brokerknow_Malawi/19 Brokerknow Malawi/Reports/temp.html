@@ -1,0 +1,266 @@
+<html>
+
+<head>
+<meta http-equiv="Content-Language" content="en-uk">
+<meta http-equiv="Content-Type" content="text/html; charset=windows-1252">
+<title>Client Statement</title>
+	<SCRIPT language=Javascript src="../scripts/common.js"></SCRIPT> 
+	<SCRIPT language=Javascript src="../scripts/fhsupport.js"></SCRIPT>
+	<link rel="stylesheet" type="text/css" href="CALENDAR/calendar.css">
+	<SCRIPT language=Javascript src="Calendar/calendar.js"></SCRIPT>
+	<LINK REL="STYLESHEET" TYPE="TEXT/CSS" HREF="../STYLE/default.css"> 
+	<LINK REL="STYLESHEET" TYPE="TEXT/CSS" HREF="../STYLE/webparts.css">
+	<SCRIPT language=VBScript src="../scripts/reports.vbs"></SCRIPT>
+	<SCRIPT language=Javascript src="../scripts/reports.js"></SCRIPT>
+
+	<style media="print">
+		@page {
+			@top{font-family: Helvetica, Arial, sans-serif;
+				font-size: 150%;
+				font-weight: bolder;
+				text-align: left;
+				content: "12-Aug-2008";			
+			}
+			
+			margin-left: 2cm;
+			margin-right: 5cm;
+			margin-top: 1cm;    
+			margin-bottom: 2cm;
+			size: portrait;
+			
+			br.newpage{
+				page-break-before:always;
+			}
+		}
+
+	</style>
+</head>
+<body Class="Reports">
+<Script Language="JavaScript">
+	function TryFramedMsg(msg){
+		try{
+			window.parent.editDocOpener.alert(msg);
+			return true;
+		}
+		catch(e){return false;}
+		}
+	function ShowMessage(msg){
+		if (TryFramedMsg(msg)==false) window.parent.alert(msg);
+	}
+</Script>
+<Script Language="VBScript">
+Function FormatNum(theNum) 
+	Dim tempNum 
+	On Error Resume Next 
+	tempNum = FormatNumber(theNum, 2) 
+	If Err.Number > 0 Then 
+		FormatNum = theNum 
+		Err.Clear 
+	Else 
+		If tempNum < 0 Then 
+			FormatNum = "(" & FormatNumber(Abs(tempNum), 2) & ")" 
+		Else	 
+			FormatNum = tempNum 
+		End If	 
+	End If	 
+End Function 
+Function FormatNumCommasOnly(theNum) 
+	Dim tempNum 
+	On Error Resume Next 
+	tempNum = FormatNumber(theNum, 0) 
+	If Err.Number > 0 Then 
+		FormatNumCommasOnly = theNum 
+		Err.Clear 
+	Else 
+		If tempNum < 0 Then 
+			FormatNumCommasOnly = "(" & FormatNumber(Abs(tempNum), 0) & ")" 
+		Else	 
+			FormatNumCommasOnly = tempNum 
+		End If	 
+	End If	 
+End Function 
+</Script>	 
+<!--BEGINPAGEFUNCS-->
+<table border=0 cellpadding=2 cellspacing=4 id="printTable" class="printTable">
+<tr name=functionRow id=functionRow>
+    <td  nowrap class=nav onMouseover="JavaScript: if (this.className=='nav') this.className='nav_over';" onMouseout="JavaScript: if (this.className=='nav_over') this.className='nav';" OnClick='javascript:printReportDoc()'><img src="../images/printLink.gif" border=0 title="Print">Print
+	<form method='POST' action='/exportXL.asp' style='position:absolute;visibility: hidden' name='frmPrinterDialog'>
+<input type=hidden name=sourcePath value="D:\08 - Brokerknow KENYA\Reports"><input type=hidden name=reportName value=""><input type=hidden name=htmlDoc><input type=hidden name=LandScape value=0><input type=hidden name=ZoomRatio value=100>  <table bgColor='#CCCCCC' border='0' cellspacing='0' cellpadding='0' style='border: 2 outset #C0C0C0' width='300px'>
+<tr OnClick="JavaScript: document.all.item('frmPrinterDialog').style.visibility='hidden';" style='cursor: hand'>
+<td nowrap style='background-color: #000080; color: #FFFFFF'>
+<p align='left'><font size='2' face='Verdana'><b>&nbsp;Printer Dialog</b></font></td>
+<td nowrap  style='background-color: #000080; color: #FFFFFF'>
+<p align='right'><font size='2' face='Verdana'><input type='button' value=' X ' name='B2' OnMouseUp="JavaScript: document.all.item('frmPrinterDialog').style.visibility='hidden';"></font></td>
+</tr>
+<tr>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td nowrap ><b><font size='2' face='Tahoma' color='#000080'>Printer</font></b></td>
+<td nowrap ><select size='1' name='cboPrinter'>
+<option value='HP TEST'>Fourth Floor Printer</Option>
+<option value='HP LaserJet 6P/6MP PostScript'>Printer For Testing(unavailable)</Option>
+<option value='NRG DSm618 RPCS on CGathigi2'>NRG DSm618 RPCS on Bmungai</Option>
+</select></td>
+</tr>
+<tr>
+<td nowrap ><b><font size='2' face='Tahoma' color='#000080'>No. of Copies</font></b></td>
+<td nowrap ><input type='text' name='txtNumbers' size='5' value='1'></td>
+</tr>
+<tr>
+<td nowrap align=right colspan='2'><b><font size='2' face='Tahoma' color='#000080'>&nbsp;</font></b><input type='button' value=' Send To Printer ...' name='B1' OnClick="JavaScript: exportDoc()"></td>
+</tr>
+</table>
+<p>&nbsp;</p>
+</form>
+    </td>
+    <td  nowrap class=nav onMouseover="JavaScript: if (this.className=='nav') this.className='nav_over';" onMouseout="JavaScript: if (this.className=='nav_over') this.className='nav';" OnClick="javascript: window.parent.history.go(-1)"><font color=blue face="Webdings" size=1>3</font>Back
+    </td>
+    <td  nowrap class=nav onMouseover="JavaScript: if (this.className=='nav') this.className='nav_over';" onMouseout="JavaScript: if (this.className=='nav_over') this.className='nav';"  onclick="launchMailerPDFDoc()"><img src="../pdf.gif" width="20" height="20">Email PDF
+	<form method='POST' style='position:absolute;visibility:hidden;display:none;' name='frmPDF' id='frmPDF'>
+		<input type=hidden name=to2>
+		<input type=hidden name=cc2>
+		<input type=hidden name=bcc2>
+		<input type=hidden name=subject2>
+		<input type=hidden name=bodyText2>
+		<input type=hidden name=attachment>
+		<input type=hidden name=PDFDoc>
+		<input type=hidden name=PDFOrient>
+	</form>
+	<div style='display: none'>
+	<IFRAME marginwidth=0 marginheight=0 FRAMEBORDER=0 ID='hiddenEmailFrame' NAME='EmailPDFFrame'></IFRAME>
+	</div>
+    </td>
+</tr></table>
+<Script Language="JavaScript">
+	function printReportDoc(){
+		document.all.item('printTable').style.display = 'none';
+		window.self.print();
+		document.all.item('printTable').style.display = '';	
+	}
+	function exportDoc(){
+		var thisHTMLDoc = getBodyHTML();
+		document.all.item('htmlDoc').value = thisHTMLDoc;
+		document.all.item('reportName').value = window.document.title;
+		document.all.item('frmPrinterDialog').target = 'deleteFrame';
+		document.all.item('frmPrinterDialog').submit();
+	}
+	function emailPDFDoc(){
+		document.all.item('frmPDF').action = '/WriteToPDF.asp';
+		document.all.item('frmPDF').submit();
+	}
+	function launchMailerPDFDoc(){
+		var thisPDFDoc = window.toPDF.innerHTML;
+		var thisPDFOrient = window.toPDFOrient.innerHTML;
+		document.all.item('PDFDoc').value = thisPDFDoc;
+		document.all.item('PDFOrient').value = thisPDFOrient;
+		window.showModalDialog('/EmailPDF.asp?enterDetailsPointer=1', window.self, 'dialogWidth:30em;dialogHeight:22em;status:0;dialogHide:false;help:no;scroll:yes;resizable:no;edge:sunken;unadorned:yes');
+	}
+
+</Script>
+<!--ENDPAGEFUNCS-->	
+<p id="toPDFOrient" name="toPDFOrient" value="P" style="display:none;">
+<p id="toPDF" name="toPDF">
+<table border="0" cellspacing="0" cellpadding="0" style="font-family: Arial Narrow" width="100%">
+	<tr>
+		<td width="100%" align="middle"><img src="../data/photos/aaprintlogo.jpg" border="0" width="482" height="178"></td>
+	</tr>
+	<!--<tr>
+		<td width="100%" height="60" align=center>&nbsp;</td>
+	</tr>-->
+	<tr>
+		<td width="100%" nowrap align="left"><font face="Impact" size="4">CLIENTS STATEMENT</font></td>      
+	</tr>
+	<tr>
+		<td width="100%" nowrap height="0" align="right">&nbsp;Page&nbsp;1&nbsp;of&nbsp;</td>      
+	</tr>
+</table>
+
+<table border="0" cellspacing="0" cellpadding="0" style="font-family: Arial Narrow" width="100%">
+    <tr>
+      <td width="1%"><b>Date:&nbsp;</b></td>
+      <td width="48%">12-Aug-2008</td>
+    </tr>
+
+    <tr>
+      <td width="1%"><b>Account:&nbsp;</b></td>
+      <td width="48%">Co-operative Bank - Co-optrust  [  2 ]none </td>
+    </tr>
+
+    <tr>
+      <td width="1%"><b><font size="2" face="Arial">&nbsp;</font></b></td>
+      <td width="48%">P.O.Box 48231
+Nairobi
+00100</td>
+    </tr>
+</table>
+<BR>
+  <table border="0" cellspacing="0" cellpadding="2" style="font-family: Arial Narrow; LEFT-MARGIN:100PX"  width="100%">
+    <tr>
+      <td style="border-left-style: solid; border-left-width: 1; border-top-style: solid; border-top-width: 1; border-bottom-style: solid; border-bottom-width: 1"><b><font face="Arial Narrow" size="3">Date</font></b></td>
+      <td style="border-top-style: solid; border-top-width: 1; border-bottom-style: solid; border-bottom-width: 1"><b><font face="Arial Narrow" size="3">Ref:</font></b></td>
+      <td style="border-top-style: solid; border-top-width: 1; border-bottom-style: solid; border-bottom-width: 1"><b><font face="Arial Narrow" size="3">Particulars:</font></b></td>
+      <td align="right" style="border-top-style: solid; border-top-width: 1; border-bottom-style: solid; border-bottom-width: 1"  align=right><b><font face="Arial Narrow" size="3">Debit:</font></b></td>
+      <td align="right" style="border-top-style: solid; border-top-width: 1; border-bottom-style: solid; border-bottom-width: 1" align=right><b><font face="Arial Narrow" size="3">Credit:</font></b></td>
+      <td align="right" style="border-right-style: solid; border-right-width: 1; border-top-style: solid; border-top-width: 1; border-bottom-style: solid; border-bottom-width: 1"  align=right><b><font face="Arial Narrow" size="3">Balance</font></b></td>
+    </tr>
+    <tr>	
+		  <td><font size="1">13 Jul 08</font></td>
+		  <td><font size="1">&nbsp;</font></td>
+		  <td><font size="1">Opening Balance</font></td>
+		  <td align="right"><font size="1">&nbsp;</font></td>
+		  <td align="right"><font size="1">&nbsp;</font></td>
+		  <td align="right"><font size="1">0.00 Cr</font></td>
+	</tr>
+	
+	<tr>	
+		  <td><font size="1">12 Aug 08</font></td>
+		  <td><font size="1">&nbsp;</font></td>
+		  <td><font size="1">Closing Balance</font></td>
+		  <td align="right"><font size="1">&nbsp;</font></td>
+		  <td align="right"><font size="1">&nbsp;</font></td>
+		  <td align="right"><font size="1">0.00 Cr</font></td>
+	</tr> 
+	
+    <tr>
+      <td colspan="6" align="right" style="border-bottom-style: solid; border-bottom-width: 1">&nbsp;&nbsp;&nbsp; </td>
+
+    </tr>
+
+    <tr>
+      <td colspan="5" align="right">
+        <font size="1">
+        Opening Balance:</font></td>
+
+      <td align="right"><font size="1">0.00 Cr</font></td>
+    </tr>
+	
+    <tr>
+      <td colspan="5" align="right"><font size="1">less Total Debits:</font></td>
+
+      <td align="right"><font size="1">0</font></td>
+    </tr>
+
+    <tr>
+      <td colspan="5" align="right"><font size="1">add Total Credits:</font></td>
+
+      <td align="right"> <font size="1">0.00 Cr</font></td>
+    </tr>
+
+    <tr>
+      <td colspan="6" align="right" style="border-bottom-style: solid; border-bottom-width: 1">
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </td>
+
+    </tr>
+
+    <tr>
+      <td colspan="2"><font size="1">Current: 0.00 Cr</font></td>
+      <td><font size="1">30-60 Days:</font> C
+		
+      </td>
+      <td><font size="1">Over 60 Days:</font> </td>
+      <td align="right"><b><font size="1">Total Balance:</font></b></td>
+      <td align="right"><b><font size="1">0.00 Cr</font></b></td>
+    </tr>
+  	 

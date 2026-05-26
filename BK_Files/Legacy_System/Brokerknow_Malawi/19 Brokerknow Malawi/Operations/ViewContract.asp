@@ -1,0 +1,181 @@
+<%
+	Dim action
+	Dim conn 
+   Dim sqlStr
+   Dim rs
+   Dim contractRS
+   Dim ID
+   Dim contractType 'for navigational information
+	
+	ID = Request("contractID")
+	contractType = ucase(Request("contractType"))
+
+		If Trim(ID) = "" Then%>
+                <script language = 'vbscript'>
+                		MsgBox "No contract selected for viewing"
+                		
+                </script>
+                <% response.end
+        End If
+        
+    Set conn = GetActiveConnection("KBroker")
+    
+    sqlStr = "SELECT * FROM [ContractLevyList] WHERE ContractLevyList.Contract_DPA_ = " & ID 
+    Set contractRS = conn.Execute(SQLServerFormat(HandleQuote(sqlStr)))
+    If contractRS.EOF Or contractRS.BOF Then%>
+                <script language = 'vbscript'>
+                		MsgBox "The selected Contract cannot be retrieved"
+                		
+                </script>
+                <% response.end
+    End If
+%>
+
+<html>
+
+<head>
+<meta http-equiv="Content-Language" content="en-us">
+<meta http-equiv="Content-Type" content="text/html; charset=windows-1252">
+<meta name="GENERATOR" content="Microsoft FrontPage 4.0">
+<meta name="ProgId" content="FrontPage.Editor.Document">
+<title><%=contractRS.fields("OrdDetailType")%> Contract</title>
+
+<LINK REL="STYLESHEET" TYPE="TEXT/CSS" HREF="../STYLE/default.css"> 
+<LINK REL="STYLESHEET" TYPE="TEXT/CSS" HREF="../STYLE/webparts.css">
+ <SCRIPT language=Javascript src="../scripts/common.js"></SCRIPT> 
+ <SCRIPT language=Javascript src="../scripts/fhsupport.js"></SCRIPT>
+ 
+ <script language="javascript">
+function printDoc() {
+	document.all.item("printLink").style.display = "none"
+	print()
+	document.all.item("printLink").style.display = ""
+}
+</script>
+</head>
+
+<body><!--#include file="../libroutines.asp"-->
+<%
+    'calculate amounts
+    Dim grossAmount 'this is the amount before application of Levies
+    Dim netAmount  'this is the amount after application of Levies
+    
+    grossAmount = contractRS.fields("LotPrice") * contractRS.fields("LotQty")
+    
+%>
+<CENTER>
+	<DIV class="ListNugget" id="AdvSearchHead" style="WIDTH: 640px" name="AdvSearchHead">
+		<TABLE class="ListNuggetHeader" cellPadding="0" cellSpacing="0" width="100%" name="AdvSearchtestHeader"> 
+			<TR>
+			<TD class="ListNuggetTitleCellWhite"
+					onselectstart="window.event.cancelBubble=true; return false;"   
+					onclick="PartWrapperToggle('AdvSearchHead');">
+					<A class=ListNuggetTitle onclick="return PartWrapperToggle('AdvSearchHead');"  
+					 href="javascript:PartWrapperToggle('AdvSearchHead');"><%=contractRS.fields("OrdDetailType")%> Contract
+					</A>
+				</TD>
+			 
+				<TD class=ListNuggetButtonCellWhite onclick="PartWrapperToggle('AdvSearchHead');">
+				<DIV class=ListNuggetButton>
+					<IMG class=ListNuggetUpButton id=AdvSearchUp height=17 alt="Hide options" src="../images/blue-chevron_up.gif" width=17 align=right border=0 name=AdvSearchHeadUp>
+					<IMG class=ListNuggetDownButton id=AdvSearchDown height=17 alt=Options src="../images/gray-chevron_down.gif" width=17 align=right border=0 name=AdvSearchHeadDown>
+				</DIV>
+			</TD>
+			</TR>
+		</TABLE>
+		
+<DIV class="ListNuggetBody" id="AdvSearchHeadBody" name="AdvSearchHeadBody" style="WIDTH: 640px">
+<table class="srch_bg" style="MARGIN-TOP: 0px" cellPadding="1" width=100% cellSpacing="0" border="0">  
+<tr><td>
+<% 
+Dim nextPage
+if contractType = "NEW" then
+		nextPage = "AddContract.asp"
+else
+		nextPage = "ViewContractList.asp"
+end if%>
+<form name = 'frmViewContract' method = 'post' action = '<%=nextPage%>' >
+<table border="0" width="100%" cellspacing="0" cellpadding="0">
+<tr>
+    <td width="20%">Client</td>
+    <td width="80%"><%=contractRS.fields("OrdDetailClient")%></td>
+  </tr>
+<tr>
+    <td width="20%">Contract Number</td>
+    <td width="80%"><%=contractRS.fields("ContractNumber")%></td>
+  </tr>
+  <tr>
+    <td width="20%">Trade Date</td>
+    <td width="80%"><%=contractRS.fields("LotTDate")%></td>
+  </tr>
+  <tr>
+    <td width="20%">REF Ref</td>
+    <td width="80%"><%=contractRS.fields("LotSlipNo")%></td>
+  </tr>
+  <tr>
+    <td width="20%">Security</td>
+    <td width="80%"><%=contractRS.fields("OrdDetailSecurity")%></td>
+  </tr>
+  <tr>
+    <td width="20%">Quantity</td>
+    <td width="80%"><%=contractRS.fields("LotQty")%></td>
+  </tr>
+  <tr>
+    <td width="20%">Price</td>
+    <td width="80%"><%=contractRS.fields("LotPrice")%></td>
+  </tr>
+  <tr>
+    <td width="20%">Gross</td>
+    <td width="80%"><%=FormatCurrency(grossAmount,2,,true,true)%></td>
+  </tr>
+  <tr>
+    <td width="100%" colspan="2">Levies</td>
+  </tr>
+  <%
+  Dim levyTotal
+  netAmount = grossAmount
+  levyTotal = 0
+  contractRS.movefirst
+  do until contractRS.eof%>
+		<tr>
+			<td width="20%"><%=contractRS.fields("LevyName")%></td>
+			<td width="80%"><%=FormatCurrency(contractRS.fields("LevyAmount"),2,,true,true)%></td>
+		</tr><%
+		if contractRS.Fields("OrderTypeSale") then
+				netAmount = netAmount - contractRS.fields("LevyAmount")
+		else
+				netAmount = netAmount + contractRS.fields("LevyAmount")
+		end if
+		levyTotal = levyTotal + contractRS.fields("LevyAmount")
+		contractRS.movenext
+  loop
+  contractRS.movefirst%>
+  <tr>
+    <td width="20%">&nbsp</td>
+    <td width="80%">&nbsp</td>
+  </tr>
+  <tr>
+    <td width="20%">Sub Total</td>
+    <td width="80%"><%=FormatCurrency(levyTotal,2,,true,true)%></td>
+  </tr>
+  <tr>
+    <td width="100%" colspan="2">Net Amount</td>
+  </tr>
+  <tr>
+    <td width="20%"></td>
+    <td width="80%"><%=FormatCurrency(netAmount,2,,true,true)%></td>
+  </tr>
+</table>
+</form>
+</td>
+</tr>
+</table>
+
+</div>
+</div>
+
+</body>
+
+</html>
+
+

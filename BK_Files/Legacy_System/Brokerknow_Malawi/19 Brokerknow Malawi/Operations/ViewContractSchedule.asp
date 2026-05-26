@@ -1,0 +1,144 @@
+<html>
+
+<head>
+<meta http-equiv="Content-Language" content="en-us">
+<meta http-equiv="Content-Type" content="text/html; charset=windows-1252">
+<meta name="GENERATOR" content="Microsoft FrontPage 4.0">
+<meta name="ProgId" content="FrontPage.Editor.Document">
+<title>Contract Schedule</title>
+
+<LINK REL="STYLESHEET" TYPE="TEXT/CSS" HREF="../STYLE/default.css"> 
+<LINK REL="STYLESHEET" TYPE="TEXT/CSS" HREF="../STYLE/webparts.css">
+ <SCRIPT language=Javascript src="../scripts/common.js"></SCRIPT> 
+ <SCRIPT language=Javascript src="../scripts/fhsupport.js"></SCRIPT>
+<!--CALENDAR -->
+<link rel="stylesheet" type="text/css" href="CALENDAR/calendar.css">
+<SCRIPT language=Javascript src="Calendar/calendar.js"></SCRIPT>
+
+<script language="javascript">
+function printDoc() {
+	document.all.item("printLink").style.display = "none"
+	print()
+	document.all.item("printLink").style.display = ""
+}
+</script>
+</head>
+
+<body><!--#include file="../libroutines.asp"-->
+
+<CENTER>
+	<DIV class="ListNugget" id="AdvSearchHead" style="WIDTH: 640px" name="AdvSearchHead">
+		<TABLE class="ListNuggetHeader" cellPadding="0" cellSpacing="0" width="100%" name="AdvSearchtestHeader"> 
+			<TR>
+			<TD class="ListNuggetTitleCellWhite"
+					onselectstart="window.event.cancelBubble=true; return false;"   
+					onclick="PartWrapperToggle('AdvSearchHead');">
+					<A class=ListNuggetTitle onclick="return PartWrapperToggle('AdvSearchHead');"  
+					 href="javascript:PartWrapperToggle('AdvSearchHead');">Contract Schedule
+					</A>
+				</TD>
+			 
+				<TD class=ListNuggetButtonCellWhite onclick="PartWrapperToggle('AdvSearchHead');">
+				<DIV class=ListNuggetButton>
+					<IMG class=ListNuggetUpButton id=AdvSearchUp height=17 alt="Hide options" src="../images/blue-chevron_up.gif" width=17 align=right border=0 name=AdvSearchHeadUp>
+					<IMG class=ListNuggetDownButton id=AdvSearchDown height=17 alt=Options src="../images/gray-chevron_down.gif" width=17 align=right border=0 name=AdvSearchHeadDown>
+				</DIV>
+			</TD>
+			</TR>
+		</TABLE>
+		
+<DIV class="ListNuggetBody" id="AdvSearchHeadBody" name="AdvSearchHeadBody" style="WIDTH: 640px">
+<table class="srch_bg" style="MARGIN-TOP: 0px" cellPadding="1" width=100% cellSpacing="0" border="0">  
+<tr><td>
+<form name = 'frmContractSchedule' method = 'post' action = 'ViewContractSchedule.asp' >
+<table border="0" width="100%">
+  <tr name="printLink" id="printLink">
+    <td width="101"><input type = 'submit' Class=Buttons name ='cmdAddDetail' id = 'cmdAddDetail' value="OK"></td>
+    <td width="513"><a href="javascript:printDoc()"><img src="../images/printLink.gif" border="0" alt=PRINT><font color="blue">PRINT</font></a>
+    </td>
+  </tr>
+  <tr>
+    <td colspan = '2'>
+    <table border="0" width="100%">
+    <tr><%Dim fldCount
+			fldCount = 0%>
+    	<td width="24%"><b><font color="#000080">Client</font></b></td><%fldCount = fldCount + 1%>
+      <td width="24%"><b><font color="#000080">Traded</font></b></td><%fldCount = fldCount + 1%>
+      <td width="16%"><b><font color="#000080">Type</font></b></td><%fldCount = fldCount + 1%>
+      <td width="12%"><b><font color="#000080">Security</font></b></td><%fldCount = fldCount + 1%>
+      <td width="24%"><b><font color="#000080">Broker</font></b><td><%fldCount = fldCount + 1%>
+      <td width="16%"><b><font color="#000080">REF Ref</font></b></td><%fldCount = fldCount + 1%>
+      <td width="24%"><b><font color="#000080">Price</font></b><td><%fldCount = fldCount + 1%>
+      <td width="24%"><b><font color="#000080">Quantity</font></b><td><%fldCount = fldCount + 1%>
+      <%
+		Dim fld
+		Dim conn 
+		Dim sqlStr
+		Dim rs
+		Dim i
+			
+		Set conn = GetActiveConnection("KBroker")
+ 		sqlStr = "ContractLeviesCrossTab"			
+		Set rs = conn.Execute(SQLServerFormat(HandleQuote(sqlStr)))
+		
+		i = 0
+		fldCount = fldCount + 2 'this is hard coding just to skip some unwanted columns 
+		for each fld in rs.fields
+				
+				if i >= fldCount then%>
+					<td width="24%"><b><font color="#000080"><%=rs.fields(i).name%></font></b><td>		
+				<%end if
+				i = i + 1
+		next
+      %>
+
+    </tr>
+ <%
+     If Not(rs.EOF Or rs.BOF) Then
+        'rs.MoveFirst
+        Do Until rs.EOF%>
+        		<tr>
+        				<td width="24%"><b><font color="#000080"><%=rs.Fields("ClientName")%></font></b></td>
+      <td width="24%"><%=rs.Fields("LotTDate")%></td>
+      <td width="16%"><%=rs.Fields("OrdDetailType")%></td>
+      <td width="12%"><%=rs.Fields("SecurityCode")%></td>
+      <td width="24%"><%=rs.Fields("BrokerCode")%><td>
+      <td width="16%"><%=rs.Fields("LotSlipNo")%></td>
+      <td width="24%"><%=FormatCurrency(rs.Fields("LotPrice"),2,,,true)%><td>
+      <td width="24%"><%=FormatNumber(rs.Fields("LotQty"),0,,,true)%><td>
+             <%i = 0
+				for each fld in rs.fields
+						
+						if i >= fldCount then%>
+							<td width="24%"><%=FormatNumber(rs.fields(i).value,2,,,true)%><td>		
+						<%end if
+						i = i + 1
+				next%>
+             </tr>
+             <%rs.MoveNext
+        Loop
+     else%>
+                <script language = 'vbscript'>
+                		MsgBox "No contracts found"
+                		
+                </script>
+                <% response.end
+     
+   End if
+ %>
+  </table>
+    </td>
+  </tr>
+  </table>
+</form>
+
+
+</td>
+</tr>
+</table>
+</div>
+</div>
+
+</body>
+
+</html>

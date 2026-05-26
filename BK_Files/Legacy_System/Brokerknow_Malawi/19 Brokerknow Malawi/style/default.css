@@ -1,0 +1,731 @@
+BODY
+{
+    SCROLLBAR-FACE-COLOR: #6699cc;
+    FONT-SIZE: 8pt;
+    BACKGROUND: #ffffff;
+    SCROLLBAR-HIGHLIGHT-COLOR: black;
+    SCROLLBAR-SHADOW-COLOR: black;
+    SCROLLBAR-ARROW-COLOR: #000000;
+    FONT-FAMILY: Verdana, Tahoma, Arial;
+    SCROLLBAR-BASE-COLOR: #6699cc;
+    TEXT-DECORATION: none;
+    scrollbar-3d-light-color: BLACK;
+    scrollbar-dark-shadow-color: BLACK;
+    SCROLL: NO;
+    leftMargin: 0;
+    topMargin: 0
+}
+
+BODY.Reports
+{
+    SCROLLBAR-FACE-COLOR: #FFFFFF;
+    FONT-SIZE: 10pt;
+    BACKGROUND: #FFFFFF;
+    SCROLLBAR-HIGHLIGHT-COLOR: #C0C0C0;
+    SCROLLBAR-SHADOW-COLOR: #C0C0C0;
+    SCROLLBAR-ARROW-COLOR: #000000;
+    FONT-FAMILY: Arial, Arial Narrow, Tahoma, Verdana;
+    SCROLLBAR-BASE-COLOR: #CCCCCC;
+    TEXT-DECORATION: none;
+    scrollbar-3d-light-color: #C0C0C0;
+    scrollbar-dark-shadow-color: #C0C0C0;
+    SCROLL: YES;
+    leftMargin: 0;
+    topMargin: 0
+}
+
+
+@media print{
+	@page	{margin: 10%}
+	br.newpage{page-break-before: always}
+	thead {display: table-header-group}
+	tfoot {display: table-footer-group}
+	
+}
+
+
+
+TABLE.ReportsTable
+{
+    FONT-SIZE: 10pt;
+    BACKGROUND: #FFFFFF;    
+    FONT-FAMILY: Arial, Arial Narrow, Tahoma, Verdana;   
+    TEXT-DECORATION: none;  
+    leftMargin: 0;
+    topMargin: 0
+}
+
+
+BODY.Green
+{
+    BACKGROUND-COLOR: #009933
+}
+BODY.Blue
+{
+    BACKGROUND-COLOR: #6699cc
+}
+BODY.FadeBlue
+{
+    filter:progid:DXImageTransform.Microsoft.Gradient(startColorStr='#E7F0D4', endColorStr='#6699cc', gradientType='1');
+    background-color: #6699cc;
+    background: no-repeat 100%;
+    vertical-align: Top;
+    SCROLLBAR-FACE-COLOR: #6699cc;
+    SCROLLBAR-HIGHLIGHT-COLOR: #ffffff;
+    SCROLLBAR-SHADOW-COLOR: #ffffff;
+    SCROLLBAR-3DLIGHT-COLOR: #6699cc;
+    SCROLLBAR-ARROW-COLOR: #ffffff;
+    SCROLLBAR-TRACK-COLOR: #6699cc;
+    SCROLLBAR-DARKSHADOW-COLOR: #000080;
+	
+}
+
+BODY.Dialog
+{
+    SCROLLBAR-FACE-COLOR: #cccccc;
+    SCROLLBAR-HIGHLIGHT-COLOR: #ffffff;
+    SCROLLBAR-SHADOW-COLOR: #ffffff;
+    SCROLLBAR-3DLIGHT-COLOR: #cccccc;
+    SCROLLBAR-ARROW-COLOR: #ffffff;
+    SCROLLBAR-TRACK-COLOR: #cccccc;
+    SCROLLBAR-DARKSHADOW-COLOR: #000000;
+    BACKGROUND-COLOR: #cccccc
+}
+BODY.Brown
+{
+    SCROLLBAR-FACE-COLOR: #996600;
+    SCROLLBAR-HIGHLIGHT-COLOR: #ffffff;
+    SCROLLBAR-SHADOW-COLOR: #ffffff;
+    SCROLLBAR-3DLIGHT-COLOR: #996600;
+    SCROLLBAR-ARROW-COLOR: #ffffff;
+    SCROLLBAR-TRACK-COLOR: #ffffff;
+    SCROLLBAR-DARKSHADOW-COLOR: #000000;
+    BACKGROUND-COLOR: #ffe666
+}
+TEXTAREA
+{
+    BORDER-RIGHT: gray 1pt solid;
+    BORDER-TOP: silver 1pt inset;
+    FONT-WEIGHT: normal;
+    FONT-SIZE: x-small;
+    BORDER-LEFT: silver 1pt inset;
+    CURSOR: hand;
+    COLOR: mediumblue;
+    BORDER-BOTTOM: gray 1pt solid;
+    FONT-FAMILY: Tahoma, arial, verdana, helvetica, sans-serif;
+    BACKGROUND-COLOR: lightsteelblue
+}
+INPUT
+{
+    BORDER-RIGHT: steelblue 1pt solid;
+    BORDER-TOP: steelblue 1pt inset;
+    FONT-WEIGHT: normal;
+    FONT-SIZE: x-small;
+    BORDER-LEFT: steelblue 1pt inset;
+    CURSOR: hand;
+    COLOR: mediumblue;
+    BORDER-BOTTOM: steelblue 1pt solid;
+    FONT-FAMILY: Tahoma, arial, verdana, helvetica, sans-serif;
+    BACKGROUND-COLOR: lightsteelblue
+}
+
+INPUT.BorderLess
+{
+    BORDER-RIGHT: steelblue 0pt solid;
+    BORDER-TOP: steelblue 0pt solid;
+    FONT-WEIGHT: normal;
+    FONT-SIZE: x-small;
+    BORDER-LEFT: steelblue 0pt solid;
+    CURSOR: hand;
+    COLOR: mediumblue;
+    BORDER-BOTTOM: steelblue 0pt solid;
+    FONT-FAMILY: Tahoma, arial, verdana, helvetica, sans-serif;
+    BACKGROUND-COLOR: transparent
+}
+INPUT.Buttons
+{    
+    BORDER-RIGHT: black 1pt outset;
+    BORDER-TOP: white 1pt solid;
+    FONT-WEIGHT: normal;
+    FONT-SIZE: x-small;
+    BORDER-LEFT: white 1pt outset;
+    CURSOR: hand;
+    COLOR: black;
+    BORDER-BOTTOM: black 1pt inset;
+    FONT-FAMILY: Tahoma, arial, verdana, helvetica, sans-serif;
+    BACKGROUND-COLOR: #C0C0C0
+}
+INPUT.data
+{
+    BORDER-RIGHT: silver 2px solid;
+    BORDER-TOP: silver 2px solid;
+    FONT-WEIGHT: normal;
+    FONT-SIZE: 8pt;
+    BORDER-LEFT: silver 2px solid;
+    WIDTH: 150px;
+    COLOR: #000099;
+    BORDER-BOTTOM: silver 2px solid;
+    FONT-FAMILY: verdana, arial, helvetica, sans-serif
+}
+INPUT.READONLY
+{
+    BORDER-RIGHT: SILVER 1px OUTSET ridge;
+    BORDER-TOP: SILVER 1px  SOLID;
+    FONT-WEIGHT: normal;
+    FONT-SIZE: 8pt;
+    BORDER-LEFT: SILVER 1px  SOLID;
+    WIDTH: 150px;
+    COLOR: NAVY;
+    BORDER-BOTTOM: SILVER 1px OUTSET;
+    FONT-FAMILY: verdana, arial, helvetica, sans-serif;
+    BACKGROUND-COLOR: #C0C0C0;
+}
+
+SELECT
+{
+    FONT-WEIGHT: normal;
+    FONT-SIZE: x-small;
+    COLOR: darkblue;
+    FONT-FAMILY: Tahoma, arial, verdana, helvetica, sans-serif;
+    BACKGROUND-COLOR: lightsteelblue
+}
+TH
+{
+    FONT-SIZE: 8.5pt;
+    FONT-FAMILY: arial,helvetica, sans-serif, verdana
+}
+TD
+{
+    FONT-SIZE: 8.5pt;
+    FONT-FAMILY: arial,helvetica, sans-serif, verdana
+}
+OL
+{
+    FONT-SIZE: x-small;
+    FONT-FAMILY: verdana, arial,helvetica, sans-serif
+}
+UL
+{
+    FONT-SIZE: x-small;
+    FONT-FAMILY: verdana, arial,helvetica, sans-serif
+}
+LI
+{
+    FONT-SIZE: x-small;
+    FONT-FAMILY: verdana, arial,helvetica, sans-serif
+}
+BODY.Large
+{
+    FONT-SIZE: x-small;
+    FONT-FAMILY: verdana, arial,helvetica, sans-serif
+}
+H1
+{
+    FONT-SIZE: 175%;
+    FONT-FAMILY: verdana, arial, helvetica, sans-serif
+}
+H2
+{
+    FONT-SIZE: 150%;
+    FONT-FAMILY: verdana, arial, helvetica, sans-serif
+}
+H3
+{
+    FONT-SIZE: 125%;
+    FONT-FAMILY: verdana, arial, helvetica, sans-serif
+}
+H4
+{
+    FONT-SIZE: 100%;
+    FONT-FAMILY: verdana, arial, helvetica, sans-serif
+}
+H5
+{
+    FONT-SIZE: 75%;
+    FONT-FAMILY: verdana, arial, helvetica, sans-serif
+}
+H6
+{
+    FONT-SIZE: 50%;
+    FONT-FAMILY: verdana, arial, helvetica, sans-serif
+}
+PRE
+{
+    FONT-SIZE: x-small;
+    FONT-FAMILY: courier, sans-serif
+}
+TT
+{
+    FONT-SIZE: x-small;
+    FONT-FAMILY: courier, sans-serif
+}
+CODE
+{
+    FONT-SIZE: x-small;
+    FONT-FAMILY: courier, sans-serif
+}
+A:hover
+{
+    FONT-SIZE: xx-small;
+    COLOR: red;
+    TEXT-DECORATION: underline overline
+}
+A.menus
+{
+    FONT-SIZE: x-small;
+    COLOR: #cc3333;
+    TEXT-DECORATION: none
+}
+A.menus:visited
+{
+    FONT-SIZE: xx-small;
+    COLOR: #cc3333;
+    TEXT-DECORATION: none
+}
+A.menus:hover
+{
+    FONT-SIZE: xx-small;
+    BACKGROUND: #ffa;
+    COLOR: #cc3333;
+    TEXT-DECORATION: none
+}
+A.menussel
+{
+    FONT-SIZE: xx-small;
+    BACKGROUND: #ffa;
+    COLOR: #cc3333;
+    TEXT-DECORATION: none
+}
+A.menussel:visited
+{
+    FONT-SIZE: xx-small;
+    BACKGROUND: #ffa;
+    COLOR: #cc3333;
+    TEXT-DECORATION: none
+}
+A.menussel:hover
+{
+    FONT-SIZE: xx-small;
+    BACKGROUND: #ffa;
+    COLOR: #cc3333;
+    TEXT-DECORATION: none
+}
+A.menusxxs
+{
+    FONT-SIZE: 7pt;
+    COLOR: #cc3333;
+    TEXT-DECORATION: none
+}
+A.menusxxs:visited
+{
+    FONT-SIZE: 7pt;
+    COLOR: #cc3333;
+    TEXT-DECORATION: none
+}
+A.menusxxs:hover
+{
+    FONT-SIZE: 7pt;
+    BACKGROUND: #ffa;
+    COLOR: #cc3333;
+    TEXT-DECORATION: none
+}
+A.biglink
+{
+    FONT-SIZE: 125%;
+    COLOR: #cc3333;
+    TEXT-DECORATION: none
+}
+A.biglink:visited
+{
+    FONT-SIZE: 125%;
+    COLOR: #cc3333;
+    TEXT-DECORATION: none
+}
+A.biglink:hover
+{
+    FONT-SIZE: 125%;
+    BACKGROUND: #ffa;
+    COLOR: #cc3333;
+    TEXT-DECORATION: none
+}
+A.normal
+{
+    FONT-WEIGHT: bold;
+    FONT-SIZE: xx-small;
+    COLOR: #000000;
+    FONT-FAMILY: Verdana, Arial, sans-serif;
+    TEXT-DECORATION: none
+}
+A.normal:visited
+{
+    FONT-WEIGHT: bold;
+    FONT-SIZE: xx-small;
+    COLOR: #000000;
+    FONT-FAMILY: Verdana, Arial, sans-serif;
+    TEXT-DECORATION: none
+}
+A.normal:hover
+{
+    FONT-WEIGHT: bold;
+    FONT-SIZE: xx-small;
+    COLOR: #000000;
+    FONT-FAMILY: Verdana, Arial, sans-serif;
+    TEXT-DECORATION: none
+}
+INPUT.cal-TextBoxLong
+{
+    BORDER-RIGHT: black 1px solid;
+    BORDER-TOP: black 1px solid;
+    FONT-WEIGHT: normal;
+    FONT-SIZE: 8pt;
+    BORDER-LEFT: black 1px solid;
+    COLOR: blue;
+    BORDER-BOTTOM: black 1px solid;
+    FONT-FAMILY: Verdana,  Arial, sans-serif;
+    BACKGROUND-COLOR: #ffffcc
+}
+.cal-TextBox
+{
+    FONT-WEIGHT: normal;
+    FONT-SIZE: 8pt;
+    COLOR: black;
+    FONT-FAMILY: Verdana,  Arial, sans-serif;
+    BACKGROUND-COLOR: #ffffcc
+}
+.cal-TextBoxReg
+{
+    BORDER-RIGHT: 1px solid;
+    BORDER-TOP: 1px solid;
+    FONT-WEIGHT: normal;
+    FONT-SIZE: 8pt;
+    BORDER-LEFT: 1px solid;
+    COLOR: black;
+    BORDER-BOTTOM: 1px solid;
+    FONT-FAMILY: Verdana,  Arial, sans-serif;
+    BACKGROUND-COLOR: #a4d1ff
+}
+.cal-TextBoxBold
+{
+    SCROLLBAR-FACE-COLOR: #996600;
+    FONT-WEIGHT: bold;
+    FONT-SIZE: 8pt;
+    SCROLLBAR-HIGHLIGHT-COLOR: #ffffff;
+    SCROLLBAR-SHADOW-COLOR: #ffffff;
+    COLOR: black;
+    SCROLLBAR-3DLIGHT-COLOR: #996600;
+    SCROLLBAR-ARROW-COLOR: #ffffff;
+    SCROLLBAR-TRACK-COLOR: #ffffff;
+    FONT-FAMILY: Verdana,  Arial, sans-serif;
+    SCROLLBAR-DARKSHADOW-COLOR: #000000;
+    BACKGROUND-COLOR: #ffffcc
+}
+.cal-TextBoxBlue
+{
+    BORDER-RIGHT: 1px solid;
+    BORDER-TOP: 1px solid;
+    SCROLLBAR-FACE-COLOR: #996600;
+    FONT-WEIGHT: normal;
+    FONT-SIZE: 8pt;
+    SCROLLBAR-HIGHLIGHT-COLOR: #ffffff;
+    BORDER-LEFT: 1px solid;
+    SCROLLBAR-SHADOW-COLOR: #ffffff;
+    COLOR: black;
+    SCROLLBAR-3DLIGHT-COLOR: #996600;
+    SCROLLBAR-ARROW-COLOR: #ffffff;
+    SCROLLBAR-TRACK-COLOR: #ffffff;
+    BORDER-BOTTOM: 1px solid;
+    FONT-FAMILY: Tahoma, Arial, sans-serif;
+    SCROLLBAR-DARKSHADOW-COLOR: #000000;
+    BACKGROUND-COLOR: #a4d1ff
+}
+.cal-TextBoxBlueSmall
+{
+    BORDER-RIGHT: 1px solid;
+    BORDER-TOP: 1px solid;
+    SCROLLBAR-FACE-COLOR: #996600;
+    FONT-SIZE: 8pt;
+    SCROLLBAR-HIGHLIGHT-COLOR: #ffffff;
+    BORDER-LEFT: 1px solid;
+    SCROLLBAR-SHADOW-COLOR: #ffffff;
+    COLOR: black;
+    SCROLLBAR-3DLIGHT-COLOR: #996600;
+    SCROLLBAR-ARROW-COLOR: #ffffff;
+    SCROLLBAR-TRACK-COLOR: #ffffff;
+    BORDER-BOTTOM: 1px solid;
+    FONT-FAMILY: Verdana,  Arial, sans-serif;
+    SCROLLBAR-DARKSHADOW-COLOR: #000000;
+    BACKGROUND-COLOR: #a4d1ff
+}
+.longTextBox
+{
+    BORDER-RIGHT: black 1px solid;
+    BORDER-TOP: black 1px solid;
+    FONT-WEIGHT: normal;
+    FONT-SIZE: 8pt;
+    BORDER-LEFT: black 1px solid;
+    COLOR: black;
+    BORDER-BOTTOM: black 1px solid;
+    FONT-FAMILY: Verdana,  Arial, sans-serif;
+    TEXT-ALIGN: left
+}
+.TextBoxReg
+{
+    BORDER-RIGHT: 1px solid;
+    BORDER-TOP: 1px solid;
+    FONT-WEIGHT: normal;
+    FONT-SIZE: 8pt;
+    BORDER-LEFT: 1px solid;
+    WIDTH: 150px;
+    COLOR: black;
+    BORDER-BOTTOM: 1px solid;
+    FONT-FAMILY: Verdana,  Arial, sans-serif;
+    BACKGROUND-COLOR: #ffffcc
+}
+.borderT
+{
+    BORDER-RIGHT: 0px solid;
+    BORDER-TOP: 0px solid;
+    BORDER-LEFT: 1px solid;
+    BORDER-BOTTOM: 1px solid
+}
+.nav_Menu_over
+{
+    BORDER-RIGHT: #000000 1px solid;
+    BORDER-TOP: #000000 2px solid;
+    FONT-SIZE: 9pt;
+    BACKGROUND-IMAGE: none;
+    BORDER-LEFT: #000000 2px solid;
+    CURSOR: hand;
+    COLOR: blue;
+    BORDER-BOTTOM: #000000 1px solid;
+    BACKGROUND-REPEAT: repeat;
+    FONT-FAMILY: Arial;
+    HEIGHT: 20px;
+    BACKGROUND-COLOR: #dddddd;
+    TEXT-ALIGN: center
+}
+.nav_Menu
+{
+    BORDER-RIGHT: gray 1px inset;
+    BORDER-TOP: gray 1px inset;
+    FONT-SIZE: 9pt;
+    BACKGROUND-IMAGE: none;
+    BORDER-LEFT: gray 1px inset;
+    CURSOR: hand;
+    COLOR: navy;
+    BORDER-BOTTOM: gray 1px inset;
+    BACKGROUND-REPEAT: repeat;
+    FONT-FAMILY: Arial;
+    HEIGHT: 20px;
+    BACKGROUND-COLOR: transparent;
+    TEXT-ALIGN: center
+}
+.nav
+{
+    BORDER-RIGHT: gray 1px inset;
+    BORDER-TOP: gray 1px inset;
+    FONT-SIZE: 8pt;
+    BACKGROUND-IMAGE: none;
+    BORDER-LEFT: gray 1px inset;
+    CURSOR: hand;
+    COLOR: navy;
+    BORDER-BOTTOM: gray 1px inset;
+    BACKGROUND-REPEAT: repeat;
+    FONT-FAMILY: verdana,arial;
+    HEIGHT: 20px;
+    BACKGROUND-COLOR: transparent;
+    TEXT-ALIGN: center
+}
+.footerHighlightNav
+{
+    filter:progid:DXImageTransform.Microsoft.Gradient(startColorStr='#6699cc', endColorStr='#000080', gradientType='0');
+    BORDER-RIGHT: gray 1px inset;
+    BORDER-TOP: gray 1px inset;
+    FONT-WEIGHT: bold;
+    FONT-SIZE: 8pt;
+    BACKGROUND-IMAGE: none;
+    BORDER-LEFT: gray 1px inset;
+    CURSOR: hand;
+    COLOR: white;
+    BORDER-BOTTOM: gray 1px inset;
+    BACKGROUND-REPEAT: repeat;
+    FONT-FAMILY: verdana,arial;
+    HEIGHT: 20px;
+    BACKGROUND-COLOR: steelblue;
+    TEXT-ALIGN: center
+}
+.footerHighlightNavOn
+{
+    BORDER-RIGHT: gray 1px dotted;
+    BORDER-TOP: gray 1px dotted;
+    FONT-WEIGHT: bold;
+    FONT-SIZE: 8pt;
+    BACKGROUND-IMAGE: none;
+    BORDER-LEFT: gray 1px dotted;
+    CURSOR: hand;
+    COLOR: white;
+    BORDER-BOTTOM: gray 1px dotted;
+    BACKGROUND-REPEAT: repeat;
+    FONT-FAMILY: verdana,arial;
+    HEIGHT: 20px;
+    BACKGROUND-COLOR: darkblue;
+    TEXT-ALIGN: center
+}
+
+.nav_over
+{
+    BORDER-RIGHT: #000000 1px solid;
+    BORDER-TOP: #000000 2px solid;
+    FONT-SIZE: 8pt;
+    BACKGROUND-IMAGE: none;
+    BORDER-LEFT: #000000 2px solid;
+    CURSOR: hand;
+    COLOR: blue;
+    BORDER-BOTTOM: #000000 1px solid;
+    BACKGROUND-REPEAT: repeat;
+    FONT-FAMILY: verdana,arial;
+    HEIGHT: 20px;
+    BACKGROUND-COLOR: #dddddd;
+    TEXT-ALIGN: center
+}
+.nav_clicked
+{
+    BORDER-RIGHT: #000000 1px solid;
+    BORDER-TOP: #000000 2px solid;
+    FONT-WEIGHT: bold;
+    FONT-SIZE: 9pt;
+    BACKGROUND-IMAGE: none;
+    BORDER-LEFT: #000000 2px solid;
+    CURSOR: hand;
+    COLOR: blue;
+    BORDER-BOTTOM: #000000 1px solid;
+    BACKGROUND-REPEAT: repeat;
+    FONT-FAMILY: Arial;
+    HEIGHT: 20px;
+    BACKGROUND-COLOR: #dddddd;
+    TEXT-ALIGN: center
+}
+.tdRule
+{
+    BORDER-BOTTOM: teal 1px inset;
+    BACKGROUND-COLOR: transparent
+}
+A:link
+{
+    FONT-SIZE: xx-small;
+    COLOR: blue;
+    TEXT-DECORATION: none
+}
+A:visited
+{
+    FONT-SIZE: xx-small;
+    COLOR: blue;
+    TEXT-DECORATION: underline
+}
+BUTTON
+{
+    FONT-SIZE: 1pt;
+    FONT-FAMILY: Verdana;
+    BACKGROUND-COLOR: transparent
+}
+
+TD.taMenu {
+	VERTICAL-ALIGN: bottom; PADDING-TOP: 0px; WHITE-SPACE: nowrap
+}
+	
+DIV.taMenu {
+	BACKGROUND: url(../images/taMenuBorder.gif) #ffffff repeat-x 50% bottom;
+	FLOAT: left; 
+	WIDTH: 100%;
+}
+DIV.taMenu UL {
+	PADDING-RIGHT: 0px;
+	PADDING-LEFT: 0px;
+	PADDING-BOTTOM: 0px;
+	MARGIN: 0px;
+	PADDING-TOP: 0px;
+	LIST-STYLE-TYPE: none
+}
+DIV.taMenu LI {
+	PADDING-RIGHT: 0px;
+	DISPLAY: inline;
+	PADDING-LEFT: 0px;
+	PADDING-BOTTOM: 0px;
+	MARGIN: 0px;
+	PADDING-TOP: 0px
+}
+DIV.taMenu A {
+	FONT-WEIGHT: bold; 
+	FONT-SIZE: x-small; 
+	BACKGROUND: url(../images/taMenuRight.gif) no-repeat right top;
+	FLOAT: left;
+	BORDER-BOTTOM: #84b0c7 1px solid;
+	TEXT-DECORATION: none
+}
+
+DIV.taMenu A:hover {
+	BACKGROUND-POSITION: 100% -150px;
+	FONT-WEIGHT: bold;
+	FONT-SIZE: x-small;
+	text-decoration: none;
+}
+DIV.taMenu A:link {
+	COLOR: #115e94;
+	FONT-WEIGHT: bold;
+	FONT-SIZE: x-small;
+	text-decoration: none;
+}
+DIV.taMenu A:visited {
+	COLOR: #115e94;
+	FONT-WEIGHT: bold;
+	FONT-SIZE: x-small;
+	text-decoration: none;
+}
+DIV.taMenu A:active {
+	COLOR: #115e94;
+	FONT-WEIGHT: bold;
+	FONT-SIZE: x-small;
+	text-decoration: none;
+}
+DIV.taMenu A:hover {
+	COLOR: #115e94;
+	FONT-WEIGHT: bold;
+	FONT-SIZE: x-small;
+	text-decoration: none;
+}
+DIV.taMenu SPAN {
+	PADDING-RIGHT: 7px;
+	DISPLAY: block; 
+	PADDING-LEFT: 7px;
+	BACKGROUND: url(../images/taMenuLeft.gif) no-repeat left top;
+	FLOAT: left;
+	PADDING-BOTTOM: 1px;
+	PADDING-TOP: 0px;
+	WHITE-SPACE: nowrap;
+}
+DIV.taMenu SPAN {
+	FLOAT: none
+}
+DIV.taMenu A:hover SPAN {
+	BACKGROUND-POSITION: 0% -150px
+}
+DIV.taMenu LI#current A {
+	BORDER-TOP-WIDTH: 0px; 
+	BACKGROUND-POSITION: 100% -150px;
+	BORDER-LEFT-WIDTH: 0px;
+	BORDER-BOTTOM-WIDTH: 0px;
+	BORDER-RIGHT-WIDTH: 0px
+}
+DIV.taMenu LI#current SPAN {
+	BACKGROUND-POSITION: 0% -150px;
+	PADDING-BOTTOM: 6px
+}
+
+.borderL
+{
+    BORDER-RIGHT: 0px solid;
+    BORDER-TOP: 0px solid;
+    BORDER-LEFT: 20px solid;
+    BORDER-BOTTOM: 0px solid;
+    BACKGROUND-COLOR:red;
+}

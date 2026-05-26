@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>BrokerKnow — Creating a Levy and Using It on an Order</title>
+<style>
+  @page { size: A4; margin: 18mm 16mm; }
+  html, body { font-family: "Segoe UI", Calibri, Arial, sans-serif; color: #222; font-size: 10.5pt; line-height: 1.4; }
+  h1 { color: #1f3864; border-bottom: 2px solid #1f3864; padding-bottom: 4px; font-size: 22pt; margin-top: 0; }
+  h2 { color: #1f3864; border-bottom: 1px solid #bdd7ee; padding-bottom: 3px; font-size: 15pt; margin-top: 22pt; page-break-after: avoid; }
+  h3 { color: #2e75b6; font-size: 12pt; margin-top: 14pt; page-break-after: avoid; }
+  h4 { color: #2e75b6; font-size: 11pt; margin-top: 10pt; }
+  p, li { font-size: 10.5pt; }
+  table { border-collapse: collapse; width: 100%; margin: 8pt 0; font-size: 9.5pt; }
+  thead { display: table-header-group; }
+  tr { page-break-inside: avoid; }
+  th, td { border: 1px solid #b4b4b4; padding: 4px 6px; text-align: left; vertical-align: top; }
+  th { background: #1f3864; color: #fff; }
+  tr:nth-child(even) td { background: #f4f7fb; }
+  code { font-family: Consolas, "Courier New", monospace; background: #eef1f5; padding: 1px 4px; border-radius: 3px; font-size: 9.5pt; }
+  pre { background: #1e1e1e; color: #e8e8e8; padding: 10px 12px; border-radius: 4px; font-family: Consolas, "Courier New", monospace; font-size: 9pt; white-space: pre; overflow-x: auto; page-break-inside: avoid; }
+  pre code { background: transparent; color: inherit; padding: 0; }
+  blockquote { border-left: 4px solid #ed7d31; background: #fff4e6; padding: 6px 12px; margin: 8pt 0; color: #6b3e00; }
+  hr { border: none; border-top: 1px solid #bdd7ee; margin: 16pt 0; }
+  .meta { color: #555; font-size: 9.5pt; margin-bottom: 14pt; }
+  .meta strong { color: #1f3864; }
+  ul, ol { margin-top: 4pt; margin-bottom: 8pt; }
+  .ascii { font-family: Consolas, "Courier New", monospace; white-space: pre; background: #f4f7fb; border: 1px solid #bdd7ee; padding: 10px; font-size: 8.5pt; line-height: 1.2; }
+</style>
+</head>
+<body>
+
+<h1>BrokerKnow — Creating a Levy and Using It on an Order</h1>
+
+<div class="meta">
+<strong>Database:</strong> TEST_Malawi / PROD_Malawi (SQL Server)<br>
+<strong>Application:</strong> BrokerKnow (Classic ASP)<br>
+<strong>Audience:</strong> System administrators, support engineers<br>
+<strong>Last updated:</strong> May 2026
+</div>
+
+<hr>
+
+<h2>1. Concept overview</h2>
+<p>A <strong>Levy</strong> in BrokerKnow is any charge attached to a contract — broker commission, MSE commission, agent commission, VAT, basic fee, CGT, handling fee, etc. Every contract that comes out of an executed order receives one row in <code>dbo.LevyContract</code> per applicable levy.</p>
+
+<p>There are <strong>two layers</strong> that have to agree for a levy to actually flow into a trade:</p>
+
+<table>
+<tr><th>Layer</th><th>Where</th><th>What it does</th></tr>
+<tr><td><strong>Catalogue</strong></td><td><code>dbo.Levy</code> table (UI: <em>Administration → System Configuration → Levies</em>)</td><td>Defines the levy: name, short name, rate/amount, type, VAT flag, scope (bonds / equities).</td></tr>
+<tr><td><strong>Engine</strong></td><td>Stored procedures <code>dbo.cont_CreateContract</code> and <code>dbo.cont_RedoBrokerCommissions</code></td><td>Hard-codes WHICH levies get inserted into <code>dbo.LevyContract</code> when a contract is created, and how the amount is calculated.</td></tr>
+</table>
+
+<blockquote><strong>CRITICAL:</strong> Adding a levy in the UI alone is <strong>not enough</strong>. The engine procs reference levies by their <code>SystemMaintained</code> integer code. If a code is not handled in the procs, no <code>LevyContract</code> row will ever be inserted for that levy, no matter what the UI shows.</blockquote>
+
+<h2>2. The <code>SystemMaintained</code> codes (HARD-CODED)</h2>
+
+<p>These integer codes are referenced literally throughout the stored procedures, the reports, and the cross-tab pivot. <strong>Do not reuse codes; do not change existing codes.</strong></p>
+
+<table>
+<tr><th>Code</th><th>Levy</th><th>Short name</th><th>Calculation basis</th><th>Where hard-coded</th></tr>
+<tr><td>11</td><td>Broker Commission</td><td><code>Commission</code></td><td>Banded % of total gross (per client commission profile)</td><td><code>cont_CreateContract</code>, <code>cont_RedoBrokerCommissions</code>, <code>ContractLeviesCrossTab</code></td></tr>
+<tr><td>12</td><td>Agent Commission</td><td><code>Agent</code></td><td>% of (Broker Commission − MSE) per agent profile</td><td><code>cont_CreateContract</code>, <code>cont_RedoBrokerCommissions</code>, <code>ContractLeviesCrossTab</code></td></tr>
+<tr><td>25</td><td>MSE Commission</td><td><code>MSEComm</code></td><td>% of Broker Commission (rate from <code>Levy.LevyAmount</code> where SM=25)</td><td><code>cont_CreateContract</code>, <code>cont_RedoBrokerCommissions</code>, <code>ContractLeviesCrossTab</code></td></tr>
+<tr><td>99</td><td>VAT</td><td><code>VAT</code></td><td>% of (Broker Commission + Basic Fee), rate from <code>Levy.LevyAmount</code> where SM=99</td><td><code>cont_CreateContract</code>, <code>cont_RedoBrokerCommissions</code>, <code>ContractLeviesCrossTab</code></td></tr>
+<tr><td>100</td><td>Basic Fee / Handling Fee</td><td><code>Basic</code></td><td>Flat MWK amount per contract (from <code>Levy.LevyAmount</code> where SM=100)</td><td><code>cont_CreateContract</code>, <code>cont_RedoBrokerCommissions</code>, <code>ContractLeviesCrossTab</code></td></tr>
+<tr><td>101</td><td>CGT (Capital Gains Tax)</td><td><code>CGT</code></td><td>% of contract gross — <strong>SALE side only</strong></td><td><code>cont_CreateContract</code> (post-2026 patch), <code>ContractLeviesCrossTab</code> (post-2026 patch)</td></tr>
+</table>
+
+<h3>Other hard-coded items in the procs</h3>
+<ul>
+<li><strong>VAT computation always reads <code>SystemMaintained = 99</code></strong> to get the VAT rate. If you change the VAT short-name or code, every proc that references <code>99</code> must be updated.</li>
+<li><strong>CGT applies only when <code>@Side = 'S'</code></strong> (<code>@Side</code> is derived from <code>LEFT(OrderType.OrderTypeDescription, 1)</code> — i.e. first letter of the order type description must be <code>S</code> for Sale).</li>
+<li><strong>Basic Fee VAT:</strong> The Levy UI flag (<code>Vatable</code> checkbox) is <strong>not</strong> consulted by the proc. The proc currently computes a VAT amount on Basic regardless of the flag. If Basic should not carry VAT, set its VAT amount to 0 directly in the proc.</li>
+<li><strong>Commission bands</strong> (2% / 1.5% / 1%) are NOT in <code>dbo.Levy</code>. They live in <code>dbo.Commission</code> per client profile (<code>CommissionRate</code>, <code>MedianSecurityCommission</code>, <code>UpperSecurityCommission</code>, <code>SecurityBoundary</code>, <code>SecondSecurityBoundary</code>, <code>MinimumSecurityCommission</code>).</li>
+<li><strong>Levy column order in the Traded Levies report</strong> is decided by <code>dbo.ContractLeviesCrossTab</code>. Adding a column there requires both the <code>MAX(CASE … END) AS [NewLevy]</code> line and inclusion in the <code>Total</code> summation. The ASP report (<code>TradedLevies.asp</code>) auto-discovers the columns; it does NOT need code changes.</li>
+<li><strong>Levy column hiding in the Single Client Compounded report:</strong> <code>SingleClientCompounded.asp</code> blanks the row label for <code>SystemMaintained = 99</code> (VAT) and <code>25</code> (MSE) — those values are still shown in the VAT column, but the levy is not listed as a separate line.</li>
+</ul>
+
+<h2>3. Step-by-step: Creating a NEW levy</h2>
+
+<p>If the levy already exists in the catalogue (e.g. CGT, MSE, VAT) skip to §4.</p>
+
+<h3>Step 1 — Insert the levy in the catalogue (UI)</h3>
+<p>Path: <strong>Administration → System Configuration → Levies → New Levy</strong></p>
+
+<table>
+<tr><th>Field</th><th>Meaning</th><th>Notes</th></tr>
+<tr><td>Description</td><td>Long name (<code>Levy.LevyDescription</code>)</td><td>Appears on contract notes</td></tr>
+<tr><td>Short Name</td><td>Pivot column key (<code>Levy.LevyShortName</code>)</td><td><strong>Must match exactly</strong> the literal used in <code>ContractLeviesCrossTab</code> (case-sensitive)</td></tr>
+<tr><td>Type</td><td><code>P</code> = Percentage, <code>S</code> = Schedule (flat amount)</td><td></td></tr>
+<tr><td>Amount/Percentage</td><td>Either the % rate or the MWK flat amount</td><td>Stored in <code>Levy.LevyAmount</code></td></tr>
+<tr><td>Block</td><td>Free integer (informational grouping)</td><td>Not used by calculation logic</td></tr>
+<tr><td>VAT</td><td>If checked, the engine <em>should</em> apply VAT on this levy</td><td>The current <code>cont_RedoBrokerCommissions</code> ignores this flag for some levies — verify proc logic</td></tr>
+<tr><td>Apply To Security</td><td>If unchecked, levy will not be applied to equities</td><td>Honoured by the engine</td></tr>
+<tr><td>Apply To Bond</td><td>If unchecked, levy will not be applied to bonds</td><td>Honoured by the engine</td></tr>
+<tr><td>Active</td><td>Yes/No</td><td>Inactive levies are ignored</td></tr>
+</table>
+
+<h3>Step 2 — Assign a <code>SystemMaintained</code> code</h3>
+
+<p>After saving, run in SSMS:</p>
+
+<pre><code>UPDATE dbo.Levy
+SET    SystemMaintained = &lt;NEW_CODE&gt;
+WHERE  LevyShortName = '&lt;YourShortName&gt;';</code></pre>
+
+<p>Pick the next free integer above 101 (e.g. 102). <strong>Document it in the table in §2.</strong></p>
+
+<h3>Step 3 — Patch <code>dbo.cont_CreateContract</code></h3>
+
+<p>Add a new block at the bottom of the levy inserts (just before <code>EXEC cont_RedoBrokerCommissions</code>). Mirror the CGT block as a template:</p>
+
+<pre><code>-- &lt;YourLevyName&gt;
+SET @SystemMaintained = &lt;NEW_CODE&gt;
+SET @LevyDescription  = LTRIM(RTRIM((SELECT TOP 1 LevyDescription FROM Levy WHERE SystemMaintained = @SystemMaintained)))
+SET @LevyShortName    = LTRIM(RTRIM((SELECT TOP 1 LevyShortName  FROM Levy WHERE SystemMaintained = @SystemMaintained)))
+SET @LevyRate         = ISNULL((SELECT TOP 1 LevyAmount FROM Levy WHERE SystemMaintained = @SystemMaintained), 0)
+SET @LevyAmount       = ROUND(@LotGross * @LevyRate / 100.0, 2)   -- if percentage
+-- SET @LevyAmount    = @LevyRate                                  -- if flat fee
+SET @LevyVATAmount    = 0                                          -- or compute if vatable
+
+-- Optional side filter, e.g. Sale-only:
+-- IF @Side = 'S'
+INSERT INTO LevyContract
+    (Contract_DPA_, LevyAmount, LevyName, LevyRate, LevyBlock, LevyShortName,
+     LevyRatePercentage, SystemMaintained, ChangedBy, TimeChanged, LevyVATAmount)
+SELECT @Contract_DPA_, @LevyAmount, @LevyDescription, @LevyRate, 0, @LevyShortName,
+       CONVERT(varchar(10), @LevyRate) + '%', @SystemMaintained, @ChangedBy, GETDATE(), @LevyVATAmount</code></pre>
+
+<h3>Step 4 — (Optional) Patch <code>dbo.cont_RedoBrokerCommissions</code></h3>
+<p>Only required if the levy needs to be <strong>recalculated</strong> when multiple lots/contracts exist for the same OrdDetail/day (e.g. flat fees per contract, or a value derived from the running broker commission). Mirror the Basic Fee block.</p>
+
+<h3>Step 5 — Patch <code>dbo.ContractLeviesCrossTab</code></h3>
+<p>Add the column <strong>before</strong> <code>Total</code> and include it in the <code>Total</code> sum. Example for a new levy with short name <code>NewLevy</code>:</p>
+
+<pre><code>MAX(CASE CAST([LevyShortName] AS nVARCHAR(255)) WHEN ''NewLevy'' THEN LevyAmount ELSE 0 END) AS [NewLevy],</code></pre>
+
+<p>…and add <code>+ MAX(CASE … WHEN ''NewLevy'' THEN LevyAmount ELSE 0 END)</code> to the <code>Total</code> expression.</p>
+
+<p>The Traded Levies ASP report will pick up the new column automatically.</p>
+
+<h3>Step 6 — (Optional) Adjust report-level visibility</h3>
+<p>If the levy should not appear as its own row on the Single Client Compounded report (like VAT/MSE today), edit <code>Files/SingleClientCompounded.asp</code> and add a branch like:</p>
+
+<pre><code>elseif levyArray(i, 2) = &lt;NEW_CODE&gt; then
+    thisLevyName = ""
+end if</code></pre>
+
+<h3>Step 7 — Backfill historic contracts (optional)</h3>
+<p>If the new levy should also apply to existing contracts:</p>
+
+<pre><code>DECLARE @Rate float = (SELECT TOP 1 LevyAmount FROM dbo.Levy WHERE SystemMaintained = &lt;NEW_CODE&gt;);
+INSERT INTO dbo.LevyContract (...)
+SELECT c.Contract_DPA_, ROUND(SUM(l.LotGrossAmount) * @Rate/100, 2), ...
+FROM   dbo.Contract c
+JOIN   dbo.Lot l ON l.Contract_DPA_ = c.Contract_DPA_ AND l.Deleted &lt;&gt; 1
+WHERE  NOT EXISTS (SELECT 1 FROM dbo.LevyContract lc
+                   WHERE lc.Contract_DPA_ = c.Contract_DPA_
+                     AND lc.SystemMaintained = &lt;NEW_CODE&gt;)
+GROUP BY c.Contract_DPA_;</code></pre>
+
+<h2>4. End-to-end: How a levy is used when placing an order</h2>
+
+<div class="ascii">User places order               Order matched / contract created            Reports
+──────────────────              ──────────────────────────────              ──────────────────
+
+AddOrder.asp                    cont_CreateContract                         SingleClientCompounded.asp
+   │                               (one call per matched lot)                  reads dbo.ContractCompoundedClients
+   │                                  │                                        which joins dbo.LevyContract
+   ▼                                  ├─ INSERT Contract row
+INSERT INTO tbOrder/                  ├─ INSERT Lot row                     TradedLevies.asp
+        OrdDetail                     ├─ INSERT LevyContract rows              calls EXEC ContractLeviesCrossTab
+   (no levy logic here)               │     (one row per SystemMaintained      which PIVOTs dbo.LevyContract
+                                      │      code, hard-coded list)            into one column per levy
+                                      └─ EXEC cont_RedoBrokerCommissions
+                                            │
+                                            ├─ Recompute brokerage
+                                            │  (banded, per-client)
+                                            ├─ Recompute MSE &amp; Agent
+                                            │  (proportional to lot gross)
+                                            ├─ Apply Basic Fee
+                                            │  (flat per contract)
+                                            └─ Roll up VAT total
+</div>
+
+<h3>Detailed flow</h3>
+<ol>
+<li><strong>Order capture</strong> (<code>AddOrder.asp</code>) — saves order header / detail lines into <code>tbOrder</code> and <code>OrdDetail</code>. <strong>No levy work happens at this stage.</strong></li>
+<li><strong>Match / release</strong> — when each lot is filled (manually or via market import), the matching code calls:
+<pre><code>EXEC cont_CreateContract
+     @OrdDetail_DPA_, @Broker_DPA_, @LotPrice, @LotQty,
+     @LotSlipNo, @LotTDateDesc, @ContractSettlementDateDesc, @ChangedBy</code></pre></li>
+<li><code>cont_CreateContract</code>:
+<ul>
+<li>Creates one row in <code>dbo.Contract</code>.</li>
+<li>Creates one row in <code>dbo.Lot</code>.</li>
+<li>Creates <strong>one <code>LevyContract</code> row per hard-coded levy code</strong> (11, 25, 12, 100, 99, 101 — the last only for Sale side).</li>
+<li>At the end calls <code>EXEC cont_RedoBrokerCommissions @OrdDetail_DPA_, @LotTDate</code>.</li>
+</ul></li>
+<li><code>cont_RedoBrokerCommissions</code>:
+<ul>
+<li>Re-aggregates <code>LotGrossAmount</code> for the OrdDetail and trade date.</li>
+<li>Recomputes the banded brokerage commission (using the <strong>client's</strong> Commission profile).</li>
+<li>Recomputes MSE, Agent, Basic Fee, VAT — distributes them across all contracts under the same OrdDetail/day proportionally to each lot's gross.</li>
+<li>Marks the parent order as <code>OrderCompounded = 1</code>.</li>
+</ul></li>
+<li><strong>Reports</strong>:
+<ul>
+<li><em>Single Client Compounded</em> (<code>SingleClientCompounded.asp</code>) reads the view <code>dbo.ContractCompoundedClients</code>, calls <code>SortLevies()</code> to order rows per <code>dbo.LevyOrderList</code>, and renders the contract note.</li>
+<li><em>Traded Levies</em> (<code>TradedLevies.asp</code>) calls <code>EXEC dbo.ContractLeviesCrossTab</code> and dynamically renders one column per pivot column (skipping the trailing <code>Total</code>).</li>
+</ul></li>
+</ol>
+
+<h2>5. Hard-coded items — quick reference</h2>
+
+<table>
+<tr><th>Hard-coded thing</th><th>Where</th><th>Notes</th></tr>
+<tr><td>Levy SystemMaintained codes (11, 12, 25, 99, 100, 101)</td><td><code>cont_CreateContract</code>, <code>cont_RedoBrokerCommissions</code>, <code>ContractLeviesCrossTab</code>, <code>SingleClientCompounded.asp</code></td><td>See §2</td></tr>
+<tr><td>VAT rate lookup uses <code>SystemMaintained = 99</code></td><td><code>cont_RedoBrokerCommissions</code>, <code>cont_CreateContract</code></td><td>If VAT code changes, update both</td></tr>
+<tr><td><code>LevyShortName</code> literal <code>'CGT'</code></td><td><code>ContractLeviesCrossTab</code></td><td>Case-sensitive in pivot</td></tr>
+<tr><td><code>LevyShortName</code> literals <code>'Agent'</code>, <code>'Basic'</code>, <code>'Commission'</code>, <code>'MSEComm'</code>, <code>'VAT'</code></td><td><code>ContractLeviesCrossTab</code></td><td>Must match <code>dbo.Levy.LevyShortName</code> exactly</td></tr>
+<tr><td><code>@Side = 'S'</code> for CGT</td><td><code>cont_CreateContract</code></td><td>Derived from <code>OrderType.OrderTypeDescription</code> first letter</td></tr>
+<tr><td>Basic Fee = flat per contract</td><td><code>cont_RedoBrokerCommissions</code></td><td>Applied to <strong>every</strong> contract for OrdDetail/day after May 2026 fix</td></tr>
+<tr><td>Commission band thresholds</td><td><code>dbo.Commission</code> rows linked to <code>Client.Commission_DPA_</code></td><td>Per-client overrides</td></tr>
+<tr><td>MSE rate of 5% in compounded report display</td><td><code>SingleClientCompounded.asp</code> branch on <code>levyArray(i, 2) = 25</code></td><td>Cosmetic only — actual amount comes from data</td></tr>
+<tr><td>VAT rate of 16.5% in compounded report display</td><td><code>SingleClientCompounded.asp</code> branch on <code>levyArray(i, 2) = 99</code></td><td>Cosmetic only</td></tr>
+<tr><td><code>beginLeviesCol = 15</code></td><td><code>TradedLevies.asp</code></td><td>First levy column position; must match the SELECT list of <code>ContractLeviesCrossTab</code></td></tr>
+<tr><td>Last 2 columns excluded from levy summation</td><td><code>TradedLevies.asp</code> (<code>fields.count - 2</code>)</td><td>Reserves the trailing <code>Total</code> (and a buffer) — placement of new levy columns must be <strong>before</strong> <code>Total</code> in the proc</td></tr>
+</table>
+
+<h2>6. Test checklist after adding a levy</h2>
+<ol>
+<li>Run a sample sale order with multiple lots → confirm the new levy appears in <code>dbo.LevyContract</code> for <strong>every</strong> child contract.</li>
+<li>Run a sample purchase order → confirm side filter (if any) is honoured.</li>
+<li>Open <em>Single Client Compounded</em> report → levy line shows expected amount.</li>
+<li>Open <em>Traded Levies</em> report → new column shows expected values; <code>Net</code> column subtracts it (sale) / adds it (purchase) correctly.</li>
+<li>Verify VAT total ties: <code>VAT amount = sum(VAT-able levies) × VAT rate</code>.</li>
+<li>Edit one of the lots and re-release → confirm <code>cont_RedoBrokerCommissions</code> re-stamps the levy correctly and does not duplicate rows.</li>
+</ol>
+
+<h2>7. Common mistakes / pitfalls</h2>
+<ul>
+<li><strong>Adding a levy in the UI without patching the procs</strong> — the levy will appear in <code>dbo.Levy</code> but no <code>LevyContract</code> row will ever be created.</li>
+<li><strong>Reusing a <code>SystemMaintained</code> code</strong> — silently corrupts other levies (the procs filter on the code).</li>
+<li><strong>Mismatched <code>LevyShortName</code> casing</strong> between <code>dbo.Levy</code> and the pivot proc — column will always show 0.</li>
+<li><strong>Placing a new pivot column AFTER <code>Total</code></strong> — the ASP loop excludes the last 2 columns, so the levy will not be summed into <code>Net</code>.</li>
+<li><strong>Forgetting <code>EXEC cont_RedoBrokerCommissions</code></strong> in any new path that creates contracts — leaves levies at 0.</li>
+<li><strong>Using <code>MAX(LevyContract_DPA_)</code> patterns</strong> for any per-contract flat fee — caused the historic Basic Fee bug (only the last contract got charged).</li>
+</ul>
+
+<hr>
+<p style="text-align:center; color:#777; font-size:9pt;"><em>End of document — BrokerKnow Levy Setup &amp; Usage</em></p>
+
+</body>
+</html>

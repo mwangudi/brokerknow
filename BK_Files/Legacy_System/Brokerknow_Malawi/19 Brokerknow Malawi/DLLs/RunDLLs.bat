@@ -1,0 +1,10 @@
+regsvr32.exe SQLParser.dll
+regsvr32.exe SQLPARSE.DLL
+regsvr32.exe ReportWizard.dll
+regsvr32.exe NDUtils.dll
+regsvr32.exe jmail.dll
+regsvr32.exe InfoLite.dll
+regsvr32.exe CDSHoldings.dll
+regsvr32.exe BrokerKnow.DLL
+regsvr32.exe aspSmartUpload.dll
+regsvr32.exe aspSmartUploadUtil.dll

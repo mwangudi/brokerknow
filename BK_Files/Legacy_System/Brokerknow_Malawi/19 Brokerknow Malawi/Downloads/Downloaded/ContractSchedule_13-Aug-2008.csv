@@ -1,0 +1,9 @@
+Contracts Schedule
+for Deals traded on: Wednesday  13-August-2008
+Traded,Client,Security,Br,Contr,REF,Price,Quantity,Agent,BSEComm,Commission,CSD,VAT,Gross,Net Amount
+13 Aug,Ceasar Pirs,OLYMPIA,CAP,P3265,test,3.65,100,0,0.55,6.75,0,0.75,365,373.05
+13 Aug,Jane Soap,ENGEN,AAM,S3266,red,100,100,0.1,15,20,0,3.5,10000,9961.5
+13 Aug,Jane Soap,ENGEN,CAP,S3267,5456623,100,100,0.1,15,20,0,3.5,10000,9961.5
+13 Aug,Jane Soap,ENGEN,AAM,S3268,100,1,100,0,0.15,0.2,0,0.05,100,99.6
+,,,,,,,Daily totals: ,0.2,30.7,46.95,0,7.8,20465,20395.65
+

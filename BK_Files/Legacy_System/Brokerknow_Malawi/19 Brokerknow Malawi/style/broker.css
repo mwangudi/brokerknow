@@ -1,0 +1,423 @@
+BODY
+{
+    SCROLLBAR-FACE-COLOR: #6699cc;
+    FONT-SIZE: 8pt;
+    SCROLLBAR-HIGHLIGHT-COLOR: black;
+    SCROLLBAR-SHADOW-COLOR: black;
+    SCROLLBAR-ARROW-COLOR: #000000;
+    FONT-FAMILY: Verdana, Tahoma, Arial;
+    SCROLLBAR-BASE-COLOR: #6699cc;
+    TEXT-DECORATION: none;
+    scrollbar-3d-light-color: BLACK;
+    scrollbar-dark-shadow-color: BLACK
+}
+BODY.OLD
+{
+    SCROLLBAR-FACE-COLOR: #6699cc;
+    FONT-SIZE: 8pt;
+    SCROLLBAR-HIGHLIGHT-COLOR: black;
+    SCROLLBAR-SHADOW-COLOR: black;
+    SCROLLBAR-ARROW-COLOR: #000000;
+    FONT-FAMILY: Verdana, Tahoma, Arial;
+    SCROLLBAR-BASE-COLOR: #6699cc;
+    TEXT-DECORATION: none;
+    scrollbar-3d-light-color: BLACK;
+    scrollbar-dark-shadow-color: BLACK
+}
+BODY.Green
+{
+    BACKGROUND-COLOR: #009933
+}
+BODY.Blue
+{
+    BACKGROUND-COLOR: #6699cc
+}
+BODY.Brown
+{
+    SCROLLBAR-FACE-COLOR: #996600;
+    SCROLLBAR-HIGHLIGHT-COLOR: #ffffff;
+    SCROLLBAR-SHADOW-COLOR: #ffffff;
+    SCROLLBAR-3DLIGHT-COLOR: #996600;
+    SCROLLBAR-ARROW-COLOR: #ffffff;
+    SCROLLBAR-TRACK-COLOR: #ffffff;
+    SCROLLBAR-DARKSHADOW-COLOR: #000000;
+    BACKGROUND-COLOR: #ffe666
+}
+INPUT
+{
+    FONT-WEIGHT: bold;
+    FONT-SIZE: x-small;
+    COLOR: #000099;
+    FONT-FAMILY: arial, verdana, helvetica, sans-serif
+}
+INPUT.Buttons
+{
+    CURSOR: hand
+}
+INPUT.data
+{
+    BORDER-RIGHT: silver 2px solid;
+    BORDER-TOP: silver 2px solid;
+    FONT-WEIGHT: normal;
+    FONT-SIZE: 8pt;
+    BORDER-LEFT: silver 2px solid;
+    WIDTH: 150px;
+    COLOR: #000099;
+    BORDER-BOTTOM: silver 2px solid;
+    FONT-FAMILY: verdana, arial, helvetica, sans-serif
+}
+SELECT
+{
+    FONT-WEIGHT: bold;
+    FONT-SIZE: x-small;
+    COLOR: #000099;
+    FONT-FAMILY: arial, verdana, helvetica, sans-serif
+}
+TH
+{
+    FONT-SIZE: xx-small;
+    FONT-FAMILY: verdana, arial,helvetica, sans-serif
+}
+TD
+{
+    FONT-SIZE: xx-small;
+    FONT-FAMILY: verdana, arial,helvetica, sans-serif
+}
+OL
+{
+    FONT-SIZE: x-small;
+    FONT-FAMILY: verdana, arial,helvetica, sans-serif
+}
+UL
+{
+    FONT-SIZE: x-small;
+    FONT-FAMILY: verdana, arial,helvetica, sans-serif
+}
+LI
+{
+    FONT-SIZE: x-small;
+    FONT-FAMILY: verdana, arial,helvetica, sans-serif
+}
+BODY.Large
+{
+    FONT-SIZE: x-small;
+    FONT-FAMILY: verdana, arial,helvetica, sans-serif
+}
+H1
+{
+    FONT-SIZE: 175%;
+    FONT-FAMILY: verdana, arial, helvetica, sans-serif
+}
+H2
+{
+    FONT-SIZE: 150%;
+    FONT-FAMILY: verdana, arial, helvetica, sans-serif
+}
+H3
+{
+    FONT-SIZE: 125%;
+    FONT-FAMILY: verdana, arial, helvetica, sans-serif
+}
+H4
+{
+    FONT-SIZE: 100%;
+    FONT-FAMILY: verdana, arial, helvetica, sans-serif
+}
+H5
+{
+    FONT-SIZE: 75%;
+    FONT-FAMILY: verdana, arial, helvetica, sans-serif
+}
+H6
+{
+    FONT-SIZE: 50%;
+    FONT-FAMILY: verdana, arial, helvetica, sans-serif
+}
+PRE
+{
+    FONT-SIZE: x-small;
+    FONT-FAMILY: courier, sans-serif
+}
+TT
+{
+    FONT-SIZE: x-small;
+    FONT-FAMILY: courier, sans-serif
+}
+CODE
+{
+    FONT-SIZE: x-small;
+    FONT-FAMILY: courier, sans-serif
+}
+A:hover
+{
+    FONT-SIZE: xx-small;
+    COLOR: red;
+    TEXT-DECORATION: underline overline
+}
+A.menus
+{
+    FONT-SIZE: x-small;
+    COLOR: #cc3333;
+    TEXT-DECORATION: none
+}
+A.menus:visited
+{
+    FONT-SIZE: xx-small;
+    COLOR: #cc3333;
+    TEXT-DECORATION: none
+}
+A.menus:hover
+{
+    FONT-SIZE: xx-small;
+    BACKGROUND: #ffa;
+    COLOR: #cc3333;
+    TEXT-DECORATION: none
+}
+A.menussel
+{
+    FONT-SIZE: xx-small;
+    BACKGROUND: #ffa;
+    COLOR: #cc3333;
+    TEXT-DECORATION: none
+}
+A.menussel:visited
+{
+    FONT-SIZE: xx-small;
+    BACKGROUND: #ffa;
+    COLOR: #cc3333;
+    TEXT-DECORATION: none
+}
+A.menussel:hover
+{
+    FONT-SIZE: xx-small;
+    BACKGROUND: #ffa;
+    COLOR: #cc3333;
+    TEXT-DECORATION: none
+}
+A.menusxxs
+{
+    FONT-SIZE: 7pt;
+    COLOR: #cc3333;
+    TEXT-DECORATION: none
+}
+A.menusxxs:visited
+{
+    FONT-SIZE: 7pt;
+    COLOR: #cc3333;
+    TEXT-DECORATION: none
+}
+A.menusxxs:hover
+{
+    FONT-SIZE: 7pt;
+    BACKGROUND: #ffa;
+    COLOR: #cc3333;
+    TEXT-DECORATION: none
+}
+A.biglink
+{
+    FONT-SIZE: 125%;
+    COLOR: #cc3333;
+    TEXT-DECORATION: none
+}
+A.biglink:visited
+{
+    FONT-SIZE: 125%;
+    COLOR: #cc3333;
+    TEXT-DECORATION: none
+}
+A.biglink:hover
+{
+    FONT-SIZE: 125%;
+    BACKGROUND: #ffa;
+    COLOR: #cc3333;
+    TEXT-DECORATION: none
+}
+A.normal
+{
+    FONT-WEIGHT: bold;
+    FONT-SIZE: xx-small;
+    COLOR: #000000;
+    FONT-FAMILY: Verdana, Arial, sans-serif;
+    TEXT-DECORATION: none
+}
+A.normal:visited
+{
+    FONT-WEIGHT: bold;
+    FONT-SIZE: xx-small;
+    COLOR: #000000;
+    FONT-FAMILY: Verdana, Arial, sans-serif;
+    TEXT-DECORATION: none
+}
+A.normal:hover
+{
+    FONT-WEIGHT: bold;
+    FONT-SIZE: xx-small;
+    COLOR: #000000;
+    FONT-FAMILY: Verdana, Arial, sans-serif;
+    TEXT-DECORATION: none
+}
+INPUT.cal-TextBoxLong
+{
+    BORDER-RIGHT: black 1px solid;
+    BORDER-TOP: black 1px solid;
+    FONT-WEIGHT: normal;
+    FONT-SIZE: 8pt;
+    BORDER-LEFT: black 1px solid;
+    COLOR: blue;
+    BORDER-BOTTOM: black 1px solid;
+    FONT-FAMILY: Verdana,  Arial, sans-serif;
+    BACKGROUND-COLOR: #ffffcc
+}
+.cal-TextBox
+{
+    FONT-WEIGHT: normal;
+    FONT-SIZE: 8pt;
+    COLOR: black;
+    FONT-FAMILY: Verdana,  Arial, sans-serif;
+    BACKGROUND-COLOR: #ffffcc
+}
+.cal-TextBoxReg
+{
+    BORDER-RIGHT: 1px solid;
+    BORDER-TOP: 1px solid;
+    FONT-WEIGHT: normal;
+    FONT-SIZE: 8pt;
+    BORDER-LEFT: 1px solid;
+    COLOR: black;
+    BORDER-BOTTOM: 1px solid;
+    FONT-FAMILY: Verdana,  Arial, sans-serif;
+    BACKGROUND-COLOR: #a4d1ff
+}
+.cal-TextBoxBold
+{
+    SCROLLBAR-FACE-COLOR: #996600;
+    FONT-WEIGHT: bold;
+    FONT-SIZE: 8pt;
+    SCROLLBAR-HIGHLIGHT-COLOR: #ffffff;
+    SCROLLBAR-SHADOW-COLOR: #ffffff;
+    COLOR: black;
+    SCROLLBAR-3DLIGHT-COLOR: #996600;
+    SCROLLBAR-ARROW-COLOR: #ffffff;
+    SCROLLBAR-TRACK-COLOR: #ffffff;
+    FONT-FAMILY: Verdana,  Arial, sans-serif;
+    SCROLLBAR-DARKSHADOW-COLOR: #000000;
+    BACKGROUND-COLOR: #ffffcc
+}
+.cal-TextBoxBlue
+{
+    BORDER-RIGHT: 1px solid;
+    BORDER-TOP: 1px solid;
+    SCROLLBAR-FACE-COLOR: #996600;
+    FONT-WEIGHT: bold;
+    FONT-SIZE: 8pt;
+    SCROLLBAR-HIGHLIGHT-COLOR: #ffffff;
+    BORDER-LEFT: 1px solid;
+    SCROLLBAR-SHADOW-COLOR: #ffffff;
+    COLOR: black;
+    SCROLLBAR-3DLIGHT-COLOR: #996600;
+    SCROLLBAR-ARROW-COLOR: #ffffff;
+    SCROLLBAR-TRACK-COLOR: #ffffff;
+    BORDER-BOTTOM: 1px solid;
+    FONT-FAMILY: Verdana,  Arial, sans-serif;
+    SCROLLBAR-DARKSHADOW-COLOR: #000000;
+    BACKGROUND-COLOR: #a4d1ff
+}
+.cal-TextBoxBlueSmall
+{
+    BORDER-RIGHT: 1px solid;
+    BORDER-TOP: 1px solid;
+    SCROLLBAR-FACE-COLOR: #996600;
+    FONT-SIZE: 8pt;
+    SCROLLBAR-HIGHLIGHT-COLOR: #ffffff;
+    BORDER-LEFT: 1px solid;
+    SCROLLBAR-SHADOW-COLOR: #ffffff;
+    COLOR: black;
+    SCROLLBAR-3DLIGHT-COLOR: #996600;
+    SCROLLBAR-ARROW-COLOR: #ffffff;
+    SCROLLBAR-TRACK-COLOR: #ffffff;
+    BORDER-BOTTOM: 1px solid;
+    FONT-FAMILY: Verdana,  Arial, sans-serif;
+    SCROLLBAR-DARKSHADOW-COLOR: #000000;
+    BACKGROUND-COLOR: #a4d1ff
+}
+.longTextBox
+{
+    BORDER-RIGHT: black 1px solid;
+    BORDER-TOP: black 1px solid;
+    FONT-WEIGHT: normal;
+    FONT-SIZE: 8pt;
+    BORDER-LEFT: black 1px solid;
+    COLOR: black;
+    BORDER-BOTTOM: black 1px solid;
+    FONT-FAMILY: Verdana,  Arial, sans-serif;
+    TEXT-ALIGN: left
+}
+.TextBoxReg
+{
+    BORDER-RIGHT: 1px solid;
+    BORDER-TOP: 1px solid;
+    FONT-WEIGHT: normal;
+    FONT-SIZE: 8pt;
+    BORDER-LEFT: 1px solid;
+    WIDTH: 150px;
+    COLOR: black;
+    BORDER-BOTTOM: 1px solid;
+    FONT-FAMILY: Verdana,  Arial, sans-serif;
+    BACKGROUND-COLOR: #ffffcc
+}
+.borderT
+{
+    BORDER-RIGHT: 0px solid;
+    BORDER-TOP: 0px solid;
+    BORDER-LEFT: 1px solid;
+    BORDER-BOTTOM: 1px solid
+}
+.borderL
+{
+    BORDER-RIGHT: 0px solid;
+    BORDER-TOP: 0px solid;
+    BORDER-LEFT: 2px solid;
+    BORDER-BOTTOM: 0px solid
+}
+.nav
+{
+    BORDER-RIGHT: #000000 2px solid;
+    BORDER-TOP: #000000 1px solid;
+    FONT-WEIGHT: bold;
+    FONT-SIZE: 8pt;
+    BACKGROUND: #dddddd;
+    BORDER-LEFT: #000000 1px solid;
+    CURSOR: hand;
+    COLOR: blue;
+    BORDER-BOTTOM: #000000 2px solid;
+    FONT-FAMILY: verdana,arial;
+    HEIGHT: 20px;
+    TEXT-ALIGN: center
+}
+.nav_over
+{
+    BORDER-RIGHT: #000000 1px solid;
+    BORDER-TOP: #000000 2px solid;
+    FONT-WEIGHT: bold;
+    FONT-SIZE: 8pt;
+    BACKGROUND: #cccccc;
+    BORDER-LEFT: #000000 2px solid;
+    CURSOR: hand;
+    COLOR: blue;
+    BORDER-BOTTOM: #000000 1px solid;
+    FONT-FAMILY: verdana,arial;
+    HEIGHT: 20px;
+    TEXT-ALIGN: center
+}
+A:link
+{
+    FONT-SIZE: xx-small;
+    COLOR: blue;
+    TEXT-DECORATION: none
+}
+A:visited
+{
+    FONT-SIZE: xx-small;
+    COLOR: blue;
+    TEXT-DECORATION: underline
+}

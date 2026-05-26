@@ -1,0 +1,24 @@
+Contracts Schedule
+for Deals traded on: Wednesday  6-August-2008
+Traded,Client,Security,Br,Contr,REF,Price,Quantity,Agent,BSEComm,Commission,CSD,VAT,Gross,Net Amount
+6 Aug,Joseph Otieno,ABCH,CAP,S3204,444,5,5,0.25,0.05,0.45,0,0.05,25,24.45
+6 Aug,Test New ,ABCH,MOT,S3206,123,5.2,5,0,0.05,0.5,0,0.05,26,25.4
+6 Aug,Test New ,Barclays,CAP,S3207,sdfs,2,8,0,0,0.3,0,0.05,16,15.65
+6 Aug,Test New ,Barclays,CAP,S3208,sfsd,9,2,0,0.05,0.35,0,0.05,18,17.55
+6 Aug,Test New ,AFL.O000,MOT,S3209,4,5,5,0,0.05,0.45,0,0.05,25,24.45
+6 Aug,Test New ,AFL.O000,STK,S3210,4,6,6,0,0.05,0.65,0,0.05,36,35.25
+6 Aug,Test New ,LETSHEGO,CAP,S3211,4,4,4,0,0,0.3,0,0.05,16,15.65
+6 Aug,Test New ,LETSHEGO,CAP,S3212,3,3,3,0,0,0.15,0,0,9,8.85
+6 Aug,Test New ,RPC Data,CAP,S3213,2,2,2,0,0,0.05,0,0,4,3.95
+6 Aug,Test New ,LETSHEGO,MOT,S3214,2,2,2,0,0,0.05,0,0,4,3.95
+6 Aug,Test New ,LETSHEGO,MOT,S3215,1,1,1,0,0,0,0,0,1,1
+6 Aug,Test New ,RDCP,CAP,S3216,4,4,4,0,0,0.3,0,0.05,16,15.65
+6 Aug,Test New ,RDCP,CAP,S3217,4,4,4,0,0,0.3,0,0.05,16,15.65
+6 Aug,Test New ,G4S,CAP,S3218,4,4,4,0,0,0.3,0,0.05,16,15.65
+6 Aug,Test New ,G4S,MOT,S3219,4,4,4,0,0,0.3,0,0.05,16,15.65
+6 Aug,Test New ,SEFALANA,AAM,S3220,123,2,2,0,0,0.05,0,0,4,3.95
+6 Aug,Ceasar Pirs,TURNSTAR,STK,P3221,P1_060808,3.5,1000,0,5.25,42,3.5,5.05,3500,3555.8
+6 Aug,Ceasar Pirs,PRIMETIME,MOT,P3223,P2_060808,4.3,2000,0,12.9,159.1,0,17.2,8600,8789.2
+6 Aug,Ceasar Pirs,OLYMPIA,MOT,P3224,P2_060808,5.5,1000,0,8.25,101.75,0,11,5500,5621
+,,,,,,,Daily totals: ,0.25,26.65,307.35,3.5,33.8,17848,18208.7
+

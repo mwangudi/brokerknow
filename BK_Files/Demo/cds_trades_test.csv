@@ -1,0 +1,10 @@
+Transaction Statement
+Exchange:,MSE
+Market:,Equity
+Participant:,CEDAR
+From:,2026-05-18
+
+Client Code,Custodian Code,Symbol,Sell Volume,Buy Volume,Price,Sett. Amount
+DEMO001,,AIRTEL,0,500,17.80,8900.00
+DEMO002,,NBM,0,100,56.25,5625.00
+DEMO003,,TNM,5000,0,1.88,9400.00

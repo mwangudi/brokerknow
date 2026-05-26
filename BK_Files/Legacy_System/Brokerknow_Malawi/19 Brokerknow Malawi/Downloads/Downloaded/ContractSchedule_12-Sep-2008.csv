@@ -1,0 +1,10 @@
+Contracts Schedule
+for Deals traded on: Friday  12-September-2008
+Traded,Client,Security,Br,Contr,REF,Price,Quantity,Agent,BSEComm,Commission,CSD,VAT,Gross,Net Amount
+12 Sep,Gabriella Sabatini,ENGEN,MOT,P3285,5Mill test,2,300000,0,900,1200,0,210,600000,602310
+12 Sep,Gabriella Sabatini,CIC ENERGY,CAP,P3286,5Mill +,20,300000,0,7200,12000,0,1920,6000000,6021120
+12 Sep,Scooby Snax,OLYMPIA,MOT,S3287,sale 5 mil exactly,2.5,2000000,0,6000,92500,0,9850,5000000,4891650
+12 Sep,Scooby Snax,AVIVA,STK,S3288,Over 5 mill,2.5,2500000,0,7500,115625,0,12312.5,6250000,6114562.5
+12 Sep,Scooby Snax,ANGLO,CAP,S3289,<5mill,2,2499999,0,7500,92499.95,0,10000,4999998,4889998.05
+,,,,,,,Daily totals: ,0,29100,313824.95,0,34292.5,22849998,22519640.55
+

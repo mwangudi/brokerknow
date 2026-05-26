@@ -1,0 +1,124 @@
+<HTML>
+<!-- Sitemap 1.0 -->
+<OBJECT type="text/site properties">
+	<param name="FrameName" value="main" "0630">
+</OBJECT>
+<UL>
+<LI><OBJECT type="Text/sitemap">
+	<param name="Name" value="Getting Started">
+	<param name="Local" value="/iishelp/iis/htm/core/iiwltop.htm">
+</OBJECT>
+	<UL>
+	<LI><OBJECT type="Text/sitemap">
+		<param name="Name" value="Release Notes">
+		<param name="Local" value="/iishelp/iis/htm/core/readme.htm">
+	</OBJECT>
+	<LI><OBJECT type="Text/sitemap">
+		<param name="Name" value="Installing IIS">
+		<param name="Local" value="/iishelp/iis/htm/core/iiiisin.htm">
+	</OBJECT>
+	<LI><OBJECT type="Text/sitemap">
+		<param name="Name" value="Features">
+		<param name="Local" value="/iishelp/iis/htm/core/iifeats.htm">
+	</OBJECT>
+	<LI><OBJECT type="Text/sitemap">
+		<param name="Name" value="What's Changed">
+		<param name="Local" value="/iishelp/iis/htm/core/iibwupm.htm">
+	</OBJECT>
+	<LI><OBJECT type="Text/sitemap">
+		<param name="Name" value="Web Resources">
+		<param name="Local" value="/iishelp/iis/htm/core/iiusdoc.htm">
+	</OBJECT>
+	<LI><OBJECT type="Text/sitemap">
+		<param name="Name" value="Quick Site Setup with IIS">
+		<param name="Local" value="/iishelp/iis/htm/core/iitstart.htm">
+	</OBJECT>
+	<LI><OBJECT type="Text/sitemap">
+		<param name="Name" value="Using the Documentation">
+		<param name="Local" value="/iishelp/iis/htm/core/iigsdocs.htm">
+	</OBJECT>
+	<LI><OBJECT type="Text/sitemap">
+		<param name="Name" value="The PWM and IIS Snap-in Options">
+		<param name="Local" value="/iishelp/iis/htm/core/iiabuti.htm">
+	</OBJECT>
+	<LI><OBJECT type="Text/sitemap">
+		<param name="Name" value="Frequently Asked Questions">
+		<param name="Local" value="/iishelp/iis/htm/core/iifaq.htm">
+	</OBJECT>
+	<LI><OBJECT type="Text/sitemap">
+		<param name="Name" value="Glossary">
+		<param name="Local" value="/iishelp/iis/htm/core/iigloss.htm">
+	</OBJECT>
+	</UL>
+<LI><OBJECT type="Text/sitemap">
+	<param name="Name" value="Personal Web Manager Documentation">
+	<param name="Local" value="/iishelp/iis/htm/core/iinewtp1.htm">
+</OBJECT>
+	<UL>
+	<LI><OBJECT type="Text/sitemap">
+		<param name="Name" value="Creating and Customizing a Web Site">
+		<param name="Local" value="/iishelp/iis/htm/core/iicreat.htm">
+	</OBJECT>
+		<UL>
+		<LI><OBJECT type="Text/sitemap">
+			<param name="Name" value="About Web Sites">
+			<param name="Local" value="/iishelp/iis/htm/core/iiabwbs.htm">
+		</OBJECT>
+		<LI><OBJECT type="Text/sitemap">
+			<param name="Name" value="Constructing an Interactive Form">
+			<param name="Local" value="/iishelp/iis/htm/core/iiconfm.htm">
+		</OBJECT>
+		<LI><OBJECT type="Text/sitemap">
+			<param name="Name" value="Viewing a Database in a Browser">
+			<param name="Local" value="/iishelp/iis/htm/core/iivewdb.htm">
+		</OBJECT>
+		</UL>
+	<LI><OBJECT type="Text/sitemap">
+		<param name="Name" value="Adding New Publishing Directories">
+		<param name="Local" value="/iishelp/iis/htm/core/iiaddpb.htm">
+	</OBJECT>
+		<UL>
+		<LI><OBJECT type="Text/sitemap">
+			<param name="Name" value="About Publishing Directories">
+			<param name="Local" value="/iishelp/iis/htm/core/iiabpdr.htm">
+		</OBJECT>
+		<LI><OBJECT type="Text/sitemap">
+			<param name="Name" value="Changing Your Home Directory">
+			<param name="Local" value="/iishelp/iis/htm/core/iichnge.htm">
+		</OBJECT>
+		<LI><OBJECT type="Text/sitemap">
+			<param name="Name" value="Adding Virtual Directories">
+			<param name="Local" value="/iishelp/iis/htm/core/iiaddvd.htm">
+		</OBJECT>
+		</UL>
+	<LI><OBJECT type="Text/sitemap">
+		<param name="Name" value="Advanced Configuration and Maintenance">
+		<param name="Local" value="/iishelp/iis/htm/core/iiadvmt.htm">
+	</OBJECT>
+		<UL>
+		<LI><OBJECT type="Text/sitemap">
+			<param name="Name" value="About Advanced Settings">
+			<param name="Local" value="/iishelp/iis/htm/core/iiabadv.htm">
+		</OBJECT>
+		<LI><OBJECT type="Text/sitemap">
+			<param name="Name" value="Changing the Default Home Page">
+			<param name="Local" value="/iishelp/iis/htm/core/iicdfhp.htm">
+		</OBJECT>
+		<LI><OBJECT type="Text/sitemap">
+			<param name="Name" value="Enabling Directory Browsing">
+			<param name="Local" value="/iishelp/iis/htm/core/iidirbr.htm">
+		</OBJECT>
+		<LI><OBJECT type="Text/sitemap">
+			<param name="Name" value="Logging Site Activity">
+			<param name="Local" value="/iishelp/iis/htm/core/iilogac.htm">
+		</OBJECT>
+		<LI><OBJECT type="Text/sitemap">
+			<param name="Name" value="Viewing Site Performance">
+			<param name="Local" value="/iishelp/iis/htm/core/iivwper.htm">
+		</OBJECT>
+		</UL>
+	</UL>
+
+	</UL>
+</UL>
+</HTML>

@@ -1,0 +1,7 @@
+From:,2026-05-18
+Exchange:,MSE
+
+CDSNo,Symbol,Quantity,AccountStatus,BalanceFree
+DEMO001,AIRTEL,5000,Active,5000
+DEMO002,NBM,1200,Active,1200
+DEMO003,TNM,25000,Active,25000

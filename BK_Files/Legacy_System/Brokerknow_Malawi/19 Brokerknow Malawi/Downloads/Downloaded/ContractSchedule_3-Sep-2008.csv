@@ -1,0 +1,9 @@
+Contracts Schedule
+for Deals traded on: Wednesday  3-September-2008
+Traded,Client,Security,Br,Contr,REF,Price,Quantity,Agent,BSEComm,Commission,CSD,VAT,Gross,Net Amount
+3 Sep,Gabriella Sabatini,FNBB,CAP,P3281,Set Sch Test,2.55,9000,0,34.45,114.75,22.95,11.5,22950,23133.65
+3 Sep,Scooby Snax,FNBB,CAP,P3282,Set Sch Test2,2.55,851,0,3.25,40.15,2.15,4.55,2170.05,2220.15
+3 Sep,Gabriella Sabatini,DIAMONEX,STK,P3283,set sch testNonCSD,2.55,9000,0,34.45,114.75,0,11.5,22950,23110.7
+3 Sep,Scooby Snax,DIAMONEX,MOT,P3284,set sch checkNonCSD2,2.55,851,0,3.25,40.15,0,4.35,2170.05,2217.8
+,,,,,,,Daily totals: ,0,75.4,309.8,25.1,31.9,50240.1,50682.3
+

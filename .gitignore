@@ -1,0 +1,32 @@
+# Editors / IDE
+.vs/
+.vscode/
+.idea/
+*.swp
+*.user
+*.suo
+
+# Build / cache
+.tmp/
+.vite/
+tmp/
+**/bin/
+**/obj/
+**/publish/
+**/node_modules/
+**/dist/
+**/.next/
+api-publish.tgz
+
+# Logs
+*.log
+
+# Local secrets / overrides
+*.local
+appsettings.Development.json
+appsettings.Local.json
+
+# Large SQL backups (use external storage, not git)
+BK_Files/Legacy_System/Malawi_LIVE_After_Levy/
+*.bak
+

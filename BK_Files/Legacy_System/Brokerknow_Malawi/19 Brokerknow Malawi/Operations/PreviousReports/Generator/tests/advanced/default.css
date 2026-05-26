@@ -1,0 +1,332 @@
+BODY
+{
+    MARGIN-TOP: 5px;
+    FONT-SIZE: 12px;
+    FONT-FAMILY: Arial, Verdana, Microsoft Sans Serif
+}
+.PageBody
+{
+    WIDTH: 90%;
+    HEIGHT: 240px
+}
+.PageBodySmall
+{
+    FONT-SIZE: 12px;
+    WIDTH: 90%;
+    HEIGHT: 240px
+}
+H1
+{
+	PADDING-TOP: 15px;
+	FONT: bold 18pt arial; COLOR: #46a;
+	FILTER: shadow(color=#cccccc); WIDTH: 100%;
+	BORDER-BOTTOM: #999999 1px solid;
+	MARGIN-BOTTOM: 5px;
+}
+H2
+{
+	FONT: bold 16px arial; COLOR: gray;	
+}
+xH1
+{
+    FONT-WEIGHT: normal;
+    FONT-SIZE: 22px;
+    MARGIN-BOTTOM: 5px;
+    WIDTH: 100%;
+    COLOR: #0066ff;
+    PADDING-TOP: 15px;
+    BORDER-BOTTOM: #99ff00 1px solid;
+    FONT-FAMILY: Trebuchet MS, Verdana,Arial
+}
+xH2
+{
+    FONT-WEIGHT: bold;
+    FONT-SIZE: 16px;
+    MARGIN-BOTTOM: 5px;
+    PADDING-TOP: 0px;
+    FONT-FAMILY: Verdana, Trebuchet MS, Arial
+}
+.h2
+{
+    FONT-WEIGHT: bold;
+    FONT-SIZE: 16px;
+    MARGIN-BOTTOM: 5px;
+    PADDING-TOP: 0px;
+    FONT-FAMILY: Verdana, Trebuchet MS, Arial
+}
+H5
+{
+    MARGIN-BOTTOM: 5px;
+    PADDING-TOP: 0px
+}
+TABLE
+{
+    FONT-SIZE: 13px
+}
+A
+{
+    COLOR: #3366cc;
+    TEXT-DECORATION: none;	
+}
+A:visited
+{
+    COLOR: #3366cc;
+    TEXT-DECORATION: none;
+}
+A:active
+{
+    COLOR: #3366cc;
+    TEXT-DECORATION: none;
+}
+A:link
+{
+    COLOR: #3366cc;
+    TEXT-DECORATION: none;
+}
+A:hover
+{
+    XCOLOR: #0066ff;
+    COLOR: #990033;
+    TEXT-DECORATION: underline;
+}
+HR
+{
+    COLOR: #0066ff
+}
+.tabSides
+{
+    BORDER-BOTTOM: #0b54b1 1px solid
+}
+.tabText
+{
+    FONT-SIZE: 13px;
+    COLOR: black;
+    FONT-FAMILY: Arial, Verdana, Arial;
+    TEXT-ALIGN: center;
+    TEXT-DECORATION: none
+}
+A.tabText
+{
+    FONT-SIZE: 13px;
+    COLOR: black;
+    FONT-FAMILY: Arial, Verdana, Arial;
+    TEXT-ALIGN: center;
+    TEXT-DECORATION: none
+}
+A.tabText:visited
+{
+    FONT-SIZE: 13px;
+    COLOR: black;
+    FONT-FAMILY: Arial, Verdana, Arial;
+    TEXT-ALIGN: center;
+    TEXT-DECORATION: none
+}
+A.tabText:hover
+{
+    COLOR: black;
+    TEXT-DECORATION: underline
+}
+.tabCell
+{
+    WIDTH: 80px;
+    HEIGHT: 24px;
+    TEXT-ALIGN: center
+}
+.tab
+{
+    BACKGROUND-IMAGE: url(../images/tab.gif);
+    WIDTH: 80px;
+    HEIGHT: 24px;Xfont-size:23px;
+    TEXT-ALIGN: center
+}
+.tabSelected
+{
+    BACKGROUND-IMAGE: url(../images/tab_selected.gif);
+    WIDTH: 80px;
+    HEIGHT: 24px;
+    TEXT-ALIGN: center
+}
+.LeftNavSearchBox
+{
+    BORDER-RIGHT: #999999 1px solid;
+    BORDER-LEFT: #999999 1px solid;
+    WIDTH: 150px
+}
+.Small
+{
+    FONT-SIZE: 11px
+}
+.SmallV
+{
+    FONT-SIZE: 10px;
+    FONT-FAMILY: Verdana, Arial
+}
+.Footer{
+	color:#999999;
+	font-size:8pt;
+}
+A.Footer:link    
+{  
+	color:#999999;	
+	xfont-size:8pt;
+}
+
+A.Footer:visited {
+	color:#999999;	
+	xfont-size:8pt; 
+}
+A.TH:link    
+{  
+	color:black;		
+}
+
+A.TH:visited {
+	color:black;
+}
+.SubFooter
+{
+    BORDER-RIGHT: #99ff00 1px solid;
+    BORDER-LEFT: #99ff00 1px solid;
+    WIDTH: 100%;
+    BORDER-BOTTOM: #99ff00 1px solid;
+    HEIGHT: 5px
+}
+.SubFooterSpacer
+{
+    HEIGHT: 20px
+}
+.Copyright
+{
+    FONT-SIZE: 11px;
+    VERTICAL-ALIGN: bottom;
+    FONT-FAMILY: Arial;
+    HEIGHT: 25px;
+    TEXT-ALIGN: right
+}
+.FormLabel
+{
+    FONT-WEIGHT: bold;
+    FONT-SIZE: 10px;
+    WIDTH: 140px;
+    FONT-FAMILY: Verdana, Arial
+}
+.formLabelPlain
+{
+    FONT-SIZE: 11px;
+    WIDTH: 140px;
+    FONT-FAMILY: Verdana, Arial
+}
+.FormTable
+{
+    PADDING-RIGHT: 3px;
+    PADDING-LEFT: 3px;
+    PADDING-BOTTOM: 3px;
+    PADDING-TOP: 3px
+}
+.FormLabelSmall
+{
+    FONT-SIZE: 10px;
+    COLOR: #666666
+}
+.Quote
+{
+    FONT-WEIGHT: bold;
+    FONT-SIZE: 15px;
+    COLOR: steelblue;
+    FONT-STYLE: italic
+}
+.QuoteTable
+{
+    BORDER-RIGHT: #666666 2px solid;
+    BORDER-TOP: #666666 2px solid;
+    BORDER-LEFT: #666666 2px solid;
+    WIDTH: 180px;
+    BORDER-BOTTOM: #666666 2px solid;
+    BACKGROUND-COLOR: white
+}
+.FAQCategory
+{
+    FONT-WEIGHT: bold;
+    FONT-SIZE: 13px;
+    FONT-FAMILY: Verdana, Arial
+}
+A.FAQCategory
+{
+    FONT-WEIGHT: bold;
+    FONT-SIZE: 13px;
+    FONT-FAMILY: Verdana, Arial
+}
+A.FAQCategory:hover
+{
+    FONT-WEIGHT: bold;
+    FONT-SIZE: 13px;
+    FONT-FAMILY: Verdana, Arial
+}
+A.FAQCategory:visited
+{
+    FONT-WEIGHT: bold;
+    FONT-SIZE: 13px;
+    FONT-FAMILY: Verdana, Arial
+}
+.SiteMapLevel1
+{
+    FONT-WEIGHT: bold;
+    MARGIN-LEFT: 20px;
+    LINE-HEIGHT: 25px
+}
+.SiteMapLevel2
+{
+    MARGIN-LEFT: 60px;
+    LINE-HEIGHT: 25px
+}
+.SiteMapLevel3
+{
+    MARGIN-LEFT: 100px;
+    LINE-HEIGHT: 25px
+}
+.SiteMapLevel4
+{
+    MARGIN-LEFT: 120px;
+    LINE-HEIGHT: 25px
+}
+.ShoppingCartBody
+{
+    WIDTH: 100%;
+    HEIGHT: 250px
+}
+.HorizontalMargin
+{
+    HEIGHT: 15px
+}
+.SmallHeading
+{
+    FONT-WEIGHT: bold;
+    FONT-SIZE: 15px;
+    COLOR: #0033cc;
+    FONT-FAMILY: Verdana
+}
+.TopNavLink
+{
+    FONT-SIZE: 11px;
+    VERTICAL-ALIGN: top
+}
+.RightBox
+{
+    BORDER-RIGHT: #999999 1px solid;
+    BORDER-LEFT: #999999 1px solid;
+    WIDTH: 150px
+}
+.Check
+{
+    LIST-STYLE-IMAGE: url(../images/check_red.gif)
+}
+.CheckList
+{
+    LIST-STYLE-IMAGE: url(../images/checklist_box.gif)
+}
+.DefaultList
+{
+    LIST-STYLE-IMAGE: none;
+    LIST-STYLE-TYPE: disc
+}
+

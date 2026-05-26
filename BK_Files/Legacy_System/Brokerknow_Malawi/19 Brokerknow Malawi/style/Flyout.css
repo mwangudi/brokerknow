@@ -1,0 +1,135 @@
+.flyoutMenu
+{
+    BEHAVIOR: url(flyout.htc);
+    WIDTH: 150px;
+    BACKGROUND-COLOR: #f2f2f2;
+    MARGIN-LEFT: 0px
+}
+.UpLevelFlyout
+{
+    MARGIN-RIGHT: 8px
+}
+.UpLevelFlyout .flyoutMenu
+{
+    MARGIN-LEFT: -2px;
+    MARGIN-RIGHT: -8px
+}
+.DownLevelFlyout .flyoutMenu
+{
+    MARGIN-RIGHT: 0px
+}
+.flyoutMenu UL
+{
+    PADDING-LEFT: 0px
+}
+.flyoutMenu LI
+{
+    PADDING-BOTTOM: 3px;
+    MARGIN-LEFT: 0px;
+    PADDING-TOP: 3px
+}
+.flyoutMenu A:visited
+{
+    COLOR: purple
+}
+.flyoutHeading
+{
+    PADDING-LEFT: 2px;
+    FONT-WEIGHT: bold;
+    FONT-SIZE: 12px;
+    PADDING-BOTTOM: 4px;
+    CURSOR: default;
+    PADDING-TOP: 2px;
+    BACKGROUND-COLOR: #f2f2f2
+}
+.flyoutLink
+{
+    BORDER-RIGHT: #f2f2f2 1px solid;
+    PADDING-RIGHT: 12px;
+    BORDER-TOP: #f2f2f2 1px solid;
+    PADDING-LEFT: 2px;
+    FONT-SIZE: 11px;
+    BORDER-LEFT: #f2f2f2 1px solid;
+    CURSOR: hand;
+    PADDING-TOP: 3px;
+    BORDER-BOTTOM: #f2f2f2 1px solid
+}
+.flyoutLink A
+{
+    MARGIN-RIGHT: 14px
+}
+.flyoutMenu TD.flyoutLink
+{
+    PADDING-RIGHT: 0px;
+    PADDING-LEFT: 0px;
+    FONT-SIZE: 11px;
+    PADDING-BOTTOM: 0px;
+    CURSOR: hand;
+    PADDING-TOP: 0px
+}
+TD.flyoutLink A
+{
+    FONT-SIZE: 11px;
+    COLOR: black;
+    TEXT-DECORATION: none
+}
+TD.flyoutLink A:hover
+{
+    FONT-SIZE: 11px;
+    COLOR: black;
+    TEXT-DECORATION: none
+}
+TD.flyoutLink A:visited
+{
+    FONT-SIZE: 11px;
+    COLOR: black;
+    TEXT-DECORATION: none
+}
+TD.flyoutLink A:active
+{
+    FONT-SIZE: 11px;
+    COLOR: black;
+    TEXT-DECORATION: none
+}
+TD.flyoutSubLink A
+{
+    FONT-SIZE: 11px;
+    COLOR: black;
+    TEXT-DECORATION: none
+}
+TD.flyoutSubLink A:hover
+{
+    FONT-SIZE: 11px;
+    COLOR: black;
+    TEXT-DECORATION: none
+}
+TD.flyoutSubLink A:visited
+{
+    FONT-SIZE: 11px;
+    COLOR: black;
+    TEXT-DECORATION: none
+}
+TD.flyoutSubLink A:active
+{
+    FONT-SIZE: 11px;
+    COLOR: black;
+    TEXT-DECORATION: none
+}
+.flyoutSubHeading
+{
+    PADDING-LEFT: 7px;
+    FONT-WEIGHT: bold;
+    FONT-SIZE: 11px;
+    PADDING-BOTTOM: 4px;
+    CURSOR: default;
+    PADDING-TOP: 2px;
+    BACKGROUND-COLOR: #f2f2f2
+}
+.flyoutSubLink
+{
+    PADDING-RIGHT: 15px;
+    PADDING-LEFT: 12px;
+    PADDING-BOTTOM: 6px;
+    CURSOR: hand;
+    PADDING-TOP: 1px
+}

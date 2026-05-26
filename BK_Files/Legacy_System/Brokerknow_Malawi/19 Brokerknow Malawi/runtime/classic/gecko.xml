@@ -1,0 +1,21 @@
+<?xml version="1.0"?>
+<bindings id="activeui"
+	xmlns="http://www.mozilla.org/xbl"
+	xmlns:html="http://www.w3.org/1999/xhtml"
+	xmlns:xul="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
+
+	<binding id="box">
+		<content>
+			<html:div class="active-gecko-box">
+				<children/>
+			</html:div>
+		</content>
+	</binding>
+	<binding id="item">
+		<content>
+			<html:div class="active-gecko-item">
+				<children/>
+			</html:div>
+		</content>
+	</binding>
+</bindings>

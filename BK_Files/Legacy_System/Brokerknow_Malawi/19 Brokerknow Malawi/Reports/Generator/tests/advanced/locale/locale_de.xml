@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<Locale version="1.0">
+	<!--wizard button text-->
+	<CloseText>Ende</CloseText>
+	<HomeText>Haupt</HomeText>
+	<BuildText>BaucReport</BuildText>
+	<!--wizard button tooltips-->
+	<CloseTitle>Ende</CloseTitle>
+	<BuildTitle>Redigieren Sie Reporteigenschaften</BuildTitle>
+	<HomeTitle>Gehen Sie zum Index</HomeTitle>
+	<!--grid filter button text-->
+	<FilterButtonText>Suche</FilterButtonText>
+	<!--grid filter text-->
+	<ContainsText>wie</ContainsText>
+	<IsEqualToText>ist gleich</IsEqualToText>
+	<IsNotEqualToText>nicht gleich</IsNotEqualToText>
+	<IsGreaterThanText>größer als</IsGreaterThanText>
+	<IsLessThanText>kleiner als</IsLessThanText>
+	<!--grid filter status text-->
+	<FiltersLabelText><![CDATA[<b>Filter(s):</b>]]></FiltersLabelText>
+	<!--grid sort status text-->
+	<SortOrderLabelText><![CDATA[<b>Sortiert nach:</b>]]></SortOrderLabelText>
+	<SortOrderAscText></SortOrderAscText>
+	<SortOrderDescText><![CDATA[<i>absteigen</i>]]></SortOrderDescText>
+	<!--grid summary status text-->
+	<SummaryLabelText><![CDATA[<b>Zusammenfassung:</b>]]></SummaryLabelText>
+	<!--grid navigation button text-->
+	<FirstText>« Zuerst</FirstText>
+	<PrevText>«</PrevText>
+	<NextText>»</NextText>
+	<LastText>Letztes »</LastText>
+	<ResetText>Reset</ResetText>
+	<ReloadText>Umladen</ReloadText>
+	<PageCountText>Seite @CurrentPage von @NumOfPages (@NumOfRecs recs)</PageCountText>
+	<PageSizeText>Zeilen:</PageSizeText>
+	<ShowPageNumbers>True</ShowPageNumbers>
+	<!--grid navigation button title-->
+	<FirstTitle>Erste Seite</FirstTitle>
+	<PrevTitle>Vorige Seite</PrevTitle>
+	<NextTitle>Nächste Seite</NextTitle>
+	<LastTitle>Letzte Seite</LastTitle>
+	<ResetTitle>Reset grid and go to first page</ResetTitle>
+	<ReloadTitle>Reload grid</ReloadTitle>
+	<!--grid header button text-->
+	<RefreshText><![CDATA[<font face="MS OUTLOOK">C</font>]]></RefreshText>
+	<SortColAscText>+</SortColAscText>
+	<SortColDescText>-</SortColDescText>
+	<!--grid header button title-->
+	<RefreshTitle>Erneuern Sie Rasterfeld</RefreshTitle>
+	<SortColAscTitle>Klicken zum Sortieren des Steigens</SortColAscTitle>
+	<SortColDescTitle>Klicken zum Sortieren des Absteigens</SortColDescTitle>
+	<RemoveSortTitle>Remove this sort</RemoveSortTitle>
+	<!--grid export button text-->
+	<PrintText>Druck</PrintText>
+	<PrintTitle></PrintTitle>
+	<XLSText>Excel</XLSText>
+	<XLSTitle></XLSTitle>
+	<CSVText>CSV</CSVText>
+	<CSVTitle></CSVTitle>
+	<XMLText>XML</XMLText>
+	<XMLTitle></XMLTitle>
+	<TXTText>Text</TXTText>
+	<TXTTitle></TXTTitle>
+	<PDFText>PDF</PDFText>
+	<PDFTitle></PDFTitle>
+	<DOCText>Word</DOCText>
+	<DOCTitle></DOCTitle>
+</Locale>

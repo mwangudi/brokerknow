@@ -1,0 +1,221 @@
+		<%
+Set conn = GetActiveConnection("KBroker")
+Set Rs = CreateObject("ADODB.Recordset")
+Set Rs2 = CreateObject("ADODB.Recordset")
+
+
+
+%>
+<head>
+<title>IPO Applications By Date</title>
+
+<LINK REL="STYLESHEET" TYPE="TEXT/CSS" HREF="../STYLE/default.css"> 
+<LINK REL="STYLESHEET" TYPE="TEXT/CSS" HREF="../STYLE/webparts.css">
+
+<style media="print">
+	@page {
+		@top{font-family: Helvetica, Arial, sans-serif;
+			font-size: 150%;
+			font-weight: bolder;
+			text-align: left;
+			content: "<%= FormatDate(Date) %>";			
+		}
+			
+		margin-left: 2cm;
+		margin-right: 5cm;
+		margin-top: 1cm;    
+		margin-bottom: 2cm;
+		size: portrait;
+			
+		br.newpage{
+			page-break-before:always;
+		}
+			
+	}
+</style>
+
+<script language="javascript">
+	function HideRemindSelectLandscape(){
+		try{			
+			document.getElementById('landRem').style.display = 'none';
+		}	
+		catch(e){}	
+	}
+	function ShowRemindSelectLandscape(){
+		try{			
+			document.getElementById('landRem').style.display = '';
+		}	
+		catch(e){}	
+	}
+	window.onbeforeprint = HideRemindSelectLandscape;
+	window.onafterprint = ShowRemindSelectLandscape;
+</script>
+<meta http-equiv="Content-Language" content="en-uk">
+<meta http-equiv="Content-Type" content="text/html; charset=windows-1252">
+	<LINK REL="STYLESHEET" TYPE="TEXT/CSS" HREF="../STYLE/default.css"> 
+	<LINK REL="STYLESHEET" TYPE="TEXT/CSS" HREF="../STYLE/webparts.css">
+	 <SCRIPT language=Javascript src="../scripts/common.js"></SCRIPT> 
+	 <SCRIPT language=Javascript src="../scripts/fhsupport.js"></SCRIPT>
+	<!--CALENDAR -->
+	<link rel="stylesheet" type="text/css" href="CALENDAR/calendar.css">
+	<SCRIPT language=Javascript src="Calendar/calendar.js"></SCRIPT>
+	<SCRIPT language=VBScript src="../scripts/reports.vbs"></SCRIPT>
+	<SCRIPT language=Javascript src="../scripts/reports.js"></SCRIPT>
+	
+	<style media="print">
+	
+		@page {
+			
+			margin-left: 1cm;
+			margin-right: 1cm;
+			margin-top: 1cm;    
+			margin-bottom: 1cm;
+			writing-mode: tb-rl;
+			height: 90%;
+			margin: 10% 0%;			
+			
+			br.newpage{
+				page-break-before:always;
+			}
+			
+			
+		}
+	</style>
+</head>
+
+<body Class="Reports">
+<!--#include file="../libroutinesTEST.asp"-->
+<%
+genReport = Request.Form("genReport")
+selectedDate = Request.Form("txtDate")
+selectedToDate = Request.Form("txtToDate")
+'selectedAgent = Trim(Request.Form("cboAgent"))
+'response.write selectedAgent :response.end
+If genReport <> "1" Or Not IsDate(selectedDate) Then%>
+	<Script Language="JavaScript">
+		report_SetBodyClass();		
+		function validateForm(frm){			
+			if (frm.txtDate.value==''){
+				alert("Select a date");
+				frm.txtDate.focus();
+				return;
+			}
+			
+			frm.target = '_self';			
+			frm.submit();
+		}
+		
+		
+		var cal=new ctlSpiffyCalendarBox("cal", "frmMain", "txtDate","cmdDate","<%= FormatDate(Date-30) %>",1);
+		var cal1=new ctlSpiffyCalendarBox("cal1", "frmMain", "txtToDate","cmdToDate","<%= FormatDate(Date) %>",1);
+	</Script>
+	<div id="spiffycalendar" class="text" STYLE="z-Index: 1000"></div>
+	<form method="POST" action="ClientListing.asp" Name="frmMain" id="frmMain">
+		<input type="hidden" value="1" name="genReport">	
+		<table>
+			
+			<tr>
+				<td>Select From Date</td>
+				<td>
+					<SCRIPT language="JavaScript">cal.writeControl();</SCRIPT>	
+				</td>
+			</tr>
+			<tr>
+				<td>Select to Date</td>
+				<td>
+					<SCRIPT language="JavaScript">cal1.writeControl();</SCRIPT>	
+				</td>
+			</tr>
+			
+
+			<tr>
+				<td colspan=2><input type="Button" class="Buttons" OnClick="JavaScript: validateForm(document.all.item('frmMain'))" Value=" Generate">&nbsp;&nbsp;</td>
+			</tr>
+		</table>
+		
+	</form>
+	<%Set rs = Nothing
+	Set Conn = Nothing
+	Response.End
+End If
+
+Set conn = GetActiveConnection("KBroker")
+Set Rs = CreateObject("ADODB.Recordset")
+Set Rs2 = CreateObject("ADODB.Recordset")
+Dim filterstr
+			sqlstr= "SELECT     Client_DPA_, ClientName, ClientCDSNo AS CDS, CASE IsCustodian WHEN 1 THEN 'Custodian' ELSE 'Non Custodian' END AS Status,  " & _
+ "                       ClientRegDate " & _
+ " FROM         Client " & _
+ " WHERE     (Deleted <> 1) AND (CAST(FLOOR(CAST(ClientRegDate AS float)) AS Datetime) BETWEEN '" & selectedDate  & "' AND ' "& selectedToDate  &" ')"                      				  
+		
+		'response.write sqlstr : response.end
+		Set Rs = conn.execute(sqlStr)
+
+		If Rs.EOF Or Rs.BOF Then
+			%>
+			<script language='javascript'>
+				alert('No records found matching you criteria');
+				window.history.url=-1
+			</script>
+			 
+			<%
+			Set rs = Nothing
+			Set Conn = Nothing
+			Response.End
+		End if
+		%>
+		<% DrawPageFunctions True, True, True, True %>
+		<table border="0" cellspacing="2" cellpadding="2" style="font-family: Arial Narrow" width="100%">
+			<tr>
+				<td width="10%" nowrap><font face="Impact" size="4">Client Listing By Date </font></td>
+			  <td width="60%" nowrap align=right><font face="Impact" size="3"><%= Session("CompanyName") %></font></td>
+			  
+			</tr>
+			<tr>
+				<td colspan=2>From <%=selectedDate%> to <%=selectedToDate%> </td> 
+			  
+			</tr>
+			
+		<table border="0" cellspacing="0" cellpadding="2" style="font-family: Arial Narrow; LEFT-MARGIN:100PX"  width="100%">
+				<tr>
+				 <td  ><b>#</b></td>
+				   <td><b>Code</b></td>
+				  <td><b>Client Name</b></td>
+				  <td ><b> CDS No</b></td>
+				  <td ><b>Status</b></td>				 
+				  <!--<td ><b>Email</b></td>-->
+				  <td ><b>Client Reg Date</b></td>
+				 	  
+				</tr>
+		<%
+		If Not (Rs.EOF Or Rs.BOF) Then
+			Dim iCount
+			iCount=0
+				Rs.movefirst
+				response.flush
+				do until Rs.eof
+				icount=icount+1
+				Response.flush
+				%>
+					<tr>
+						<td nowrap><%=icount%> </td>
+						<td nowrap><%=Rs("Client_DPA_")%> </td>
+						<td nowrap><%=Rs("ClientName")%> </td>
+						<td nowrap><%=Rs("CDs")%> </td>
+						<td nowrap><%=Rs("Status")%> </td>
+						<!--<td nowrap><%=Rs("EMail")%> </td>-->
+						<td nowrap><%=Rs("ClientRegDate")%> </td>
+						
+					</tr>
+				
+				<%
+					rs.movenext
+				loop
+				%>
+			
+			<%
+		End If	
+	Set rs = Nothing
+	Set Conn = Nothing
+			%>
+</body>

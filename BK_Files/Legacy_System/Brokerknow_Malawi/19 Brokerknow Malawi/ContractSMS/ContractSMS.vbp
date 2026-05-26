@@ -1,0 +1,36 @@
+Type=Exe
+Reference=*\G{00020430-0000-0000-C000-000000000046}#2.0#0#..\..\..\WINDOWS\System32\STDOLE2.TLB#OLE Automation
+Reference=*\G{D97A6DA0-9C1C-11D0-9C3C-00A0C922E764}#2.0#0#..\..\..\WINDOWS\system32\inetsrv\asptxn.dll#Microsoft Active Server Pages ObjectContext Object Library
+Reference=*\G{00000206-0000-0010-8000-00AA006D2EA4}#2.6#0#..\..\..\Program Files\Common Files\system\ado\msado26.tlb#Microsoft ActiveX Data Objects 2.6 Library
+Reference=*\G{420B2830-E718-11CF-893D-00A0C9054228}#1.0#0#..\..\..\WINDOWS\System32\scrrun.dll#Microsoft Scripting Runtime
+Form=frmContractSMs.frm
+Startup="frmContractSMs"
+ExeName32="ContractSMS.exe"
+Command32=""
+Name="Project1"
+HelpContextID="0"
+CompatibleMode="0"
+MajorVer=1
+MinorVer=0
+RevisionVer=0
+AutoIncrementVer=0
+ServerSupportFiles=0
+VersionCompanyName="AFRICAN ALLIANCE"
+CompilationType=0
+OptimizationType=0
+FavorPentiumPro(tm)=0
+CodeViewDebugInfo=0
+NoAliasing=0
+BoundsCheck=0
+OverflowCheck=0
+FlPointCheck=0
+FDIVCheck=0
+UnroundedFP=0
+StartMode=0
+Unattended=0
+Retained=0
+ThreadPerObject=0
+MaxNumberOfThreads=1
+
+[MS Transaction Server]
+AutoRefresh=1

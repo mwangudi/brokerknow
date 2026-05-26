@@ -1,0 +1,2 @@
+Traded	Client,Security,Br,Contr,Ref,Price,Quantity,	Agent	Agent	BSEComm	BSEComm	Commission	Commission	CSD	CSD	VAT	VAT	Gross	Net Amount
+

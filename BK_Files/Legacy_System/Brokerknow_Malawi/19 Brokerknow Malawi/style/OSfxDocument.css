@@ -1,0 +1,237 @@
+.FH2 {
+	Z-INDEX: 2; MARGIN: -18px 6px 18px 12px; WIDTH: 95%; POSITION: relative
+}
+.FHFlat {
+	Z-INDEX: 2; MARGIN: -18px 6px 18px 12px; WIDTH: 95%; POSITION: relative
+}
+.FAQHOME {
+	Z-INDEX: 2; MARGIN: -18px 6px 18px 12px; WIDTH: 95%; POSITION: relative
+}
+.FHTOC {
+	Z-INDEX: 2; MARGIN: -18px 6px 18px 12px; WIDTH: 95%; POSITION: relative
+}
+.FH1 {
+	MARGIN: -32px 24px 18px 12px; WIDTH: 100%; POSITION: relative
+}
+.faqOuterContainer {
+	MARGIN-TOP: 2px; Z-INDEX: 2; POSITION: relative
+}
+.FH1 .faqOuterContainer {
+	MARGIN-TOP: 0px; MARGIN-RIGHT: 12px; POSITION: relative
+}
+.fhRightNav {
+	MARGIN-LEFT: 24px; PADDING-TOP: 32px
+}
+.FHHOME .fhRightNav {
+	PADDING-TOP: 0px
+}
+.webContentContainer {
+	MARGIN-TOP: 0px; MARGIN-BOTTOM: 12px; MARGIN-LEFT: 0px; WIDTH: 95%; POSITION: relative
+}
+.FHFlat UL {
+	MARGIN-TOP: 6px
+}
+.faqTocContainer UL {
+	MARGIN-TOP: 0px; MARGIN-BOTTOM: 0px
+}
+.faqTocText UL {
+	MARGIN-TOP: 0px; MARGIN-BOTTOM: 0px; MARGIN-LEFT: 18px
+}
+.FH1 LI {
+	MARGIN-BOTTOM: 6px
+}
+.FAQHOME LI {
+	MARGIN-BOTTOM: 6px
+}
+.FH2 LI {
+	MARGIN-BOTTOM: 6px
+}
+.FHFlat LI {
+	MARGIN-BOTTOM: 6px
+}
+.FH1 H2 {
+	FONT-SIZE: 16px; MARGIN-BOTTOM: 6px; FONT-FAMILY: Arial, Helvetica
+}
+.FHFlat H3 {
+	FONT-SIZE: 14px
+}
+.faqPageTitle H2 {
+	FONT-SIZE: 14px
+}
+.faqHeaderIcon {
+	PADDING-RIGHT: 27px; Z-INDEX: 1; LEFT: 0px; FLOAT: right; MARGIN-BOTTOM: -75px; MARGIN-LEFT: 12px; MARGIN-RIGHT: 24px; POSITION: relative; TOP: -41px
+}
+.FHHOME .homeLinkCell A {
+	FONT-WEIGHT: bold; FONT-SIZE: 11px
+}
+.FHHOME .homeLinkCell .homeLinkDescription {
+	MARGIN-TOP: 2px; FONT-WEIGHT: normal; FONT-SIZE: 11px
+}
+.FHHOME .homeLinkCell .homeLinkDescription A {
+	FONT-WEIGHT: normal; FONT-SIZE: 11px
+}
+.faqHomeDescriptionText {
+	MARGIN-RIGHT: 42px
+}
+.faqHomeTopTable {
+	MARGIN-BOTTOM: 18px; MARGIN-RIGHT: 32px
+}
+.faqAdditionalTable {
+	MARGIN: 24px 12px 12px 24px
+}
+.faqSelectLabel {
+	FONT-WEIGHT: bold; FONT-SIZE: 11px; MARGIN-RIGHT: 6px
+}
+.faqProductSelectorTable {
+	MARGIN-TOP: 16px; MARGIN-LEFT: 12px
+}
+.faqProductSelectorLabel {
+	FONT-WEIGHT: bold; FONT-SIZE: 11px; COLOR: white
+}
+.faqTitleBlock {
+	MARGIN-LEFT: 6px
+}
+.faqPageTitle {
+	DISPLAY: none; WIDTH: 95%; TEXT-ALIGN: center
+}
+.faqTocContainer {
+	MARGIN-TOP: 0px; MARGIN-LEFT: 12px
+}
+.faqTocTitle {
+	MARGIN-TOP: 4px; FONT-WEIGHT: bold; FONT-SIZE: 12px; MARGIN-BOTTOM: 6px; FONT-FAMILY: Arial, Tahoma, Verdana, Helvetica
+}
+.FHFLAT .faqTocTitle {
+	PADDING-BOTTOM: 4px; BORDER-BOTTOM: gray 1px solid
+}
+.faqFlatCategoryHead {
+	MARGIN-TOP: 4px; FONT-WEIGHT: bold; FONT-SIZE: 11px; MARGIN-BOTTOM: 6px; FONT-FAMILY: Arial, Tahoma, Verdana, Helvetica
+}
+.FHTOC .faqTocTitle {
+	PADDING-RIGHT: 4px; PADDING-LEFT: 4px; FONT-WEIGHT: bold; FONT-SIZE: 11px; PADDING-BOTTOM: 4px; PADDING-TOP: 4px; FONT-FAMILY: Arial, Verdana, Helvetica
+}
+.FHTOC .faqFlatCategoryHead {
+	PADDING-RIGHT: 4px; PADDING-LEFT: 4px; FONT-WEIGHT: bold; FONT-SIZE: 11px; PADDING-BOTTOM: 4px; PADDING-TOP: 4px; FONT-FAMILY: Arial, Verdana, Helvetica
+}
+.FHTOC TABLE.faqCategory {
+	BORDER-TOP: #cccccc 1px solid; MARGIN-BOTTOM: 12px; MARGIN-LEFT: 12px
+}
+TABLE.faqTocTable {
+	MARGIN-TOP: 3px; MARGIN-BOTTOM: 24px
+}
+.faqTocContainer A:visited {
+	COLOR: blue
+}
+.faqTocContainer A:active {
+	COLOR: red
+}
+.faqTocContainer A:hover {
+	COLOR: red
+}
+.faqTocTextContainer {
+	PADDING-RIGHT: 12px; DISPLAY: none; PADDING-LEFT: 12px; MARGIN-BOTTOM: 12px; PADDING-BOTTOM: 24px; MARGIN-LEFT: 12px; PADDING-TOP: 12px
+}
+.faqTocText {
+	MARGIN-TOP: 12px
+}
+.faqTocTextContainer .faqTocTitle {
+	MARGIN-TOP: -12px; MARGIN-LEFT: -12px
+}
+.faqBodyContainer {
+	MARGIN-TOP: 6px
+}
+.faqCategoryContainer {
+	MARGIN-BOTTOM: 12px; MARGIN-LEFT: 12px; MARGIN-RIGHT: 12px
+}
+.faqCategoryText {
+	MARGIN-BOTTOM: 12px; MARGIN-LEFT: 12px; MARGIN-RIGHT: 12px
+}
+.faqCategoryText {
+	MARGIN-RIGHT: 48px
+}
+.faqHeaderOpen {
+	COLOR: white; BACKGROUND-COLOR: #3366cc
+}
+.faqHeaderClosed {
+	COLOR: black; BACKGROUND-COLOR: #cccccc
+}
+.faqHeaderOpen A {
+	COLOR: white; TEXT-DECORATION: none
+}
+.faqHeaderOpen A:hover {
+	COLOR: white; TEXT-DECORATION: none
+}
+.faqHeaderOpen A:visited {
+	COLOR: white; TEXT-DECORATION: none
+}
+.faqHeaderClosed A {
+	COLOR: black; TEXT-DECORATION: none
+}
+.faqHeaderClosed A:visited {
+	COLOR: black; TEXT-DECORATION: none
+}
+.faqHeaderClosed A:hover {
+	COLOR: black; TEXT-DECORATION: none
+}
+.faqHeaderOpen A:active {
+	COLOR: #ffff66
+}
+.faqHeaderClosed A:active {
+	COLOR: #ffff66
+}
+.faqHeaderText {
+	FONT-SIZE: 11px
+}
+.faqHeaderLeftSwitches {
+	MARGIN: 2px 6px 2px 2px
+}
+.faqHeaderRightSwitches {
+	MARGIN: 2px 6px 2px 2px
+}
+.faqHeaderCell {
+	FONT-WEIGHT: bold; FONT-SIZE: 11px; CURSOR: hand; FONT-FAMILY: Arial,Helvetica,Tahoma,Verdana
+}
+.faqHeaderContent {
+	
+}
+.faqCategorySelectLabel {
+	DISPLAY: block; FONT-WEIGHT: bold; MARGIN-BOTTOM: 4px
+}
+.faqCategorySelect {
+	WIDTH: 340px
+}
+.faqCategoryContent {
+	BORDER-RIGHT: #3366cc 1px solid; PADDING-RIGHT: 12px; BORDER-TOP: #3366cc 1px solid; MARGIN-BOTTOM: 12px; BORDER-LEFT: #3366cc 1px solid; BORDER-BOTTOM: #3366cc 1px solid
+}
+.faqCategoryContentNoHeader {
+	BORDER-RIGHT: medium none; BORDER-TOP: medium none; MARGIN-BOTTOM: 12px; BORDER-LEFT: medium none; BORDER-BOTTOM: medium none
+}
+.faqdesc {
+	MARGIN-TOP: 4px; DISPLAY: block; MARGIN-RIGHT: 48px
+}
+.FH2 .faqlink {
+	FONT-WEIGHT: bolder
+}
+.faqFlatCategoryHead {
+	FONT-WEIGHT: bold; FONT-SIZE: 14px
+}
+.faqCategoryLeftClip {
+	
+}
+.faqCategoryRightClip {
+	
+}
+#LTRContent .faqHomeCategoryImage {
+	FLOAT: left
+}
+#RTLContent #faqHeaderLeft {
+	BACKGROUND-POSITION: left top; BACKGROUND-IMAGE: url(/common/resources/right.gif); BACKGROUND-REPEAT: no-repeat
+}
+#RTLContent #faqHeaderRight {
+	BACKGROUND-POSITION: left top; BACKGROUND-IMAGE: url(/common/resources/left.gif); BACKGROUND-REPEAT: no-repeat
+}
+#faqHeaderRight {
+	BACKGROUND-POSITION: right top; BACKGROUND-IMAGE: url(/common/resources/right.gif); BACKGROUND-REPEAT: no-repeat
+}
+#faqHeaderLeft {
+	BACKGROUND-POSITION: left top; BACKGROUND-IMAGE: url(/common/resources/left.gif); BACKGROUND-REPEAT: no-repeat
+}

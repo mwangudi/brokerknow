@@ -1,0 +1,351 @@
+
+                   Holdings for B23 as at  1/7/2005   10:01 am
+
+
+
+
+
+    Client Registration     Security       Share Quantity     Account Status
+
+     0000000005517LI      NMG  O 0000          4038           BALANCE FREE
+
+
+     0000000007730LC      ARM  O 0000         50000           BALANCE FREE
+     0000000007730LC      BOC  O 0000          195            BALANCE FREE
+     0000000007730LC      CARB O 0000          3918           BALANCE FREE
+
+
+     0000000008044LI      KCB  O 0000           33            BALANCE FREE
+
+
+     0000000008907LI      BAT  O 0000          1000           BALANCE FREE
+     0000000008907LI      EABL O 0000          8800           BALANCE FREE
+     0000000008907LI      HFCK O 0000          6000           BALANCE FREE
+     0000000008907LI      KCB  O 0000          766            BALANCE FREE
+     0000000008907LI      MSC  O 0000          1500           BALANCE FREE
+     0000000008907LI      NBK  O 0000          6582           BALANCE FREE
+     0000000008907LI      PORT O 0000          900            BALANCE FREE
+
+
+     0000000012157LI      DTK  O 0000          1750           BALANCE FREE
+
+
+     0000000017620LI      TOTL O 0000          1500           BALANCE FREE
+
+
+     0000000018627LI      CMC  O 0000          3000           BALANCE FREE
+
+
+     0000000019135LI      KCB  O 0000          4198           BALANCE FREE
+     0000000019135LI      MSC  O 0000          4500           BALANCE FREE
+
+
+     0000000026018LI      EABL O 0000          4500           BALANCE FREE
+     0000000026018LI      KQ   O 0000          5300           BALANCE FREE
+     0000000026018LI      MSC  O 0000         25000           BALANCE FREE
+
+
+     0000000030503LI      BBK  O 0000          329            BALANCE FREE
+     0000000030503LI      NMG  O 0000          702            BALANCE FREE
+
+
+     0000000033766LI      KCB  O 0000          1000           BALANCE FREE
+
+
+     0000000033774LI      KCB  O 0000          866            BALANCE FREE
+     0000000033774LI      KENO O 0000          500            BALANCE FREE
+
+
+     0000000033782LI      EABL O 0000          1030           BALANCE FREE
+     0000000033782LI      HFCK O 0000          1000           BALANCE FREE
+     0000000033782LI      NBK  O 0000          3100           BALANCE FREE
+
+
+     0000000037117LI      ARM  O 0000          2500           BALANCE FREE
+     0000000037117LI      CMC  O 0000          2000           BALANCE FREE
+     0000000037117LI      EABL O 0000          3380           BALANCE FREE
+     0000000037117LI      PORT O 0000          900            BALANCE FREE
+
+
+     0000000037125LI      ARM  O 0000          5000           BALANCE FREE
+     0000000037125LI      KCB  O 0000          9735           BALANCE FREE
+     0000000037125LI      MSC  O 0000         28000           BALANCE FREE
+     0000000037125LI      NBK  O 0000          4850           BALANCE FREE
+
+
+     0000000037141LI      KCB  O 0000          2500           BALANCE FREE
+     0000000037141LI      MSC  O 0000         38000           BALANCE FREE
+
+
+     0000000037206LI      EABL O 0000          1473           BALANCE FREE
+
+
+     0000000037230LI      BBK  O 0000          198            BALANCE FREE
+     0000000037230LI      KPLC O 0000          1700           BALANCE FREE
+     0000000037230LI      MSC  O 0000         15000           BALANCE FREE
+     0000000037230LI      UNGA O 0000          100            BALANCE FREE
+
+
+     0000000042170LI      KQ   O 0000          2000           BALANCE FREE
+     0000000042170LI      SASN O 0000          3000           BALANCE FREE
+
+
+     0000000047015LI      CMC  O 0000          1000           BALANCE FREE
+
+
+     0000000047740LI      ARM  O 0000         10068           BALANCE FREE
+     0000000047740LI      CFC  O 0000          1000           BALANCE FREE
+     0000000047740LI      CMC  O 0000          2000           BALANCE FREE
+     0000000047740LI      HFCK O 0000          500            BALANCE FREE
+     0000000047740LI      KCB  O 0000          500            BALANCE FREE
+     0000000047740LI      KPLC O 0000          3000           BALANCE FREE
+     0000000047740LI      MSC  O 0000          2000           BALANCE FREE
+     0000000047740LI      PORT O 0000         10000           BALANCE FREE
+     0000000047740LI      TOTL O 0000          1200           BALANCE FREE
+     0000000047740LI      UNGA O 0000          6801           BALANCE FREE
+
+
+     0000000068985LI      EABL O 0000          100            BALANCE FREE
+
+
+     0000000070327LI      EABL O 0000          8000           BALANCE FREE
+     0000000070327LI      MSC  O 0000         17960           BALANCE FREE
+
+
+     0000000070483LI      BERG O 0000          550            BALANCE FREE
+
+
+     0000000076511LI      ARM  O 0000          3400           BALANCE FREE
+     0000000076511LI      KCB  O 0000          1366           BALANCE FREE
+     0000000076511LI      NBK  O 0000          6275           BALANCE FREE
+
+
+     0000000076546LI      MSC  O 0000         39080           BALANCE FREE
+     0000000076546LI      NBK  O 0000         27000           BALANCE FREE
+
+
+     0000000077054LI      KCB  O 0000          466            BALANCE FREE
+
+
+     0000000078328LI      KCB  O 0000          4471           BALANCE FREE
+     0000000078328LI      KPLC O 0000          4800           BALANCE FREE
+
+
+     0000000080810LI      MSC  O 0000          1000           BALANCE FREE
+
+
+     0000000083070LI      MSC  O 0000          2000           BALANCE FREE
+     0000000083070LI      REA  O 0000          5900           BALANCE FREE
+
+
+     0000000088595LC      ARM  O 0000          6500           BALANCE FREE
+     0000000088595LC      BERG O 0000          500            BALANCE FREE
+     0000000088595LC      EABL O 0000         173407          BALANCE FREE
+     0000000088595LC      FIRE O 0000         420000          BALANCE FREE
+     0000000088595LC      KCB  O 0000        1507273          BALANCE FREE
+     0000000088595LC      KQ   O 0000         90427           BALANCE FREE
+     0000000088595LC      MSC  O 0000         875634          BALANCE FREE
+     0000000088595LC      NMG  O 0000          166            BALANCE FREE
+     0000000088595LC      PORT O 0000         10000           BALANCE FREE
+     0000000088595LC      REA  O 0000         96959           BALANCE FREE
+     0000000088595LC      UCHM O 0000        3459637          BALANCE FREE
+     0000000088595LC      UNGA O 0000         52786           BALANCE FREE
+     0000000088595LC      WTK  O 0000          4675           BALANCE FREE
+
+
+     0000000092649LI      HFCK O 0000          4900           BALANCE FREE
+
+
+     0000000096890LI      ARM  O 0000         55000           BALANCE FREE
+     0000000096890LI      BBK  O 0000          940            BALANCE FREE
+     0000000096890LI      KCB  O 0000         28000           BALANCE FREE
+     0000000096890LI      KQ   O 0000         40000           BALANCE FREE
+     0000000096890LI      MSC  O 0000         33095           BALANCE FREE
+     0000000096890LI      NIC  O 0000          5000           BALANCE FREE
+     0000000096890LI      TOTL O 0000          5000           BALANCE FREE
+
+
+     0000000097055LI      MSC  O 0000         25000           BALANCE FREE
+     0000000097055LI      XPRS O 0000          3200           BALANCE FREE
+
+
+     0000000098604LI      BBK  O 0000          2747           BALANCE FREE
+     0000000098604LI      NIC  O 0000          9998           BALANCE FREE
+     0000000098604LI      NMG  O 0000          6750           BALANCE FREE
+     0000000098604LI      SCBK O 0000          2805           BALANCE FREE
+
+
+     0000000104450LC      KQ   O 0000         50000           BALANCE FREE
+
+
+     0000000104531LC      CFC  O 0000         126360          BALANCE FREE
+     0000000104531LC      EABL O 0000         29535           REGISTERED CT PEND
+     0000000104531LC      HFCK O 0000         101018          BALANCE FREE
+     0000000104531LC      ICDC O 0000         60565           BALANCE FREE
+     0000000104531LC      KQ   O 0000         50000           BALANCE FREE
+     0000000104531LC      KQ   O 0000         50000           REGISTERED CT PEND
+     0000000104531LC      NBK  O 0000          1750           BALANCE FREE
+     0000000104531LC      NIC  O 0000        1010750          REGISTERED CT PEND
+
+
+     0000000109266LI      UCHM O 0000          1730           BALANCE FREE
+
+
+     0000000112062LI      ARM  O 0000          1300           REGISTERED CT PEND
+     0000000112062LI      ICDC O 0000          200            BALANCE FREE
+     0000000112062LI      KCB  O 0000          1177           REGISTERED CT PEND
+     0000000112062LI      KQ   O 0000          1809           REGISTERED CT PEND
+     0000000112062LI      UNGA O 0000          250            REGISTERED CT PEND
+
+
+     0000000113476LI      HFCK O 0000          2500           BALANCE FREE
+     0000000113476LI      KCB  O 0000          200            BALANCE FREE
+     0000000113476LI      NBK  O 0000          1425           BALANCE FREE
+     0000000113476LI      PORT O 0000          490            BALANCE FREE
+
+
+     0000000115169LI      EABL O 0000          4000           BALANCE FREE
+     0000000115169LI      HFCK O 0000          1000           BALANCE FREE
+
+
+     0000000124680LI      ARM  O 0000          8000           BALANCE FREE
+     0000000124680LI      EABL O 0000          1000           BALANCE FREE
+     0000000124680LI      MSC  O 0000          8100           BALANCE FREE
+     0000000124680LI      NBK  O 0000          7475           BALANCE FREE
+
+
+     0000000128228LI      EABL O 0000          1380           BALANCE FREE
+     0000000128228LI      KPLC O 0000          1200           BALANCE FREE
+
+
+     0000000139378LI      HFCK O 0000          7123           BALANCE FREE
+     0000000139378LI      MSC  O 0000         23898           BALANCE FREE
+     0000000139378LI      NBK  O 0000          8500           BALANCE FREE
+
+
+     0000000157970LC      KCB  O 0000          1841           BALANCE FREE
+     0000000157970LC      MSC  O 0000          2500           BALANCE FREE
+
+
+     0000000174432LC      KCB  O 0000          3333           BALANCE FREE
+
+
+     0000000174513LC      KCB  O 0000         15000           BALANCE FREE
+
+
+     0000000198579LI      KQ   O 0000          2085           BALANCE FREE
+
+
+     0000000208060LI      KCB  O 0000          300            BALANCE FREE
+     0000000208060LI      MSC  O 0000          3600           BALANCE FREE
+     0000000208060LI      REA  O 0000          1395           BALANCE FREE
+
+
+     0000000210943LI      KCB  O 0000          1888           REGISTERED CT PEND
+     0000000210943LI      NBK  O 0000          3000           BALANCE FREE
+
+
+     0000000218510LI      KCB  O 0000          888            BALANCE FREE
+     0000000218510LI      MSC  O 0000          1000           BALANCE FREE
+     0000000218510LI      TPS  O 0000          1928           REGISTERED CT PEND
+
+
+     0000000222895LI      ARM  O 0000          900            BALANCE FREE
+
+
+     0000000223328LC      KQ   O 0000         11300           BALANCE FREE
+
+
+     0000000225800LI      FIRE O 0000          600            BALANCE FREE
+     0000000225800LI      NBK  O 0000          875            BALANCE FREE
+     0000000225800LI      NIC  O 0000          976            BALANCE FREE
+
+
+     0000000226025LI      BAMB O 0000          480            BALANCE FREE
+     0000000226025LI      HFCK O 0000          3000           BALANCE FREE
+     0000000226025LI      PORT O 0000          200            BALANCE FREE
+     0000000226025LI      TOTL O 0000          1200           BALANCE FREE
+
+
+     0000000228923LI      KQ   O 0000          500            BALANCE FREE
+
+
+     0000000229598LC      KCB  O 0000          410            BALANCE FREE
+     0000000229598LC      WTK  O 0000          2200           BALANCE FREE
+
+
+     0000000237914LI      EABL O 0000          1000           BALANCE FREE
+     0000000237914LI      KQ   O 0000          4000           BALANCE FREE
+
+
+     0000000242071LI      CFC  O 0000          1000           BALANCE FREE
+     0000000242071LI      KCB  O 0000          1266           BALANCE FREE
+     0000000242071LI      MSC  O 0000          2800           BALANCE FREE
+
+
+     0000000250945LC      ARM  O 0000          2750           BALANCE FREE
+
+
+     0000000259063LI      KQ   O 0000          800            BALANCE FREE
+
+
+     0000000267040LI      BERG O 0000          2250           BALANCE FREE
+     0000000267040LI      HFCK O 0000          4000           BALANCE FREE
+
+
+     0000000269000LI      MSC  O 0000          4200           BALANCE FREE
+
+
+     0000000269182LI      MSC  O 0000          1000           BALANCE FREE
+
+
+     0000000269239LI      KCB  O 0000          1333           BALANCE FREE
+
+
+     0000000276219LI      HFCK O 0000          5000           BALANCE FREE
+     0000000276219LI      KCB  O 0000          2210           REGISTERED CT PEND
+     0000000276219LI      KPLC O 0000          2000           REGISTERED CT PEND
+     0000000276219LI      MSC  O 0000         20000           BALANCE FREE
+     0000000276219LI      REA  O 0000         10000           BALANCE FREE
+
+
+     0000000280097LI      CMC  O 0000          1000           BALANCE FREE
+
+
+     0000000280283LI      CMC  O 0000          1257           BALANCE FREE
+     0000000280283LI      HFCK O 0000          2000           BALANCE FREE
+     0000000280283LI      MSC  O 0000          7463           BALANCE FREE
+     0000000280283LI      SCBK O 0000          1275           BALANCE FREE
+     0000000280283LI      XPRS O 0000          5627           BALANCE FREE
+
+
+     0000000284408LI      HFCK O 0000          4800           BALANCE FREE
+     0000000284408LI      KCB  O 0000          313            BALANCE FREE
+     0000000284408LI      TOTL O 0000          3270           BALANCE FREE
+     0000000284408LI      UCHM O 0000           60            BALANCE FREE
+
+
+     0000000296350LI      KCB  O 0000          236            BALANCE FREE
+
+
+     0000000301876LI      MSC  O 0000         80116           BALANCE FREE
+
+
+     0000000311405LI      HFCK O 0000          7000           BALANCE FREE
+     0000000311405LI      KQ   O 0000          2700           BALANCE FREE
+     0000000311405LI      MSC  O 0000         14600           BALANCE FREE
+     0000000311405LI      REA  O 0000          7146           BALANCE FREE
+
+
+     0000000314250LI      KQ   O 0000          1000           REGISTERED CT PEND
+
+
+     0000000314404LI      MSC  O 0000          4100           BALANCE FREE
+
+
+     0000000333352LI      KQ   O 0000          500            REGISTERED CT PEND
+
+
+     0000000341142LI      MSC  O 0000          5500           BALANCE FREE
+
+

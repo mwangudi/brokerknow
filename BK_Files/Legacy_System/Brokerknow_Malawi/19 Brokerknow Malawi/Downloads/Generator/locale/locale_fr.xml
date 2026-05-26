@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<Locale version="1.0">
+	<!--wizard button text-->
+	<CloseText>Close</CloseText>
+	<HomeText>Home</HomeText>
+	<BuildText>Build Report</BuildText>
+	<!--wizard button tooltips-->
+	<CloseTitle>Close window</CloseTitle>
+	<BuildTitle>Edit report properties</BuildTitle>
+	<HomeTitle>Return home</HomeTitle>
+	<!--grid filter button text-->
+	<FilterButtonText>Go</FilterButtonText>
+	<!--grid filter text-->
+	<ContainsText>contains</ContainsText>
+	<IsEqualToText>is equal to</IsEqualToText>
+	<IsNotEqualToText>is not equal to</IsNotEqualToText>
+	<IsGreaterThanText>is greater than</IsGreaterThanText>
+	<IsLessThanText>is less than</IsLessThanText>
+	<!--grid filter status text-->
+	<FiltersLabelText><![CDATA[<b>Filter(s):</b>]]></FiltersLabelText>
+	<!--grid sort status text-->
+	<SortOrderLabelText><![CDATA[<b>Sort Order:</b>]]></SortOrderLabelText>
+	<SortOrderAscText></SortOrderAscText>
+	<SortOrderDescText><![CDATA[<i>descending</i>]]></SortOrderDescText>
+	<!--grid summary status text-->
+	<SummaryLabelText><![CDATA[<b>Sommaire:</b>]]></SummaryLabelText>
+	<!--grid navigation button text-->
+	<FirstText>« First</FirstText>
+	<PrevText>«</PrevText>
+	<NextText>»</NextText>
+	<LastText>Last »</LastText>
+	<ResetText>Reset</ResetText>
+	<ReloadText>Reload</ReloadText>
+	<PageCountText>Page @CurrentPage of @NumOfPages (@NumOfRecs recs)</PageCountText>
+	<PageSizeText>Page Size:</PageSizeText>
+	<ShowPageNumbers>True</ShowPageNumbers>
+	<!--grid navigation button title-->
+	<FirstTitle>Go to the first page</FirstTitle>
+	<PrevTitle>Previous page</PrevTitle>
+	<NextTitle>Next page</NextTitle>
+	<LastTitle>Go to the last page</LastTitle>
+	<ResetTitle>Reset grid and go to first page</ResetTitle>
+	<ReloadTitle>Reload grid</ReloadTitle>
+	<!--grid header button text-->
+	<RefreshText><![CDATA[<font face="MS OUTLOOK">C</font>]]></RefreshText>
+	<SortColAscText>+</SortColAscText>
+	<SortColDescText>-</SortColDescText>
+	<!--grid header button title-->
+	<RefreshTitle>Refresh grid</RefreshTitle>
+	<SortColAscTitle>Click to sort ascending</SortColAscTitle>
+	<SortColDescTitle>Click to sort descending</SortColDescTitle>
+	<RemoveSortTitle>Remove this sort</RemoveSortTitle>
+	<!--grid export button text-->
+	<PrintText>Print</PrintText>
+	<PrintTitle></PrintTitle>
+	<XLSText>Excel</XLSText>
+	<XLSTitle></XLSTitle>
+	<CSVText>CSV</CSVText>
+	<CSVTitle></CSVTitle>
+	<XMLText>XML</XMLText>
+	<XMLTitle></XMLTitle>
+	<TXTText>Text</TXTText>
+	<TXTTitle></TXTTitle>
+	<PDFText>PDF</PDFText>
+	<PDFTitle></PDFTitle>
+	<DOCText>Word</DOCText>
+	<DOCTitle></DOCTitle>
+</Locale>

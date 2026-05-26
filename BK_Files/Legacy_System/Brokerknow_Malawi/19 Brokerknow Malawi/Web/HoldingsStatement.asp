@@ -1,0 +1,190 @@
+<html>
+<%
+	' DB Connection
+Dim Conn 
+    Set Conn = CreateObject("ADODB.Connection")
+    theDBName = "KBroker" 
+    Conn.ConnectionString =  "FILE NAME=" & GetUDLPath(theDBName) 
+    Conn.Open
+    
+   Function GetUDLPath(theDBName) 
+    Dim tmpStr
+    
+    tmpStr = StrReverse(Request.ServerVariables("APPL_PHYSICAL_PATH"))
+    
+    tmpStr = Mid(tmpStr, InStr(1, tmpStr, "\") + 1)
+    
+    tmpStr = StrReverse(tmpStr)
+    
+    GetUDLPath = tmpStr & "\UDL\" & Trim(theDBName) & ".UDL"
+
+End Function
+%>
+<head>
+<meta http-equiv="Content-Language" content="en-uk">
+<meta http-equiv="Content-Type" content="text/html; charset=windows-1252">
+<title>Holdings Statements</title>
+	<SCRIPT language=Javascript src="../scripts/common.js"></SCRIPT> 
+	<SCRIPT language=Javascript src="../scripts/fhsupport.js"></SCRIPT>
+	<link rel="stylesheet" type="text/css" href="CALENDAR/calendar.css">
+	<SCRIPT language=Javascript src="Calendar/calendar.js"></SCRIPT>
+	<LINK REL="STYLESHEET" TYPE="TEXT/CSS" HREF="../STYLE/default.css"> 
+	<LINK REL="STYLESHEET" TYPE="TEXT/CSS" HREF="../STYLE/webparts.css">
+	<SCRIPT language=VBScript src="../scripts/reports.vbs"></SCRIPT>
+	<SCRIPT language=Javascript src="../scripts/reports.js"></SCRIPT>
+
+	<style media="print">
+		@page {
+			@top{font-family: Helvetica, Arial, sans-serif;
+				font-size: 150%;
+				font-weight: bolder;
+				text-align: left;
+				content: "<%= FormatDate(Date) %>";			
+			}
+			
+			margin-left: 2cm;
+			margin-right: 5cm;
+			margin-top: 1cm;    
+			margin-bottom: 2cm;
+			size: portrait;
+			
+			br.newpage{
+				page-break-before:always;
+			}
+			
+			
+		}
+
+	</style>
+</head>
+
+<body Class="Reports">
+<!--#include file="../libroutines.asp"-->
+
+<%
+selectedClient = Session("Client_DPA_")
+
+%>
+<% DrawPageFunctions True, True, True %>
+
+<%
+	Set conn = GetActiveConnection("KBroker")
+	Set Rs = CreateObject("ADODB.Recordset")						        
+	'sqlStr = "SELECT * FROM HoldingsSecurityPriceList WHERE ClientDPA = " & selectedClient
+	sqlStr = "SELECT * FROM HoldingsSecurityPriceList WHERE (BalanceFree ='Y') and (Client_DPA_ = " & selectedClient &")ORDER BY Security_DPA_"
+	'Response.Write sqlstr
+	'Response.End
+	'sqlStr = "ClientStatement"
+	Rs.CursorLocation = adUseClient	
+	Rs.Open SQLServerFormat(sqlStr), conn.ConnectionString, adOpenKeyset, adLockOptimistic
+	'Rs.Filter = "Client_DPA_ = '" & selectedClient & "' AND TransDate >= '" & FormatDate(selectedFromDate) & "'"
+	
+	
+	If rs.EOF Or rs.BOF Then%>
+		<Script Language="JavaScript">
+			alert("The specified client does not have any Holdings Statements")
+			window.history.go(-1);
+		</Script>
+		<%Set Rs = Nothing
+		Set Conn = Nothing
+		Response.End
+	End If
+	
+	Set rsClient = Conn.Execute ("SELECT * FROM Client WHERE Client_DPA_ = " & selectedClient)
+	
+	If Not (rsClient.EOF Or rsClient.BOF) Then
+		accountDesc = rsClient.Fields("ClientName").Value & " " & rsClient.Fields("Client_DPA_").Value
+		accountAddress = rsClient.Fields("ClientAddr").Value
+	End If
+	
+	Set rsClient = Nothing
+	
+%>	
+
+<table border="0" cellspacing="2" cellpadding="2" style="font-family: Arial Narrow" width="100%">
+    <tr>
+		<td width="10%" nowrap><font face="Impact" size="4">CDS HOLDING VALUATION</font></td>
+      <td width="60%" nowrap align=right><font face="Impact" size="3"><%= Session("CompanyName") %></font></td>
+      
+    </tr>
+
+  </table>
+<br>
+<table border="0" cellspacing="0" cellpadding="2" style="font-family: Arial Narrow" width="100%">
+    <tr>
+      <td width="1%"><b>Date:</b></td>
+      <td width="48%"><%= FormatDate1(rs("TradeDate")) %></td>
+    </tr>
+
+    <tr>
+      <td width="1%"><b>Account:</b></td>
+      <td width="48%"><%= accountDesc %></td>
+    </tr>
+
+    <tr>
+      <td width="1%"><b><font size="2" face="Arial">&nbsp;</font></b></td>
+      <td width="48%"><%= accountAddress %></td>
+    </tr>
+
+</table>
+<BR>
+
+
+  <table border="0" cellspacing="0" cellpadding="2" style="font-family: Arial Narrow; LEFT-MARGIN:100PX"  width="100%">
+    <tr>
+      <td style="border-top-style: solid; border-top-width: 1; border-bottom-style: solid; border-bottom-width: 1"><b><font face="Arial Narrow" size="3">Security:</font></b></td>
+      <td align="right" style="border-top-style: solid; border-top-width: 1; border-bottom-style: solid; border-bottom-width: 1"  align=right><b><font face="Arial Narrow" size="3">Quantity:</font></b></td>
+      <td align="right" style="border-top-style: solid; border-top-width: 1; border-bottom-style: solid; border-bottom-width: 1"  align=right><b><font face="Arial Narrow" size="3">Price:</font></b></td>
+      <td align="right" style="border-top-style: solid; border-top-width: 1; border-bottom-style: solid; border-bottom-width: 1"  align=right><b><font face="Arial Narrow" size="3">Amount:</font></b></td>
+      
+    </tr>
+
+   <%
+    dim totalPrice
+    dim amount
+		amount=0
+		totalPrice=0 
+    Do Until Rs.EOF
+		amount = Rs.Fields("Quantity").Value*Rs.Fields("Price").Value
+		totalPrice = totalPrice + amount
+    %>
+		<tr>	
+		  <td><font size="1"><%= rs.Fields("SecurityCode").Value %></font></td>		  
+		  <td  style="text-align: right"><font size="1"><%= formatnumber(Rs.Fields("Quantity").Value,0) %></font></td>
+		  <td  style="text-align: right"><font size="1"><%= formatnumber(Rs.Fields("Price").Value,2) %></font></td>
+		  <td  style="text-align: right"><font size="1"><%= formatnumber(amount,2) %></font></td>
+		</tr>
+	
+	<%	Rs.MoveNext
+	Loop
+	rs.Close 
+	%>
+	
+    <tr>
+      <td colspan="6" align="right" style="border-bottom-style: solid; border-bottom-width: 1">
+        &nbsp;&nbsp;&nbsp; </td>
+
+    </tr>
+
+ <tr>
+  </td>
+      <td><font size="2" colspan="1">&nbsp;</font> </td>
+      <td><font size="2" colspan="1">&nbsp;</font> </td>
+      <td ><b>Total:</b></td>
+       <td style="text-align: right"><b><%= formatnumber(totalPrice,2) %></b></td>
+    </tr>
+     <tr>
+      <td colspan="6" align="right" style="border-bottom-style: solid; border-bottom-width: 1">
+        &nbsp;&nbsp;&nbsp; </td>
+
+    </tr>
+  </table>
+   
+   
+<%
+	
+Set Rs = Nothing
+Set Conn = Nothing%>   
+</body>
+
+</html>
