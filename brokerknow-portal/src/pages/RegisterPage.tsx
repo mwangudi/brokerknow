@@ -27,12 +27,23 @@ interface FormState {
   postalAddress: string;
   physicalAddress: string;
   contactPerson: string;
+
+  // FIU / Cedar Capital KYC documents
+  idDocument: File | null;
+  proofOfAddress: File | null;
+  sourceOfFunds: File | null;
+  otherDocuments: File[];
 }
 
-type Errors = Partial<Record<keyof FormState, string>>;
+type Errors = Partial<Record<keyof FormState | "documents", string>>;
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const PHONE_RE = /^[+\d\s()-]{7,20}$/;
+const MAX_FILE_BYTES = 10 * 1024 * 1024;
+const ALLOWED_EXT = [
+  ".pdf", ".jpg", ".jpeg", ".png", ".gif", ".webp",
+  ".doc", ".docx", ".xls", ".xlsx", ".csv", ".txt",
+];
 
 const EMPTY: FormState = {
   clientKind: null,
@@ -48,6 +59,10 @@ const EMPTY: FormState = {
   postalAddress: "",
   physicalAddress: "",
   contactPerson: "",
+  idDocument: null,
+  proofOfAddress: null,
+  sourceOfFunds: null,
+  otherDocuments: [],
 };
 
 // ─── Per-step validation ────────────────────────────────────────────
@@ -121,6 +136,18 @@ function validateStep(step: number, form: FormState): Errors {
       e.postalAddress = "Provide at least one address (postal or physical).";
   }
 
+  // Documents step is always second-to-last. For existing CDS clients
+  // that's step 2; for new applicants it's step 4. FIU / Cedar Capital
+  // require ID + proof of address + proof of source of funds.
+  const docsStep = isExisting ? 2 : 4;
+  if (step === docsStep) {
+    const missing: string[] = [];
+    if (!form.idDocument) missing.push("National ID / Passport");
+    if (!form.proofOfAddress) missing.push("Proof of address");
+    if (!form.sourceOfFunds) missing.push("Proof of source of funds");
+    if (missing.length) e.documents = `Please attach: ${missing.join(", ")}.`;
+  }
+
   return e;
 }
 
@@ -140,12 +167,13 @@ export default function RegisterPage() {
   const steps = useMemo(
     () =>
       isExisting
-        ? ["Account", "Your details", "Review"]
-        : ["Account", "Personal", "Contact", "Addresses", "Review"],
+        ? ["Account", "Your details", "Documents", "Review"]
+        : ["Account", "Personal", "Contact", "Addresses", "Documents", "Review"],
     [isExisting],
   );
   const lastStep = steps.length - 1;
   const isReview = step === lastStep;
+  const isDocuments = step === lastStep - 1;
 
   function set<K extends keyof FormState>(field: K, value: FormState[K]) {
     setForm((prev) => ({ ...prev, [field]: value }));
@@ -205,6 +233,10 @@ export default function RegisterPage() {
       physicalAddress: form.physicalAddress || undefined,
       postalAddress: form.postalAddress || undefined,
       contactPerson: form.contactPerson || undefined,
+      idDocument: form.idDocument ?? undefined,
+      proofOfAddress: form.proofOfAddress ?? undefined,
+      sourceOfFunds: form.sourceOfFunds ?? undefined,
+      otherDocuments: form.otherDocuments.length ? form.otherDocuments : undefined,
     });
 
     if (result.error) {
@@ -389,6 +421,53 @@ export default function RegisterPage() {
           </div>
         )}
 
+        {/* ── Documents step (second-to-last) ──────────────────── */}
+        {isDocuments && (
+          <div>
+            <h2 className="mb-1 text-xl font-semibold text-gray-900">
+              KYC documents
+            </h2>
+            <p className="mb-4 text-sm text-gray-500">
+              In line with FIU / Cedar Capital onboarding requirements, please
+              attach the following. Certified copies dated within the last
+              three months are preferred.
+            </p>
+            {errors.documents && (
+              <div className="mb-4 rounded-lg bg-red-50 p-3 text-sm text-red-700">
+                {errors.documents}
+              </div>
+            )}
+            <div className="space-y-4">
+              <FileSlot
+                label="National ID or Passport"
+                required
+                file={form.idDocument}
+                onChange={(f) => set("idDocument", f)}
+              />
+              <FileSlot
+                label="Proof of residential address (utility bill, bank statement, lease)"
+                required
+                file={form.proofOfAddress}
+                onChange={(f) => set("proofOfAddress", f)}
+              />
+              <FileSlot
+                label="Proof of source of funds (payslip, bank statement, business registration)"
+                required
+                file={form.sourceOfFunds}
+                onChange={(f) => set("sourceOfFunds", f)}
+              />
+              <MultiFileSlot
+                label="Other supporting documents (optional)"
+                files={form.otherDocuments}
+                onChange={(files) => set("otherDocuments", files)}
+              />
+            </div>
+            <p className="mt-4 text-xs text-gray-500">
+              Accepted: PDF, images, Word, Excel, CSV, text. Maximum 10&nbsp;MB per file.
+            </p>
+          </div>
+        )}
+
         {/* ── Final: Review ────────────────────────────────────── */}
         {isReview && (
           <div>
@@ -527,6 +606,17 @@ function Summary({ form }: { form: FormState }) {
       { label: "Contact person", value: form.contactPerson || "—" },
     );
   }
+  rows.push(
+    { label: "ID document", value: form.idDocument?.name ?? "—" },
+    { label: "Proof of address", value: form.proofOfAddress?.name ?? "—" },
+    { label: "Source of funds", value: form.sourceOfFunds?.name ?? "—" },
+    {
+      label: "Other documents",
+      value: form.otherDocuments.length
+        ? form.otherDocuments.map((f) => f.name).join(", ")
+        : "—",
+    },
+  );
   return (
     <dl className="divide-y divide-gray-100 rounded-lg border border-gray-200">
       {rows.map((r) => (
@@ -583,6 +673,138 @@ function Field({
       ) : hint ? (
         <p className="mt-1 text-xs text-gray-500">{hint}</p>
       ) : null}
+    </div>
+  );
+}
+
+// ── File upload helpers ────────────────────────────────
+function validateFile(f: File): string | null {
+  if (f.size > MAX_FILE_BYTES) return `${f.name} exceeds the 10 MB limit.`;
+  const lower = f.name.toLowerCase();
+  if (!ALLOWED_EXT.some((ext) => lower.endsWith(ext)))
+    return `${f.name}: file type not allowed.`;
+  return null;
+}
+
+function formatSize(bytes: number): string {
+  if (bytes < 1024) return `${bytes} B`;
+  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+  return `${(bytes / 1024 / 1024).toFixed(1)} MB`;
+}
+
+function FileSlot({
+  label,
+  required,
+  file,
+  onChange,
+}: {
+  label: string;
+  required?: boolean;
+  file: File | null;
+  onChange: (f: File | null) => void;
+}) {
+  const [err, setErr] = useState<string | null>(null);
+  function pick(f: File | null) {
+    if (!f) { onChange(null); setErr(null); return; }
+    const e = validateFile(f);
+    if (e) { setErr(e); return; }
+    setErr(null);
+    onChange(f);
+  }
+  return (
+    <div className="rounded-lg border border-gray-200 bg-gray-50 p-3">
+      <div className="mb-2 text-sm font-medium text-gray-700">
+        {label} {required && <span className="text-red-500">*</span>}
+      </div>
+      {file ? (
+        <div className="flex items-center justify-between gap-3 rounded-md border border-gray-200 bg-white px-3 py-2 text-sm">
+          <div className="min-w-0 truncate">
+            <span className="font-medium text-gray-800">{file.name}</span>{" "}
+            <span className="text-xs text-gray-500">({formatSize(file.size)})</span>
+          </div>
+          <button
+            type="button"
+            onClick={() => pick(null)}
+            className="text-xs font-medium text-red-600 hover:underline"
+          >
+            Remove
+          </button>
+        </div>
+      ) : (
+        <label className="flex cursor-pointer items-center justify-center rounded-md border border-dashed border-gray-300 bg-white px-3 py-4 text-sm text-gray-500 hover:border-brand-400 hover:text-brand-600">
+          <input
+            type="file"
+            className="sr-only"
+            accept={ALLOWED_EXT.join(",")}
+            onChange={(e) => pick(e.target.files?.[0] ?? null)}
+          />
+          Click to choose a file
+        </label>
+      )}
+      {err && <p className="mt-1 text-xs text-red-600">{err}</p>}
+    </div>
+  );
+}
+
+function MultiFileSlot({
+  label,
+  files,
+  onChange,
+}: {
+  label: string;
+  files: File[];
+  onChange: (f: File[]) => void;
+}) {
+  const [err, setErr] = useState<string | null>(null);
+  function add(list: FileList | null) {
+    if (!list || list.length === 0) return;
+    const next = [...files];
+    for (const f of Array.from(list)) {
+      const e = validateFile(f);
+      if (e) { setErr(e); continue; }
+      next.push(f);
+    }
+    setErr(null);
+    onChange(next);
+  }
+  function remove(i: number) {
+    const next = [...files];
+    next.splice(i, 1);
+    onChange(next);
+  }
+  return (
+    <div className="rounded-lg border border-gray-200 bg-gray-50 p-3">
+      <div className="mb-2 text-sm font-medium text-gray-700">{label}</div>
+      {files.length > 0 && (
+        <ul className="mb-2 space-y-1">
+          {files.map((f, i) => (
+            <li key={`${f.name}-${i}`} className="flex items-center justify-between gap-3 rounded-md border border-gray-200 bg-white px-3 py-2 text-sm">
+              <div className="min-w-0 truncate">
+                <span className="font-medium text-gray-800">{f.name}</span>{" "}
+                <span className="text-xs text-gray-500">({formatSize(f.size)})</span>
+              </div>
+              <button
+                type="button"
+                onClick={() => remove(i)}
+                className="text-xs font-medium text-red-600 hover:underline"
+              >
+                Remove
+              </button>
+            </li>
+          ))}
+        </ul>
+      )}
+      <label className="flex cursor-pointer items-center justify-center rounded-md border border-dashed border-gray-300 bg-white px-3 py-3 text-sm text-gray-500 hover:border-brand-400 hover:text-brand-600">
+        <input
+          type="file"
+          multiple
+          className="sr-only"
+          accept={ALLOWED_EXT.join(",")}
+          onChange={(e) => { add(e.target.files); e.currentTarget.value = ""; }}
+        />
+        Click to add files
+      </label>
+      {err && <p className="mt-1 text-xs text-red-600">{err}</p>}
     </div>
   );
 }

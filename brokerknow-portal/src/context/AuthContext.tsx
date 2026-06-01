@@ -40,6 +40,11 @@ interface RegisterData {
   physicalAddress?: string;
   postalAddress?: string;
   contactPerson?: string;
+  // FIU / Cedar Capital KYC documents (required server-side).
+  idDocument?: File;
+  proofOfAddress?: File;
+  sourceOfFunds?: File;
+  otherDocuments?: File[];
 }
 
 const AuthContext = createContext<AuthState | null>(null);
@@ -93,7 +98,29 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const register = useCallback(async (data: RegisterData) => {
     setLoading(true);
     try {
-      const r = await api.post("/auth/register", data);
+      // KYC documents must travel as multipart so the server can persist
+      // them under /uploads/portal-applications/{userId}/.
+      const fd = new FormData();
+      const scalarKeys = [
+        "email", "firstName", "lastName", "phone", "officePhone", "homePhone",
+        "idNumber", "cdsNumber", "dateOfBirth", "physicalAddress",
+        "postalAddress", "contactPerson",
+      ] as const;
+      for (const k of scalarKeys) {
+        const v = data[k];
+        if (v !== undefined && v !== null && v !== "") fd.append(k, String(v));
+      }
+      if (data.idDocument) fd.append("idDocument", data.idDocument, data.idDocument.name);
+      if (data.proofOfAddress) fd.append("proofOfAddress", data.proofOfAddress, data.proofOfAddress.name);
+      if (data.sourceOfFunds) fd.append("sourceOfFunds", data.sourceOfFunds, data.sourceOfFunds.name);
+      if (data.otherDocuments) {
+        for (const f of data.otherDocuments) fd.append("otherDocuments", f, f.name);
+      }
+      // Pass undefined so axios fills in multipart/form-data with the
+      // correct boundary; explicit \"multipart/form-data\" would drop it.
+      const r = await api.post("/auth/register", fd, {
+        headers: { "Content-Type": undefined as unknown as string },
+      });
       return { message: r.data.message };
     } catch (err: any) {
       return { error: err.response?.data?.error || "Registration failed." };
