@@ -33,3 +33,7 @@ BK_Files/Legacy_System/Malawi_LIVE_After_Levy/
 
 *.tgz
 
+
+# TypeScript build info
+*.tsbuildinfo
+
