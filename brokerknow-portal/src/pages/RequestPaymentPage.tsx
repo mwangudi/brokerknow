@@ -13,6 +13,7 @@ interface PaymentRequestRow {
   processedAt: string | null;
   clientBankAccountDpa: number | null;
   clientBankAccount: string | null;
+  hasProof: boolean;
 }
 
 interface BalanceResponse {
@@ -69,6 +70,7 @@ export default function RequestPaymentPage() {
   const [reference, setReference] = useState("");
   const [narrative, setNarrative] = useState("");
   const [bankAccountId, setBankAccountId] = useState<string>("");
+  const [proofFile, setProofFile] = useState<File | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [submitOk, setSubmitOk] = useState<string | null>(null);
@@ -111,6 +113,18 @@ export default function RequestPaymentPage() {
 
   useEffect(() => { void refresh(); }, []);
 
+  async function viewProof(id: number) {
+    try {
+      const resp = await api.get(`/portal/payment-requests/${id}/proof`, { responseType: "blob" });
+      const url = window.URL.createObjectURL(resp.data as Blob);
+      window.open(url, "_blank", "noopener,noreferrer");
+      // Revoke shortly after to free memory; the new tab keeps its own ref.
+      setTimeout(() => window.URL.revokeObjectURL(url), 60_000);
+    } catch {
+      setError("Could not open the proof file.");
+    }
+  }
+
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
     setSubmitError(null);
@@ -144,7 +158,7 @@ export default function RequestPaymentPage() {
 
     setSubmitting(true);
     try {
-      await api.post("/portal/payment-requests", {
+      const created = await api.post<{ id: number }>("/portal/payment-requests", {
         requestType,
         amount: amt,
         reference: reference || null,
@@ -152,9 +166,26 @@ export default function RequestPaymentPage() {
         clientBankAccountDpa:
           requestType === "Withdrawal" && bankAccountId ? Number(bankAccountId) : null,
       });
+      // J5 — upload the proof of deposit if attached.
+      if (requestType === "Deposit" && proofFile && created.data?.id) {
+        const fd = new FormData();
+        fd.append("file", proofFile);
+        try {
+          await api.post(`/portal/payment-requests/${created.data.id}/proof`, fd, {
+            headers: { "Content-Type": "multipart/form-data" },
+          });
+        } catch (uploadErr) {
+          const ex = uploadErr as { response?: { data?: { error?: string } } };
+          setSubmitError(
+            "Request saved, but the proof could not be uploaded: " +
+              (ex.response?.data?.error ?? "please try again from the history list."),
+          );
+        }
+      }
       setAmount("");
       setReference("");
       setNarrative("");
+      setProofFile(null);
       if (bankAccounts.length !== 1) setBankAccountId("");
       setSubmitOk(
         requestType === "Deposit"
@@ -337,6 +368,23 @@ export default function RequestPaymentPage() {
               />
             </div>
 
+            {requestType === "Deposit" && (
+              <div>
+                <label className="mb-1.5 block text-sm font-medium text-gray-700">
+                  Proof of deposit
+                </label>
+                <input
+                  type="file"
+                  accept=".pdf,.jpg,.jpeg,.png,.webp"
+                  onChange={(e) => setProofFile(e.target.files?.[0] ?? null)}
+                  className="block w-full text-sm text-gray-700 file:mr-3 file:rounded-md file:border-0 file:bg-amber-50 file:px-3 file:py-2 file:text-sm file:font-medium file:text-amber-700 hover:file:bg-amber-100"
+                />
+                <p className="mt-1.5 text-xs text-gray-500">
+                  Optional. Attach a bank slip or transfer receipt (PDF, JPG, PNG or WEBP, max 10 MB).
+                </p>
+              </div>
+            )}
+
             <div className="flex justify-end">
               <button
                 type="submit"
@@ -391,6 +439,17 @@ export default function RequestPaymentPage() {
                       {r.status === "Rejected" && r.rejectReason && (
                         <p className="mt-1 text-xs text-rose-700">
                           Rejected: {r.rejectReason}
+                        </p>
+                      )}
+                      {r.hasProof && (
+                        <p className="mt-1">
+                          <button
+                            type="button"
+                            onClick={() => void viewProof(r.id)}
+                            className="text-xs font-medium text-amber-700 hover:underline"
+                          >
+                            View proof of deposit
+                          </button>
                         </p>
                       )}
                     </div>

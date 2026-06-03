@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { Link } from "react-router";
 import api from "../lib/api";
 
 interface OrderRow {
@@ -35,7 +36,15 @@ export default function OrdersPage() {
 
   return (
     <div>
-      <h2 className="mb-6 text-2xl font-bold text-gray-900">My Orders</h2>
+      <div className="mb-6 flex items-center justify-between">
+        <h2 className="text-2xl font-bold text-gray-900">My Orders</h2>
+        <Link
+          to="/orders/new"
+          className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-blue-700"
+        >
+          + Place order
+        </Link>
+      </div>
 
       <div className="rounded-xl border border-gray-200 bg-white">
         <div className="overflow-x-auto">
