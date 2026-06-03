@@ -207,6 +207,13 @@ export default function RegisterPage() {
     e.preventDefault();
     setSubmitError("");
 
+    // Guard against Enter-key submits from earlier steps: only the final
+    // Review step is allowed to actually post the application.
+    if (!isReview) {
+      next();
+      return;
+    }
+
     // Re-validate all relevant steps before sending.
     const all: Errors = {};
     for (let s = 1; s < lastStep; s++) {
@@ -293,20 +300,20 @@ export default function RegisterPage() {
         {step === 0 && (
           <div>
             <h2 className="mb-1 text-xl font-semibold text-gray-900">
-              Welcome — let's get you started
+              Welcome to Cedar Capital, let's get you started.
             </h2>
             <p className="mb-6 text-sm text-gray-500">
-              Are you an existing CDS account holder, or applying for the first time?
+              Tell us which best describes you so we can take you down the right path.
             </p>
             <div className="grid gap-4 sm:grid-cols-2">
               <ChoiceCard
-                title="I have an existing CDS account"
-                description="You already trade through us and just need an online portal login. We'll verify your CDS number and link this login to your account."
+                title="I am already a Cedar Capital Client"
+                description="You already have a CDS account with us and just need an online portal login. We'll verify your CDS number and link this login to your existing client record."
                 onClick={() => chooseKind("existing")}
               />
               <ChoiceCard
-                title="I'm new — I'd like to open an account"
-                description="You don't yet have a CDS account. Complete the full application and we'll onboard you."
+                title="I am new, I would like to be a Cedar Client"
+                description="You don't yet have a CDS account. Complete the full application below and our onboarding team will set you up."
                 onClick={() => chooseKind("new")}
               />
             </div>
