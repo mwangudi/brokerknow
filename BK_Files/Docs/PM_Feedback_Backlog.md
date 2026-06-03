@@ -53,13 +53,13 @@ Source: `BK_Files/Docs/Testing Comments 2.docx`. Triaged into themes. Numbers re
 - I1. Allow creating new commission rates and editing existing ones (per-client override already exists — keep).
 
 ## J. Client Portal
-- J1. Allow placing orders from the portal.
+- J1. Allow placing orders from the portal. ✅ shipped
 - J2. Onboarding greeting: "Welcome to Cedar Capital, let's get you started." + two choices:
   - "I am already a Cedar Capital Client"
   - "I am new, I would like to be a Cedar Client"
 - J3. Registration: review-step before final submit (currently goes through on Next).
 - J4. When linking a client, replace scroll with **search**.
-- J5. Deposit screen: allow upload of proof of deposit.
+- J5. Deposit screen: allow upload of proof of deposit. ✅ shipped
 
 ---
 
