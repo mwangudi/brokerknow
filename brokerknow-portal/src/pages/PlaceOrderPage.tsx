@@ -136,7 +136,7 @@ export default function PlaceOrderPage() {
 
       <form
         onSubmit={handleSubmit}
-        className="max-w-2xl space-y-5 rounded-2xl border border-gray-200 bg-white p-6 shadow-sm"
+        className="w-full space-y-5 rounded-2xl border border-gray-200 bg-white p-6 shadow-sm"
       >
         {submitError && (
           <div className="rounded-lg border border-rose-200 bg-rose-50 px-3 py-2 text-sm text-rose-800">
@@ -144,7 +144,8 @@ export default function PlaceOrderPage() {
           </div>
         )}
 
-        <div>
+        <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
+        <div className="md:col-span-2">
           <label className="mb-1.5 block text-sm font-medium text-gray-700">Side *</label>
           <div className="inline-flex rounded-lg border border-gray-200 bg-gray-50 p-1">
             {options?.orderTypes.map((ot) => {
@@ -182,7 +183,7 @@ export default function PlaceOrderPage() {
           </select>
         </div>
 
-        <div className="relative">
+        <div className="relative md:col-span-2">
           <label className="mb-1.5 block text-sm font-medium text-gray-700">Security *</label>
           {selectedSecurity && !securityPickerOpen ? (
             <div className="flex items-center justify-between rounded-lg border border-blue-200 bg-blue-50 px-3 py-2.5 text-sm">
@@ -238,7 +239,7 @@ export default function PlaceOrderPage() {
           )}
         </div>
 
-        <div>
+        <div className="md:col-span-2">
           <label className="inline-flex items-center gap-2 text-sm text-gray-700">
             <input
               type="checkbox"
@@ -251,7 +252,7 @@ export default function PlaceOrderPage() {
         </div>
 
         {!best && (
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:col-span-2">
             <div>
               <label className="mb-1.5 block text-sm font-medium text-gray-700">Quantity *</label>
               <input
@@ -278,7 +279,7 @@ export default function PlaceOrderPage() {
         )}
 
         {best && isPurchase && (
-          <div>
+          <div className="md:col-span-2">
             <label className="mb-1.5 block text-sm font-medium text-gray-700">Maximum amount (MWK) *</label>
             <input
               type="number"
@@ -314,6 +315,7 @@ export default function PlaceOrderPage() {
             placeholder="Short note for the broker (optional)"
             className="w-full rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm text-gray-700 focus:border-blue-400 focus:outline-none focus:ring-4 focus:ring-blue-200"
           />
+        </div>
         </div>
 
         <div className="flex justify-end gap-2 pt-2">

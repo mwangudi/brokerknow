@@ -8,6 +8,7 @@ import ProfilePage from "./pages/ProfilePage";
 import StatementPage from "./pages/StatementPage";
 import OrdersPage from "./pages/OrdersPage";
 import PlaceOrderPage from "./pages/PlaceOrderPage";
+import OrderDetailPage from "./pages/OrderDetailPage";
 import MarketPricesPage from "./pages/MarketPricesPage";
 import RequestPaymentPage from "./pages/RequestPaymentPage";
 import ChangePasswordPage from "./pages/ChangePasswordPage";
@@ -36,6 +37,7 @@ export default function App() {
           <Route path="statement" element={<StatementPage />} />
           <Route path="orders" element={<OrdersPage />} />
           <Route path="orders/new" element={<PlaceOrderPage />} />
+          <Route path="orders/:id" element={<OrderDetailPage />} />
           <Route path="market-prices" element={<MarketPricesPage />} />
           <Route path="request-payment" element={<RequestPaymentPage />} />
         </Route>

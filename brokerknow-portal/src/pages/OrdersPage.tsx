@@ -8,6 +8,10 @@ interface OrderRow {
   orderDate: string;
   orderType: string;
   status: string;
+  security?: string | null;
+  quantity?: number | null;
+  price?: string | null;
+  best?: boolean;
 }
 
 export default function OrdersPage() {
@@ -54,15 +58,19 @@ export default function OrdersPage() {
                 <th className="px-4 py-3">Order #</th>
                 <th className="px-4 py-3">Date</th>
                 <th className="px-4 py-3">Type</th>
+                <th className="px-4 py-3">Security</th>
+                <th className="px-4 py-3">Quantity</th>
+                <th className="px-4 py-3">Price</th>
                 <th className="px-4 py-3">Reference</th>
                 <th className="px-4 py-3">Status</th>
+                <th className="px-4 py-3"></th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100">
               {loading ? (
-                <tr><td colSpan={5} className="px-4 py-8 text-center text-gray-500">Loading...</td></tr>
+                <tr><td colSpan={9} className="px-4 py-8 text-center text-gray-500">Loading...</td></tr>
               ) : orders.length === 0 ? (
-                <tr><td colSpan={5} className="px-4 py-8 text-center text-gray-500">No orders found.</td></tr>
+                <tr><td colSpan={9} className="px-4 py-8 text-center text-gray-500">No orders found.</td></tr>
               ) : orders.map((o, i) => (
                 <tr key={o.orderDpa} className={i % 2 === 0 ? "bg-blue-50/50" : ""}>
                   <td className="px-4 py-2.5 font-medium text-gray-900">{o.orderDpa}</td>
@@ -70,11 +78,21 @@ export default function OrdersPage() {
                     {new Date(o.orderDate).toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" })}
                   </td>
                   <td className="px-4 py-2.5">{o.orderType}</td>
+                  <td className="px-4 py-2.5 text-gray-700">{o.security || "—"}</td>
+                  <td className="px-4 py-2.5 text-gray-700">
+                    {o.best ? "Best (market)" : (o.quantity ? o.quantity.toLocaleString() : "—")}
+                  </td>
+                  <td className="px-4 py-2.5 text-gray-700">{o.best ? "Best" : (o.price || "—")}</td>
                   <td className="px-4 py-2.5 text-gray-500">{o.orderRef || "—"}</td>
                   <td className="px-4 py-2.5">
                     <span className={`inline-flex rounded-full px-2 py-0.5 text-xs font-medium ${statusColor[o.status] || "bg-gray-100 text-gray-700"}`}>
                       {o.status}
                     </span>
+                  </td>
+                  <td className="px-4 py-2.5 text-right">
+                    <Link to={`/orders/${o.orderDpa}`} className="text-sm font-medium text-blue-600 hover:underline">
+                      View
+                    </Link>
                   </td>
                 </tr>
               ))}
