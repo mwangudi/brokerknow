@@ -87,7 +87,7 @@ function validateStep(step: number, form: FormState): Errors {
       e.lastName = "Last name must be at least 2 characters.";
 
     if (isExisting && !form.cdsNumber.trim())
-      e.cdsNumber = "Your CDS number is required so we can link your existing account.";
+      e.cdsNumber = "Your CSD number is required so we can link your existing account.";
 
     if (form.dateOfBirth) {
       const dob = new Date(form.dateOfBirth);
@@ -206,7 +206,7 @@ export default function RegisterPage() {
       if (data.idNumberTaken)
         e.idNumber = "This ID / Passport number is already registered.";
       if (data.cdsNumberTaken)
-        e.cdsNumber = "This CDS number is already registered.";
+        e.cdsNumber = "This CSD number is already registered.";
       return e;
     } catch {
       return {};
@@ -356,12 +356,12 @@ export default function RegisterPage() {
             <div className="grid gap-4 sm:grid-cols-2">
               <ChoiceCard
                 title="I am already a Cedar Capital Client"
-                description="You already have a CDS account with us and just need an online portal login. We'll verify your CDS number and link this login to your existing client record."
+                description="You already have a CSD account with us and just need an online portal login. We'll verify your CSD number and link this login to your existing client record."
                 onClick={() => chooseKind("existing")}
               />
               <ChoiceCard
                 title="I am new, I would like to be a Cedar Client"
-                description="You don't yet have a CDS account. Complete the full application below and our onboarding team will set you up."
+                description="You don't yet have a CSD account. Complete the full application below and our onboarding team will set you up."
                 onClick={() => chooseKind("new")}
               />
             </div>
@@ -393,12 +393,12 @@ export default function RegisterPage() {
                 error={errors.lastName} onChange={(v) => set("lastName", v)}
                 placeholder="e.g. Banda" />
               <Field
-                label="CDS number"
+                label="CSD number"
                 required={isExisting}
                 value={form.cdsNumber}
                 error={errors.cdsNumber}
                 onChange={(v) => set("cdsNumber", v)}
-                placeholder="e.g. CDS-000123"
+                placeholder="e.g. CSD-000123"
                 hint={isExisting ? "Required so admin can link your portal login." : undefined}
               />
               <Field
@@ -645,9 +645,9 @@ function ChoiceCard({
 function Summary({ form }: { form: FormState }) {
   const isExisting = form.clientKind === "existing";
   const rows: { label: string; value: string }[] = [
-    { label: "Account type", value: isExisting ? "Existing CDS client" : "New applicant" },
+    { label: "Account type", value: isExisting ? "Existing CSD client" : "New applicant" },
     { label: "Name", value: `${form.firstName} ${form.lastName}`.trim() || "—" },
-    { label: "CDS number", value: form.cdsNumber || "—" },
+    { label: "CSD number", value: form.cdsNumber || "—" },
     { label: "ID / Passport", value: form.idNumber || "—" },
     { label: "Date of birth", value: form.dateOfBirth || "—" },
     { label: "Email", value: form.email || "—" },

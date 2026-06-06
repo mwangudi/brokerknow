@@ -86,7 +86,7 @@ export default function ProfilePage() {
           gradient="bg-blue-50 text-blue-600 dark:bg-blue-500/10 dark:text-blue-400"
           rows={[
             { label: "ID / Passport", value: profile.clientIdPass },
-            { label: "CDS Number", value: profile.clientCdsNo },
+            { label: "CSD Number", value: profile.clientCdsNo },
             { label: "Date of Birth", value: profile.clientBDate ? new Date(profile.clientBDate).toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" }) : undefined },
             { label: "Contact Person", value: profile.clientContact },
           ]}
