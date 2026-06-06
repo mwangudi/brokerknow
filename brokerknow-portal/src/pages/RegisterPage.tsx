@@ -315,7 +315,7 @@ export default function RegisterPage() {
           <p className="mb-6 text-gray-600">{success}</p>
           <p className="mb-6 text-sm text-gray-500">
             {isExisting
-              ? "An administrator will verify your CDS number against our records and email you your login credentials."
+              ? "An administrator will verify your CSD number against our records and email you your login credentials."
               : "Our team will review your application and email you your login credentials once approved."}
           </p>
           <Link
