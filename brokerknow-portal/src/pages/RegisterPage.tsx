@@ -382,7 +382,7 @@ export default function RegisterPage() {
             </h2>
             <p className="mb-6 text-sm text-gray-500">
               {isExisting
-                ? "Provide your name and CDS number so our team can locate your account."
+                ? "Provide your name and CSD number so our team can locate your account."
                 : "Please fill in your personal details."}
             </p>
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
