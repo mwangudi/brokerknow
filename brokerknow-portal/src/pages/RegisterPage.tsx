@@ -1,6 +1,7 @@
 import { useMemo, useState, type FormEvent, type ReactNode } from "react";
 import { Link } from "react-router";
 import { useAuth } from "../context/AuthContext";
+import api from "../lib/api";
 import DatePicker from "../components/form/DatePicker";
 
 // ─── Types ──────────────────────────────────────────────────────────
@@ -159,6 +160,8 @@ export default function RegisterPage() {
   const [errors, setErrors] = useState<Errors>({});
   const [submitError, setSubmitError] = useState("");
   const [success, setSuccess] = useState("");
+  // True while we ask the API whether the ID/CDS/email is already registered.
+  const [checking, setChecking] = useState(false);
 
   const isExisting = form.clientKind === "existing";
 
@@ -187,13 +190,58 @@ export default function RegisterPage() {
     setStep(1);
   }
 
-  function next() {
+  // Ask the API whether any of the supplied identifiers are already in use.
+  // On a network/server error we don't block the applicant — the final submit
+  // (and the server-side guard) will still reject a genuine duplicate.
+  async function checkDuplicates(fields: {
+    email?: string;
+    idNumber?: string;
+    cdsNumber?: string;
+  }): Promise<Errors> {
+    try {
+      const { data } = await api.post("/auth/check-availability", fields);
+      const e: Errors = {};
+      if (data.emailTaken)
+        e.email = "An account with this email already exists.";
+      if (data.idNumberTaken)
+        e.idNumber = "This ID / Passport number is already registered.";
+      if (data.cdsNumberTaken)
+        e.cdsNumber = "This CDS number is already registered.";
+      return e;
+    } catch {
+      return {};
+    }
+  }
+
+  async function next() {
     setSubmitError("");
     const stepErrors = validateStep(step, form);
     if (Object.keys(stepErrors).length) {
       setErrors(stepErrors);
       return;
     }
+
+    // Duplicate-prevention gate: step 1 carries ID/Passport + CDS, step 2
+    // carries the email. Block advancing if any is already registered.
+    let dupFields: { email?: string; idNumber?: string; cdsNumber?: string } | null = null;
+    if (step === 1) {
+      dupFields = {};
+      if (form.idNumber.trim()) dupFields.idNumber = form.idNumber.trim();
+      if (form.cdsNumber.trim()) dupFields.cdsNumber = form.cdsNumber.trim();
+    } else if (step === 2 && form.email.trim()) {
+      dupFields = { email: form.email.trim() };
+    }
+
+    if (dupFields && Object.keys(dupFields).length) {
+      setChecking(true);
+      const dupErrors = await checkDuplicates(dupFields);
+      setChecking(false);
+      if (Object.keys(dupErrors).length) {
+        setErrors(dupErrors);
+        return;
+      }
+    }
+
     setStep((s) => Math.min(s + 1, lastStep));
   }
 
@@ -210,7 +258,7 @@ export default function RegisterPage() {
     // Guard against Enter-key submits from earlier steps: only the final
     // Review step is allowed to actually post the application.
     if (!isReview) {
-      next();
+      void next();
       return;
     }
 
@@ -508,9 +556,10 @@ export default function RegisterPage() {
               <button
                 type="button"
                 onClick={next}
-                className="rounded-lg bg-brand-600 px-6 py-2.5 text-sm font-semibold text-white hover:bg-brand-700"
+                disabled={checking}
+                className="rounded-lg bg-brand-600 px-6 py-2.5 text-sm font-semibold text-white hover:bg-brand-700 disabled:opacity-50"
               >
-                Continue
+                {checking ? "Checking…" : "Continue"}
               </button>
             )}
           </div>
