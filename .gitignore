@@ -30,6 +30,12 @@ appsettings.Local.json
 BK_Files/Legacy_System/Malawi_LIVE_After_Levy/
 *.bak
 
+# F3 contract-note signature — a real person's signature (provided by the PM).
+# Never commit or push it. Kept locally in the docs folder + deployed to the
+# API wwwroot only. See BK_Files/Docs/Ops_Runbook.md §5.4
+/BK_Files/Docs/signature.png
+/BK_Files/Docs/Gina's Signature .pdf
+
 
 *.tgz
 
@@ -37,3 +43,6 @@ BK_Files/Legacy_System/Malawi_LIVE_After_Levy/
 # TypeScript build info
 *.tsbuildinfo
 
+
+# Deploy helper state
+stamp-all.txt

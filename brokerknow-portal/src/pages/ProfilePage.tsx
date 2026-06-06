@@ -122,7 +122,144 @@ export default function ProfilePage() {
           ]}
         />
       </div>
+
+      {/* Documents — KYC / account-opening files uploaded by the back-office.
+          Read-only: portal clients can download but not upload or delete. */}
+      <div className="mt-6">
+        <DocumentsCard />
+      </div>
     </>
+  );
+}
+
+interface PortalAttachment {
+  id: string;
+  name: string;
+  size: number;
+  uploadedAt: string;
+  contentType: string;
+}
+
+function formatBytes(n: number): string {
+  if (n < 1024) return `${n} B`;
+  if (n < 1024 * 1024) return `${(n / 1024).toFixed(1)} KB`;
+  return `${(n / 1024 / 1024).toFixed(2)} MB`;
+}
+
+function DocumentsCard() {
+  const [items, setItems] = useState<PortalAttachment[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    api
+      .get<PortalAttachment[]>("/portal/attachments")
+      .then((r) => {
+        if (!cancelled) setItems(r.data ?? []);
+      })
+      .catch((err) => {
+        if (!cancelled) {
+          setError(err.response?.data?.error || "Failed to load documents.");
+        }
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  async function download(a: PortalAttachment) {
+    try {
+      const res = await api.get(`/portal/attachments/${encodeURIComponent(a.id)}`, {
+        responseType: "blob",
+      });
+      const url = window.URL.createObjectURL(res.data as Blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = a.name;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+    } catch (err) {
+      const e = err as { message?: string };
+      setError(e.message ?? "Download failed.");
+    }
+  }
+
+  return (
+    <div className="rounded-2xl border border-gray-200 bg-white dark:border-gray-800 dark:bg-white/[0.03]">
+      <div className="flex items-center gap-3 border-b border-gray-100 px-6 py-4 dark:border-gray-800">
+        <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-purple-50 text-purple-600 dark:bg-purple-500/10 dark:text-purple-400">
+          <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2M9 12h6M9 16h6" />
+          </svg>
+        </div>
+        <div className="min-w-0 flex-1">
+          <h3 className="font-semibold text-gray-900 dark:text-white">My Documents</h3>
+          <p className="text-xs text-gray-500 dark:text-gray-400">
+            KYC and account-opening files. Contact your account manager if anything is missing.
+          </p>
+        </div>
+      </div>
+
+      <div className="p-6">
+        {error && (
+          <div className="mb-4 rounded-lg border border-error-200 bg-error-50 px-3 py-2 text-xs text-error-700 dark:border-error-500/30 dark:bg-error-500/10 dark:text-error-400">
+            {error}
+          </div>
+        )}
+
+        {loading ? (
+          <p className="text-sm text-gray-500 dark:text-gray-400">Loading documents...</p>
+        ) : items.length === 0 ? (
+          <div className="rounded-lg border border-dashed border-gray-300 bg-gray-50 px-4 py-8 text-center text-sm text-gray-500 dark:border-gray-700 dark:bg-white/[0.02] dark:text-gray-400">
+            No documents on file yet.
+          </div>
+        ) : (
+          <ul className="divide-y divide-gray-100 dark:divide-gray-800">
+            {items.map((a) => (
+              <li key={a.id} className="flex items-center gap-3 py-3">
+                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-brand-50 text-brand-500 dark:bg-brand-500/15 dark:text-brand-400">
+                  <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 2v6h6" />
+                  </svg>
+                </div>
+                <div className="min-w-0 flex-1">
+                  <button
+                    type="button"
+                    onClick={() => download(a)}
+                    className="block truncate text-left text-sm font-medium text-gray-800 hover:text-brand-600 hover:underline dark:text-white/90 dark:hover:text-brand-400"
+                    title={a.name}
+                  >
+                    {a.name}
+                  </button>
+                  <div className="text-xs text-gray-500 dark:text-gray-400">
+                    {formatBytes(a.size)} · uploaded{" "}
+                    {new Date(a.uploadedAt).toLocaleDateString("en-GB", {
+                      day: "2-digit",
+                      month: "short",
+                      year: "numeric",
+                    })}
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => download(a)}
+                  className="rounded border border-gray-300 bg-white px-2.5 py-1 text-xs text-gray-700 hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300"
+                >
+                  Download
+                </button>
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
+    </div>
   );
 }
 
