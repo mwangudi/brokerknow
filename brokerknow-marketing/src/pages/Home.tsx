@@ -13,27 +13,27 @@ export default function Home() {
       <HeroCarousel />
 
       {/* ---------- ABOUT TEASER ---------- */}
-      <section className="mx-auto max-w-6xl px-4 py-16 lg:px-6 lg:py-24">
+      <section className="mx-auto max-w-[1320px] px-4 py-16 lg:px-6 lg:py-24">
         <div className="grid items-center gap-12 lg:grid-cols-2">
           <div>
-            <h2 className="text-3xl font-bold text-brand-800">
+            <h2 className="section-title inline-block text-3xl text-dark">
               Trusted partner to institutional and high-net-worth investors
             </h2>
-            <p className="mt-4 text-slate-700">
+            <p className="mt-4 text-text">
               Situated in the prestigious Livingstone Towers in Blantyre, Malawi&rsquo;s
               financial capital, Cedar Capital is headed by veteran stockbroker
               Armstrong Kamphoni. We specialise in corporate actions, stockbroking and
               the management of portfolios for foreign investors and high-net-worth
               Malawians.
             </p>
-            <p className="mt-4 text-slate-700">
+            <p className="mt-4 text-text">
               Our processes, procedures and the combined experience of our energetic,
               client-centric dealing staff are integral to delivering world-class
               stockbroking services in a price-sensitive and confidential manner.
             </p>
             <Link
               to="/about"
-              className="mt-6 inline-flex items-center text-sm font-semibold text-brand-700 hover:text-brand-900"
+              className="mt-6 inline-flex items-center font-secondary text-sm font-bold text-primary hover:opacity-80"
             >
               More about us &rarr;
             </Link>
@@ -60,11 +60,11 @@ export default function Home() {
       </section>
 
       {/* ---------- SERVICES ---------- */}
-      <section className="bg-slate-50 py-16 lg:py-24">
-        <div className="mx-auto max-w-6xl px-4 lg:px-6">
+      <section className="bg-theme-light py-16 lg:py-24">
+        <div className="mx-auto max-w-[1320px] px-4 lg:px-6">
           <div className="mb-12 text-center">
-            <h2 className="text-3xl font-bold text-brand-800">What we do</h2>
-            <p className="mt-3 text-slate-600">
+            <h2 className="section-title inline-block text-3xl text-dark">What we do</h2>
+            <p className="mt-3 text-text">
               Full-service capital-markets coverage on the Malawi Stock Exchange.
             </p>
           </div>
@@ -72,10 +72,10 @@ export default function Home() {
             {SERVICES.map((s) => (
               <div
                 key={s.title}
-                className="rounded-lg border border-slate-200 bg-white p-6 shadow-sm"
+                className="rounded-lg border border-[#e1e1e1] bg-white p-6 transition hover:shadow-lg"
               >
-                <h3 className="text-lg font-semibold text-brand-800">{s.title}</h3>
-                <p className="mt-3 text-sm text-slate-600">{s.body}</p>
+                <h3 className="text-lg font-bold text-dark">{s.title}</h3>
+                <p className="mt-3 text-sm text-text">{s.body}</p>
               </div>
             ))}
           </div>
@@ -83,18 +83,15 @@ export default function Home() {
       </section>
 
       {/* ---------- CTA ---------- */}
-      <section className="bg-brand-700 py-16 text-white">
-        <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-6 px-4 text-center sm:flex-row sm:text-left lg:px-6">
+      <section className="bg-primary py-16 text-white">
+        <div className="mx-auto flex max-w-[1320px] flex-col items-center justify-between gap-6 px-4 text-center sm:flex-row sm:text-left lg:px-6">
           <div>
-            <h3 className="text-2xl font-bold">Ready to invest on the MSE?</h3>
-            <p className="mt-1 text-brand-100">
+            <h3 className="text-2xl font-bold text-white">Ready to invest on the MSE?</h3>
+            <p className="mt-1 text-white/80">
               Open an account in minutes through our secure online portal.
             </p>
           </div>
-          <a
-            href={SITE.portalUrl}
-            className="rounded-md bg-white px-6 py-3 text-sm font-semibold text-brand-800 shadow-sm transition hover:bg-brand-50"
-          >
+          <a href={SITE.portalUrl} className="btn bg-white text-primary hover:opacity-90">
             Get started &rarr;
           </a>
         </div>

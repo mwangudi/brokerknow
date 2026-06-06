@@ -78,7 +78,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const login = useCallback(async (email: string, password: string) => {
     setLoading(true);
     try {
-      const r = await api.post("/auth/login", { email, password });
+      const r = await api.post("/auth/login", { email, password, audience: "portal" });
       const { accessToken, refreshToken, user: u, requiresPasswordChange } = r.data;
       // Reflect the server's policy decision on the cached user object.
       const userWithFlag: User = { ...u, mustChangePassword: !!requiresPasswordChange };

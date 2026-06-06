@@ -57,14 +57,12 @@ export default function HeroCarousel() {
 
   return (
     <section
-      className="relative isolate overflow-hidden bg-brand-900 text-white"
+      className="relative isolate overflow-hidden border-b border-[#e1e1e1] bg-white text-text"
       onMouseEnter={() => setPaused(true)}
       onMouseLeave={() => setPaused(false)}
       aria-roledescription="carousel"
       aria-label="Cedar Capital highlights"
     >
-      <div className="absolute inset-0 bg-gradient-to-br from-brand-700 via-brand-800 to-brand-900" />
-
       <div className="relative">
         {SLIDES.map((s, i) => (
           <div
@@ -75,47 +73,35 @@ export default function HeroCarousel() {
             aria-hidden={i !== index}
           >
             <div
-              className="absolute inset-0 opacity-25"
+              className="absolute inset-0 opacity-60"
               style={{ backgroundImage: s.gradient }}
             />
-            <div className="relative mx-auto max-w-6xl px-4 py-24 lg:px-6 lg:py-32">
-              <p className="mb-3 text-sm font-semibold uppercase tracking-widest text-gold-500">
+            <div className="relative mx-auto max-w-[1320px] px-4 py-24 lg:px-6 lg:py-32">
+              <p className="mb-4 text-sm font-bold uppercase tracking-widest text-primary">
                 {s.eyebrow}
               </p>
-              <h1 className="max-w-3xl text-4xl font-bold leading-tight sm:text-5xl lg:text-6xl">
-                {s.title}
+              <h1 className="banner-title max-w-4xl text-4xl leading-[1.05] sm:text-5xl lg:text-[64px]">
+                <strong>{s.title}</strong>
               </h1>
-              <p className="mt-6 max-w-2xl text-lg text-brand-100 lg:text-xl">{s.body}</p>
-              <div className="mt-8 flex flex-wrap gap-3">
+              <p className="mt-6 max-w-2xl text-lg text-text lg:text-xl">{s.body}</p>
+              <div className="mt-8 flex flex-wrap gap-4">
                 {s.primary &&
                   (s.primary.external ? (
-                    <a
-                      href={s.primary.href}
-                      className="rounded-md bg-gold-500 px-6 py-3 text-sm font-semibold text-brand-900 shadow-sm transition hover:bg-gold-600"
-                    >
+                    <a href={s.primary.href} className="btn btn-primary">
                       {s.primary.label}
                     </a>
                   ) : (
-                    <Link
-                      to={s.primary.href}
-                      className="rounded-md bg-gold-500 px-6 py-3 text-sm font-semibold text-brand-900 shadow-sm transition hover:bg-gold-600"
-                    >
+                    <Link to={s.primary.href} className="btn btn-primary">
                       {s.primary.label}
                     </Link>
                   ))}
                 {s.secondary &&
                   (s.secondary.external ? (
-                    <a
-                      href={s.secondary.href}
-                      className="rounded-md border border-white/40 px-6 py-3 text-sm font-semibold text-white transition hover:bg-white/10"
-                    >
+                    <a href={s.secondary.href} className="btn btn-outline-primary">
                       {s.secondary.label}
                     </a>
                   ) : (
-                    <Link
-                      to={s.secondary.href}
-                      className="rounded-md border border-white/40 px-6 py-3 text-sm font-semibold text-white transition hover:bg-white/10"
-                    >
+                    <Link to={s.secondary.href} className="btn btn-outline-primary">
                       {s.secondary.label}
                     </Link>
                   ))}
@@ -129,7 +115,7 @@ export default function HeroCarousel() {
         type="button"
         onClick={() => go(index - 1)}
         aria-label="Previous slide"
-        className="absolute left-3 top-1/2 z-10 hidden -translate-y-1/2 rounded-full bg-black/30 p-3 text-white backdrop-blur transition hover:bg-black/50 sm:block"
+        className="absolute left-3 top-1/2 z-10 hidden -translate-y-1/2 rounded-full bg-primary p-3 text-white transition hover:opacity-85 sm:block"
       >
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
       </button>
@@ -137,7 +123,7 @@ export default function HeroCarousel() {
         type="button"
         onClick={() => go(index + 1)}
         aria-label="Next slide"
-        className="absolute right-3 top-1/2 z-10 hidden -translate-y-1/2 rounded-full bg-black/30 p-3 text-white backdrop-blur transition hover:bg-black/50 sm:block"
+        className="absolute right-3 top-1/2 z-10 hidden -translate-y-1/2 rounded-full bg-primary p-3 text-white transition hover:opacity-85 sm:block"
       >
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M9 6l6 6-6 6"/></svg>
       </button>
@@ -151,7 +137,7 @@ export default function HeroCarousel() {
             aria-label={`Go to slide ${i + 1}`}
             aria-current={i === index}
             className={`h-2 rounded-full transition-all ${
-              i === index ? "w-8 bg-gold-500" : "w-2 bg-white/40 hover:bg-white/70"
+              i === index ? "w-8 bg-primary" : "w-2 bg-black/15 hover:bg-black/30"
             }`}
           />
         ))}

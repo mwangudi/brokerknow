@@ -16,7 +16,138 @@
 
   --color-gold-500: #c69d4e;
   --color-gold-600: #a47b30;
+
+  /* ── geeky-nextjs design tokens (ported) ─────────────────────────────── */
+  --color-primary: #1f6342;       /* Cedar green stands in for geeky #2ba283 */
+  --color-primary-soft: #2f7a53;
+  --color-dark: #222222;
+  --color-text: #555555;
+  --color-light: #999999;
+  --color-bordergeek: #e1e1e1;
+  --color-theme-light: #f2f2f2;
+  --color-theme-dark: #1a202c;
+
+  /* Typography — Raleway body / Merriweather Sans headings */
+  --font-primary: "Raleway", ui-sans-serif, system-ui, sans-serif;
+  --font-secondary: "Merriweather Sans", ui-sans-serif, system-ui, sans-serif;
+
+  /* geeky type scale (base 16px, scale 1.2) */
+  --text-h1: 2.98598rem;
+  --text-h1-sm: 2.38878rem;
+  --text-h2: 2.48832rem;
+  --text-h2-sm: 1.99066rem;
+  --text-h3: 2.0736rem;
+  --text-h3-sm: 1.65888rem;
+  --text-h4: 1.728rem;
+  --text-h5: 1.44rem;
+  --text-h6: 1.2rem;
 }
 
-html { scroll-behavior: smooth; }
-body { font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; }
+html {
+  scroll-behavior: smooth;
+  font-size: 16px;
+}
+
+@layer base {
+  body {
+    font-family: var(--font-primary);
+    line-height: 1.7;
+    color: var(--color-text);
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-secondary);
+    font-weight: 700;
+    line-height: 1.2;
+    color: #000;
+  }
+}
+
+/* ── geeky component classes (ported) ──────────────────────────────────── */
+@layer components {
+  .section {
+    padding-top: 4rem;
+    padding-bottom: 4rem;
+  }
+
+  /* Section heading */
+  .section-title {
+    margin-bottom: 3rem;
+  }
+
+  /* Banner heading: primary accent on <strong>, muted dark on <span> */
+  .banner-title strong { color: var(--color-primary); }
+  .banner-title span { font-weight: 700; color: var(--color-dark); }
+
+  /* Pill buttons with hover sweep */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--font-secondary);
+    font-weight: 700;
+    padding: 0.625rem 2rem;
+    height: 3rem;
+    border-radius: 50px;
+    transition: all 0.25s ease;
+    position: relative;
+    overflow: hidden;
+  }
+  .btn-primary {
+    background-color: var(--color-primary);
+    color: #fff;
+    border: 0;
+  }
+  .btn-primary::before {
+    content: "";
+    position: absolute;
+    height: 100%;
+    right: 0;
+    top: 0;
+    width: 0;
+    background-color: rgba(0, 0, 0, 0.08);
+    border-radius: 50px;
+    transition: all 0.5s cubic-bezier(0.42, 0, 0.58, 1);
+  }
+  .btn-primary:hover::before { width: 100%; right: auto; left: 0; }
+
+  .btn-outline-primary {
+    border: 1px solid var(--color-primary);
+    background: transparent;
+    color: var(--color-primary);
+  }
+  .btn-outline-primary:hover {
+    background-color: var(--color-primary);
+    color: #fff;
+  }
+
+  /* Pill nav links */
+  .nav-link {
+    border-radius: 30px;
+    padding: 0.625rem 1.25rem;
+    font-family: var(--font-secondary);
+    font-size: 13.5px;
+    text-transform: capitalize;
+    color: var(--color-dark);
+    transition: all 0.2s ease;
+  }
+  .nav-link:hover,
+  .nav-link.active {
+    background-color: var(--color-primary);
+    color: #fff;
+  }
+
+  /* Circular social icons */
+  .social-icons a {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    height: 2.25rem;
+    width: 2.25rem;
+    border-radius: 9999px;
+    background-color: var(--color-primary);
+    color: #fff;
+    transition: opacity 0.2s ease;
+  }
+  .social-icons a:hover { opacity: 0.85; }
+}

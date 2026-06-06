@@ -23,16 +23,19 @@ export default function ChangePasswordPage() {
   // Hard-block access when there is no session at all.
   if (!token || !user) return <Navigate to="/login" replace />;
 
+  const isForced = !!user.mustChangePassword;
+
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
     setError("");
     if (next !== confirm) { setError("New passwords do not match."); return; }
     if (next.length < 8) { setError("Password must be at least 8 characters."); return; }
+    if (!isForced && !current) { setError("Please enter your current password."); return; }
 
     setSaving(true);
     try {
       await api.post("/auth/change-password", {
-        currentPassword: current,
+        currentPassword: isForced ? "" : current,
         newPassword: next,
       });
       markPasswordChanged();
@@ -44,7 +47,7 @@ export default function ChangePasswordPage() {
     }
   }
 
-  const reason = user!.mustChangePassword
+  const reason = isForced
     ? "Your password is temporary or has expired. Set a new one to continue."
     : "Pick a new password.";
 
@@ -59,7 +62,7 @@ export default function ChangePasswordPage() {
             <div className="mb-4 rounded-lg bg-red-50 p-3 text-sm text-red-700">{error}</div>
           )}
 
-          <Field label="Current password" value={current} onChange={setCurrent} autoComplete="current-password" />
+          <Field label="Current password" value={current} onChange={setCurrent} autoComplete="current-password" hidden={isForced} />
           <Field label="New password" value={next} onChange={setNext} autoComplete="new-password" />
           <Field label="Confirm new password" value={confirm} onChange={setConfirm} autoComplete="new-password" />
 
@@ -88,12 +91,15 @@ function Field({
   value,
   onChange,
   autoComplete,
+  hidden,
 }: {
   label: string;
   value: string;
   onChange: (v: string) => void;
   autoComplete: string;
+  hidden?: boolean;
 }) {
+  if (hidden) return null;
   return (
     <div className="mb-4">
       <label className="mb-1.5 block text-sm font-medium text-gray-700">{label}</label>

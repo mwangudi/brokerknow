@@ -10,7 +10,7 @@ export const SITE = {
   email: "kamphonia@cedarcapital.mw",
   phone: "+265 1 832 307",
   phoneTel: "+2651832307",
-  portalUrl: "https://portal.cedarcapital.mw",
+  portalUrl: "http://test-portal.test/",
   adminUrl: "https://admin.cedarcapital.mw",
 };
 

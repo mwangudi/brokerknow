@@ -12,7 +12,7 @@ Source: `BK_Files/Docs/Testing Comments 2.docx`. Triaged into themes. Numbers re
 - B2. Replace "Pending Allocations" tile with "Most Active Stock". ✅ shipped
 
 ## C. Auth / Users
-- C1. Allow password reset + request a new one-time prompt (OTP). ⏸ blocked — PM to confirm OTP channel
+- C1. Allow password reset + request a new one-time prompt (OTP). ✅ shipped — admin-driven reset only (no email/OTP delivery yet); admins issue a temp password from PortalUsers / System Users / ViewClient, user is forced to set a new one on next sign-in. Self-service "Forgot password?" link parked until an email transport is wired.
 - C2. (Portal) Admin portal user failed to load profile; the linked one worked. [bug — investigate] ✅ shipped
 
 ## D. Reports
@@ -36,11 +36,11 @@ Source: `BK_Files/Docs/Testing Comments 2.docx`. Triaged into themes. Numbers re
 ## F. Contract Notes
 - F1. Remove the descriptions after Broker Commission (the "50k, etc."). ✅ shipped
 - F2. Use the same contractual wording as legacy BK. ✅ shipped
-- F3. PM will supply a signature image — paste on Contract Note; auto-stamp Date with current timestamp. ⏸ blocked — awaiting signature image asset
-- F4. Allow delete/reverse a Contract Note (very-high-permission action). Confirm whether already implemented. ⏸ blocked — PM to confirm scope
+- F3. PM will supply a signature image — paste on Contract Note; auto-stamp Date with current timestamp. ✅ shipped — a real signature PNG is deployed at `wwwroot/signature.png` and is **live on PROD + TEST** (since 2026-06-04). The Contract Note PDF renders it in the signature block above the "Sign" line and auto-stamps `Date:` from the server clock; if the asset is ever missing it falls back to a faint "[Signature pending]" placeholder. 🔒 It is a real person's signature → **deliberately kept out of git** (git-ignored in both repos); reference copies live locally in `BK_Files/Docs/` (`Gina's Signature .pdf` + `signature.png`). Fresh-deploy restore step documented in `Ops_Runbook.md §5.4`.
+- F4. Allow delete/reverse a Contract Note (very-high-permission action). Confirm whether already implemented. ✅ shipped — full Maker/Checker reversal flow: a maker raises a reversal from ViewContract → it queues in `/contracts/approvals`; a different approver (ADMINISTRATORS / MANAGEMENT / SIGNATORIES / OPERATIONS) approves or rejects. Guards: cannot reverse a contract already linked to a settlement voucher, cannot double-request, maker ≠ checker. Pending PM acceptance test.
 
 ## G. Payments & Receipts
-- G1. Maker/Checker workflow: one role creates, another approves; covers reverse/delete too. ⏸ blocked — PM to supply role/permission matrix
+- G1. Maker/Checker workflow: one role creates, another approves; covers reverse/delete too. ✅ shipped — Maker/Checker queues for both cash movements (`/accounts/payment-approvals`) and contract reversals (`/contracts/approvals`). A maker raises create/delete; a different user in an approver role (ADMINISTRATORS / MANAGEMENT / SIGNATORIES / OPERATIONS) approves. No real Payment/Contract row changes until approval; maker ≠ checker enforced server-side. Roles derive from legacy Groups via login. Pending PM sign-off on the approver role set.
 - G2. Receipt: Bank field should list **internal ledger accounts only**. ✅ shipped
 - G3. Payment: when `EntityType = Client` → auto-pick "Client Payout"; `Agent` → "Agent Commission Payout"; etc. ✅ shipped
 - G4. **Bug**: payment allowed > client balance. Repro: client 448 (Dr Kennedy Malisita). Enforce balance check. [bug — investigate] ✅ shipped
@@ -74,7 +74,6 @@ Source: `BK_Files/Docs/Testing Comments 2.docx`. Triaged into themes. Numbers re
 8. C1 password reset + OTP — touches auth pipeline; size before starting.
 
 Items needing PM input:
-- F3 signature image asset
-- C1 OTP channel (email? SMS?)
-- F4 confirm delete/reverse not already shipped
-- G1 role list / permission matrix
+- F3 — live with a real signature; **resolved**: kept out of git (real person's signature), reference copies in `BK_Files/Docs/`, restore step in `Ops_Runbook.md §5.4`.
+- C1 OTP channel (email? SMS?) — admin-driven reset already shipped; self-service delivery parked
+- F4 / G1 — built; need PM acceptance test + confirmation the approver role set (ADMINISTRATORS / MANAGEMENT / SIGNATORIES / OPERATIONS) is correct
