@@ -34,6 +34,7 @@ export default function StatementPage() {
   const [pageSize] = useState(15);
   const [data, setData] = useState<StatementData | null>(null);
   const [loading, setLoading] = useState(true);
+  const [pdfError, setPdfError] = useState<string | null>(null);
 
   function fetchStatement(f: string, t: string, p: number) {
     setLoading(true);
@@ -62,6 +63,7 @@ export default function StatementPage() {
     const params = new URLSearchParams();
     if (appliedFrom) params.set("from", appliedFrom);
     if (appliedTo) params.set("to", appliedTo);
+    setPdfError(null);
     api
       .get(`/portal/statement.pdf?${params}`, { responseType: "blob" })
       .then((r) => {
@@ -74,7 +76,7 @@ export default function StatementPage() {
         link.remove();
         window.URL.revokeObjectURL(url);
       })
-      .catch(() => alert("Failed to download statement PDF."));
+      .catch(() => setPdfError("Failed to download statement PDF. Please try again in a moment."));
   }
 
   const totalPages = data ? Math.max(1, Math.ceil(data.total / pageSize)) : 1;
@@ -114,6 +116,12 @@ export default function StatementPage() {
           PDF
         </button>
       </div>
+
+      {pdfError && (
+        <div className="mb-3 rounded-lg border border-rose-200 bg-rose-50 px-3 py-2 text-sm text-rose-800">
+          {pdfError}
+        </div>
+      )}
 
       {/* Table */}
       <div className="rounded-xl border border-gray-200 bg-white">
