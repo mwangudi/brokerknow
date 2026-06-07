@@ -1,6 +1,7 @@
 import { useEffect, useState, type FormEvent } from "react";
 import { useNavigate } from "react-router";
 import api from "../lib/api";
+import { useMarketToday } from "../hooks/useMarketToday";
 
 interface LookupOption {
   value: number;
@@ -34,6 +35,10 @@ export default function PlaceOrderPage() {
   const [remarks, setRemarks] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
+
+  // Heads-up: portal orders are dated today, so warn before submit when
+  // the exchange isn't open (weekend or public holiday).
+  const market = useMarketToday();
 
   useEffect(() => {
     api.get<OrderOptions>("/portal/order-options")
@@ -138,6 +143,29 @@ export default function PlaceOrderPage() {
         onSubmit={handleSubmit}
         className="w-full space-y-5 rounded-2xl border border-gray-200 bg-white p-6 shadow-sm"
       >
+        {!market.isOpen && (
+          <div className="rounded-lg border border-amber-300 bg-amber-50 px-3 py-2.5 text-sm text-amber-800">
+            <strong>The market is closed today.</strong>{" "}
+            {market.reason === "weekend"
+              ? "Orders can only be submitted on business days (Mon–Fri, excluding public holidays)."
+              : `Today is a public holiday${market.holidayName ? ` (${market.holidayName})` : ""}. Orders can only be submitted on business days.`}
+            {market.nextOpen && (
+              <>
+                {" "}You'll be able to place this order on{" "}
+                <strong>
+                  {new Date(market.nextOpen).toLocaleDateString("en-GB", {
+                    weekday: "long",
+                    day: "2-digit",
+                    month: "short",
+                    year: "numeric",
+                  })}
+                </strong>
+                .
+              </>
+            )}
+          </div>
+        )}
+
         {submitError && (
           <div className="rounded-lg border border-rose-200 bg-rose-50 px-3 py-2 text-sm text-rose-800">
             {submitError}
@@ -328,7 +356,8 @@ export default function PlaceOrderPage() {
           </button>
           <button
             type="submit"
-            disabled={submitting}
+            disabled={submitting || !market.isOpen}
+            title={!market.isOpen ? "The market is closed today — orders can only be placed on business days." : undefined}
             className="rounded-lg bg-blue-600 px-5 py-2.5 text-sm font-medium text-white shadow-sm hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
           >
             {submitting ? "Submitting..." : "Submit order"}
