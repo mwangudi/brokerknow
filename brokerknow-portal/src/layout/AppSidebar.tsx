@@ -4,6 +4,7 @@ import { Link, useLocation } from "react-router";
 import {
   ChevronDownIcon,
   DollarLineIcon,
+  FileIcon,
   GridIcon,
   HorizontaLDots,
   ListIcon,
@@ -40,6 +41,11 @@ const navItems: NavItem[] = [
     icon: <ListIcon />,
     name: "My Orders",
     path: "/orders",
+  },
+  {
+    icon: <FileIcon />,
+    name: "Contract Notes",
+    path: "/contracts",
   },
   {
     icon: <DollarLineIcon />,

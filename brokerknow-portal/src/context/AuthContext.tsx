@@ -40,7 +40,9 @@ interface RegisterData {
   physicalAddress?: string;
   postalAddress?: string;
   contactPerson?: string;
-  // FIU / Cedar Capital KYC documents (required server-side).
+  // True when an existing client is just requesting a portal login (skips KYC).
+  isExistingClient?: boolean;
+  // FIU / Cedar Capital KYC documents (required server-side for NEW applicants).
   idDocument?: File;
   proofOfAddress?: File;
   sourceOfFunds?: File;
@@ -110,6 +112,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         const v = data[k];
         if (v !== undefined && v !== null && v !== "") fd.append(k, String(v));
       }
+      // Always send the existing-client flag so the server can relax the KYC
+      // upload + duplicate-client checks for returning clients.
+      fd.append("isExistingClient", String(!!data.isExistingClient));
       if (data.idDocument) fd.append("idDocument", data.idDocument, data.idDocument.name);
       if (data.proofOfAddress) fd.append("proofOfAddress", data.proofOfAddress, data.proofOfAddress.name);
       if (data.sourceOfFunds) fd.append("sourceOfFunds", data.sourceOfFunds, data.sourceOfFunds.name);

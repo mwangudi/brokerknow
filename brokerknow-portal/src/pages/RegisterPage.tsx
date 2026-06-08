@@ -86,8 +86,8 @@ function validateStep(step: number, form: FormState): Errors {
     else if (form.lastName.trim().length < 2)
       e.lastName = "Last name must be at least 2 characters.";
 
-    if (isExisting && !form.cdsNumber.trim())
-      e.cdsNumber = "Your CSD number is required so we can link your existing account.";
+    // Existing clients are already on the CDS — the CSD number is optional
+    // (helps us match faster, but staff can also link by name/email).
 
     if (form.dateOfBirth) {
       const dob = new Date(form.dateOfBirth);
@@ -137,11 +137,10 @@ function validateStep(step: number, form: FormState): Errors {
       e.postalAddress = "Provide at least one address (postal or physical).";
   }
 
-  // Documents step is always second-to-last. For existing CDS clients
-  // that's step 2; for new applicants it's step 4. FIU / Cedar Capital
-  // require ID + proof of address + proof of source of funds.
-  const docsStep = isExisting ? 2 : 4;
-  if (step === docsStep) {
+  // Documents step — new applicants only (existing clients are already KYC'd
+  // so they have no upload step). For new applicants it's step 4. FIU / Cedar
+  // Capital require ID + proof of address + proof of source of funds.
+  if (!isExisting && step === 4) {
     const missing: string[] = [];
     if (!form.idDocument) missing.push("National ID / Passport");
     if (!form.proofOfAddress) missing.push("Proof of address");
@@ -170,13 +169,17 @@ export default function RegisterPage() {
   const steps = useMemo(
     () =>
       isExisting
-        ? ["Account", "Your details", "Documents", "Review"]
+        ? // Existing clients are already KYC'd and on the CDS, so they skip the
+          // document-upload + address steps and CSD is optional — we just need
+          // their name + contact email to match them and create the login.
+          ["Account", "Personal", "Contact", "Review"]
         : ["Account", "Personal", "Contact", "Addresses", "Documents", "Review"],
     [isExisting],
   );
   const lastStep = steps.length - 1;
   const isReview = step === lastStep;
-  const isDocuments = step === lastStep - 1;
+  // Documents only exist in the new-applicant flow (step 4).
+  const isDocuments = !isExisting && step === lastStep - 1;
 
   function set<K extends keyof FormState>(field: K, value: FormState[K]) {
     setForm((prev) => ({ ...prev, [field]: value }));
@@ -223,12 +226,17 @@ export default function RegisterPage() {
 
     // Duplicate-prevention gate: step 1 carries ID/Passport + CDS, step 2
     // carries the email. Block advancing if any is already registered.
+    //
+    // For EXISTING clients we skip this gate — their email/ID/CSD already live
+    // in the client master (that's the record we're matching them to), so the
+    // shared availability check would wrongly flag them. The server's
+    // existing-client-aware guard still blocks a duplicate portal *login*.
     let dupFields: { email?: string; idNumber?: string; cdsNumber?: string } | null = null;
-    if (step === 1) {
+    if (!isExisting && step === 1) {
       dupFields = {};
       if (form.idNumber.trim()) dupFields.idNumber = form.idNumber.trim();
       if (form.cdsNumber.trim()) dupFields.cdsNumber = form.cdsNumber.trim();
-    } else if (step === 2 && form.email.trim()) {
+    } else if (!isExisting && step === 2 && form.email.trim()) {
       dupFields = { email: form.email.trim() };
     }
 
@@ -288,6 +296,7 @@ export default function RegisterPage() {
       physicalAddress: form.physicalAddress || undefined,
       postalAddress: form.postalAddress || undefined,
       contactPerson: form.contactPerson || undefined,
+      isExistingClient: isExisting,
       idDocument: form.idDocument ?? undefined,
       proofOfAddress: form.proofOfAddress ?? undefined,
       sourceOfFunds: form.sourceOfFunds ?? undefined,
@@ -315,7 +324,7 @@ export default function RegisterPage() {
           <p className="mb-6 text-gray-600">{success}</p>
           <p className="mb-6 text-sm text-gray-500">
             {isExisting
-              ? "An administrator will verify your CSD number against our records and email you your login credentials."
+              ? "An administrator will verify your details against our records and email you your login credentials."
               : "Our team will review your application and email you your login credentials once approved."}
           </p>
           <Link
@@ -382,7 +391,7 @@ export default function RegisterPage() {
             </h2>
             <p className="mb-6 text-sm text-gray-500">
               {isExisting
-                ? "Provide your name and CSD number so our team can locate your account."
+                ? "Provide your name so our team can locate your existing account. CSD number is optional but helps us match you faster."
                 : "Please fill in your personal details."}
             </p>
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
@@ -394,12 +403,11 @@ export default function RegisterPage() {
                 placeholder="e.g. Banda" />
               <Field
                 label="CSD number"
-                required={isExisting}
                 value={form.cdsNumber}
                 error={errors.cdsNumber}
                 onChange={(v) => set("cdsNumber", v)}
                 placeholder="e.g. CSD-000123"
-                hint={isExisting ? "Required so admin can link your portal login." : undefined}
+                hint={isExisting ? "Optional — helps admin match your existing account." : undefined}
               />
               <Field
                 label="ID / Passport number"
