@@ -301,7 +301,7 @@ const AppSidebar: React.FC = () => {
           ) : (
             <img
               src="/images/logo/brokerknow-icon.svg"
-              alt="BrokerKnow"
+              alt="Axis"
               width={32}
               height={32}
             />
@@ -330,6 +330,27 @@ const AppSidebar: React.FC = () => {
           </div>
         </nav>
       </div>
+
+      {(isExpanded || isHovered || isMobileOpen) && (
+        <a
+          href="https://www.martensafrica.com/"
+          target="_blank"
+          rel="noopener noreferrer"
+          aria-label="Axis by Martens Africa"
+          className="mt-auto flex items-center gap-2 border-t border-gray-200 py-3 dark:border-gray-800"
+        >
+          <span className="shrink-0 text-[10px] font-medium uppercase tracking-wide text-gray-400">
+            Axis by
+          </span>
+          <span className="inline-flex rounded dark:bg-white/95 dark:p-1">
+            <img
+              src="/images/logo/martens-logo.png"
+              alt="Martens Africa"
+              className="h-4 w-auto object-contain"
+            />
+          </span>
+        </a>
+      )}
     </aside>
   );
 };
