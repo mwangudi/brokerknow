@@ -48,6 +48,11 @@ const navItems: NavItem[] = [
     path: "/contracts",
   },
   {
+    icon: <PageIcon />,
+    name: "My Documents",
+    path: "/documents",
+  },
+  {
     icon: <DollarLineIcon />,
     name: "Market Prices",
     path: "/market-prices",

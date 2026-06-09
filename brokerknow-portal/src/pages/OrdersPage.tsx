@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router";
 import api from "../lib/api";
+import Badge from "../components/ui/badge/Badge";
 
 interface OrderRow {
   orderDpa: number;
@@ -12,6 +13,25 @@ interface OrderRow {
   quantity?: number | null;
   price?: string | null;
   best?: boolean;
+}
+
+/** Buy/Sell side colour: Purchase = green, Sale = red — matches the back office. */
+function sideColor(type: string): "success" | "error" | "primary" {
+  const t = (type || "").toLowerCase();
+  if (t.startsWith("purchase") || t.startsWith("buy")) return "success";
+  if (t.startsWith("sale") || t.startsWith("sell")) return "error";
+  return "primary";
+}
+
+/** Order status colour, mirroring the internal order list. */
+function statusColor(status: string): "success" | "error" | "warning" | "info" | "light" {
+  switch (status) {
+    case "Canceled": return "error";
+    case "Held": return "warning";
+    case "Traded": return "success";
+    case "Released": return "info";
+    default: return "light";
+  }
 }
 
 export default function OrdersPage() {
@@ -30,13 +50,6 @@ export default function OrdersPage() {
   }, [page]);
 
   const totalPages = Math.max(1, Math.ceil(total / pageSize));
-
-  const statusColor: Record<string, string> = {
-    Released: "bg-green-100 text-green-700",
-    Held: "bg-amber-100 text-amber-700",
-    Canceled: "bg-red-100 text-red-700",
-    Pending: "bg-gray-100 text-gray-700",
-  };
 
   return (
     <div>
@@ -57,7 +70,7 @@ export default function OrdersPage() {
               <tr className="border-b border-gray-100 text-left text-xs font-medium uppercase text-gray-500">
                 <th className="px-4 py-3">Order #</th>
                 <th className="px-4 py-3">Date</th>
-                <th className="px-4 py-3">Type</th>
+                <th className="px-4 py-3">Side</th>
                 <th className="px-4 py-3">Security</th>
                 <th className="px-4 py-3">Quantity</th>
                 <th className="px-4 py-3">Price</th>
@@ -77,7 +90,9 @@ export default function OrdersPage() {
                   <td className="px-4 py-2.5 text-gray-700">
                     {new Date(o.orderDate).toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" })}
                   </td>
-                  <td className="px-4 py-2.5">{o.orderType}</td>
+                  <td className="px-4 py-2.5">
+                    <Badge size="sm" color={sideColor(o.orderType)}>{o.orderType}</Badge>
+                  </td>
                   <td className="px-4 py-2.5 text-gray-700">{o.security || "—"}</td>
                   <td className="px-4 py-2.5 text-gray-700">
                     {o.best ? "Best (market)" : (o.quantity ? o.quantity.toLocaleString() : "—")}
@@ -85,9 +100,7 @@ export default function OrdersPage() {
                   <td className="px-4 py-2.5 text-gray-700">{o.best ? "Best" : (o.price || "—")}</td>
                   <td className="px-4 py-2.5 text-gray-500">{o.orderRef || "—"}</td>
                   <td className="px-4 py-2.5">
-                    <span className={`inline-flex rounded-full px-2 py-0.5 text-xs font-medium ${statusColor[o.status] || "bg-gray-100 text-gray-700"}`}>
-                      {o.status}
-                    </span>
+                    <Badge size="sm" color={statusColor(o.status)}>{o.status}</Badge>
                   </td>
                   <td className="px-4 py-2.5 text-right">
                     <Link to={`/orders/${o.orderDpa}`} className="text-sm font-medium text-blue-600 hover:underline">
