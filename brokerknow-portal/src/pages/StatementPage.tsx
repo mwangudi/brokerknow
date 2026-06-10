@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import api from "../lib/api";
 import DatePicker from "../components/form/DatePicker";
+import Icon from "../components/ui/Icon";
 
 interface StatementRow {
   source: string;
@@ -18,11 +19,19 @@ interface StatementRow {
 interface StatementData {
   total: number;
   rows: StatementRow[];
-  summary: { totalDebit: number; totalCredit: number; closingBalance: number; pendingCount: number };
+  summary: {
+    totalDebit: number;
+    totalCredit: number;
+    closingBalance: number;
+    pendingCount: number;
+  };
 }
 
 function fmt(n: number) {
-  return Math.abs(n).toLocaleString("en", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  return Math.abs(n).toLocaleString("en", {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  });
 }
 
 export default function StatementPage() {
@@ -43,7 +52,8 @@ export default function StatementPage() {
     if (t) params.set("to", t);
     params.set("page", p.toString());
     params.set("pageSize", pageSize.toString());
-    api.get(`/portal/statement?${params}`)
+    api
+      .get(`/portal/statement?${params}`)
       .then((r) => setData(r.data))
       .catch(() => {})
       .finally(() => setLoading(false));
@@ -51,6 +61,7 @@ export default function StatementPage() {
 
   useEffect(() => {
     fetchStatement(appliedFrom, appliedTo, page);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [appliedFrom, appliedTo, page]);
 
   function search() {
@@ -67,112 +78,212 @@ export default function StatementPage() {
     api
       .get(`/portal/statement.pdf?${params}`, { responseType: "blob" })
       .then((r) => {
-        const url = window.URL.createObjectURL(new Blob([r.data], { type: "application/pdf" }));
+        const url = window.URL.createObjectURL(
+          new Blob([r.data], { type: "application/pdf" }),
+        );
         const link = document.createElement("a");
         link.href = url;
-        link.setAttribute("download", `statement-${new Date().toISOString().slice(0, 10)}.pdf`);
+        link.setAttribute(
+          "download",
+          `statement-${new Date().toISOString().slice(0, 10)}.pdf`,
+        );
         document.body.appendChild(link);
         link.click();
         link.remove();
         window.URL.revokeObjectURL(url);
       })
-      .catch(() => setPdfError("Failed to download statement PDF. Please try again in a moment."));
+      .catch(() =>
+        setPdfError(
+          "Failed to download statement PDF. Please try again in a moment.",
+        ),
+      );
   }
 
   const totalPages = data ? Math.max(1, Math.ceil(data.total / pageSize)) : 1;
 
   return (
-    <div>
-      <h2 className="mb-6 text-2xl font-bold text-gray-900">My Statement</h2>
-
-      {/* Summary cards (top) */}
-      {data?.summary && (
-        <div className="mb-5 grid grid-cols-2 gap-4 lg:grid-cols-4">
-          <Stat label="Total Debit" value={`MWK ${fmt(data.summary.totalDebit)}`} />
-          <Stat label="Total Credit" value={`MWK ${fmt(data.summary.totalCredit)}`} />
-          <Stat label="Closing Balance" value={`MWK ${fmt(data.summary.closingBalance)} ${data.summary.closingBalance >= 0 ? "Cr" : "Dr"}`} />
-          <Stat label="Pending" value={data.summary.pendingCount.toString()} />
-        </div>
-      )}
-
-      {/* Filters / Download */}
-      <div className="mb-5 flex flex-wrap items-end justify-end gap-4 rounded-xl border border-gray-200 bg-white p-4 dark:border-gray-800 dark:bg-white/[0.03]">
-        <div>
-          <div className="w-44">
-            <DatePicker value={from} onChange={setFrom} placeholder="Filter from date" maxDate={null} />
-          </div>
-        </div>
-        <div>
-          <div className="w-44">
-            <DatePicker value={to} onChange={setTo} placeholder="Filter to date" maxDate={null} />
-          </div>
-        </div>
-        <button onClick={search}
-          className="rounded-lg bg-brand-500 px-4 py-2 text-sm font-medium text-white hover:bg-brand-600">
-          Search
-        </button>
-        <button onClick={downloadPdf}
-          className="rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700">
-          PDF
-        </button>
+    <div className="space-y-6">
+      <div>
+        <h1 className="font-display text-2xl font-semibold text-primary">
+          Statement
+        </h1>
+        <p className="text-sm text-on-surface-variant">
+          Your full transaction ledger and running balance.
+        </p>
       </div>
 
-      {pdfError && (
-        <div className="mb-3 rounded-lg border border-rose-200 bg-rose-50 px-3 py-2 text-sm text-rose-800">
-          {pdfError}
+      {/* Summary bento */}
+      {data?.summary && (
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-4">
+          <SummaryCard
+            label="Total Debit"
+            value={`MWK ${fmt(data.summary.totalDebit)}`}
+            icon="trending_down"
+            tone="error"
+          />
+          <SummaryCard
+            label="Total Credit"
+            value={`MWK ${fmt(data.summary.totalCredit)}`}
+            icon="trending_up"
+            tone="secondary"
+          />
+          <div className="overflow-hidden rounded-xl bg-primary-container p-5 shadow-lg">
+            <div className="mb-3 flex items-start justify-between">
+              <span className="text-[11px] font-semibold uppercase tracking-wide text-on-primary-container">
+                Closing Balance
+              </span>
+              <Icon
+                name="account_balance_wallet"
+                size={18}
+                className="text-secondary-fixed"
+              />
+            </div>
+            <div className="font-display text-xl font-semibold text-white">
+              MWK {fmt(data.summary.closingBalance)}{" "}
+              <span className="text-sm font-medium text-on-primary-container">
+                {data.summary.closingBalance >= 0 ? "Cr" : "Dr"}
+              </span>
+            </div>
+          </div>
+          <SummaryCard
+            label="Pending Clearance"
+            value={`${data.summary.pendingCount} ${data.summary.pendingCount === 1 ? "item" : "items"}`}
+            icon="schedule"
+            tone="muted"
+          />
         </div>
       )}
 
-      {/* Table */}
-      <div className="rounded-xl border border-gray-200 bg-white">
+      {/* Ledger */}
+      <div className="overflow-hidden rounded-xl border border-outline-variant bg-surface-container-lowest shadow-[0px_4px_12px_rgba(15,23,42,0.03)]">
+        {/* Filters */}
+        <div className="flex flex-wrap items-center justify-between gap-3 border-b border-outline-variant px-5 py-3">
+          <div className="flex flex-wrap items-end gap-2">
+            <div className="w-40">
+              <DatePicker value={from} onChange={setFrom} placeholder="From date" maxDate={null} />
+            </div>
+            <div className="w-40">
+              <DatePicker value={to} onChange={setTo} placeholder="To date" maxDate={null} />
+            </div>
+            <button
+              onClick={search}
+              className="rounded-lg bg-primary px-4 py-2 text-xs font-semibold uppercase tracking-wide text-on-primary transition-opacity hover:opacity-90"
+            >
+              Search
+            </button>
+          </div>
+          <button
+            onClick={downloadPdf}
+            className="inline-flex items-center gap-1.5 rounded-lg border border-outline-variant bg-surface-container-lowest px-4 py-2 text-xs font-semibold text-on-surface transition-colors hover:bg-surface-container-low"
+          >
+            <Icon name="picture_as_pdf" size={16} />
+            Export PDF
+          </button>
+        </div>
+
+        {pdfError && (
+          <div className="border-b border-axis-error/20 bg-axis-error/5 px-5 py-2 text-sm text-axis-error">
+            {pdfError}
+          </div>
+        )}
+
+        {/* Table */}
         <div className="overflow-x-auto">
-          <table className="min-w-full text-sm">
+          <table className="w-full text-left text-sm">
             <thead>
-              <tr className="border-b border-gray-100 text-left text-xs font-medium uppercase text-gray-500">
-                <th className="px-4 py-3">Date</th>
-                <th className="px-4 py-3">Type</th>
-                <th className="px-4 py-3">Reference</th>
-                <th className="px-4 py-3">Particulars</th>
-                <th className="px-4 py-3 text-right">Debit</th>
-                <th className="px-4 py-3 text-right">Credit</th>
-                <th className="px-4 py-3 text-right">Balance</th>
+              <tr className="border-b border-outline-variant bg-surface-container text-[11px] uppercase tracking-wider text-on-surface-variant">
+                <th className="px-5 py-3 font-semibold">Date</th>
+                <th className="px-5 py-3 font-semibold">Type</th>
+                <th className="px-5 py-3 font-semibold">Reference</th>
+                <th className="px-5 py-3 font-semibold">Particulars</th>
+                <th className="px-5 py-3 text-right font-semibold">Debit</th>
+                <th className="px-5 py-3 text-right font-semibold">Credit</th>
+                <th className="px-5 py-3 text-right font-semibold">Balance</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-100">
+            <tbody className="divide-y divide-outline-variant">
               {loading ? (
-                <tr><td colSpan={7} className="px-4 py-8 text-center text-gray-500">Loading...</td></tr>
-              ) : data?.rows.length === 0 ? (
-                <tr><td colSpan={7} className="px-4 py-8 text-center text-gray-500">No transactions.</td></tr>
-              ) : data?.rows.map((r, i) => (
-                <tr key={`${r.source}-${r.id}`} className={i % 2 === 0 ? "bg-blue-50/50" : ""}>
-                  <td className="whitespace-nowrap px-4 py-2.5 text-gray-700">
-                    {r.source === "opening" ? "" : new Date(r.date).toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" })}
-                  </td>
-                  <td className="px-4 py-2.5">
-                    <span className={`inline-flex rounded-full px-2 py-0.5 text-xs font-medium ${r.pending ? "bg-amber-100 text-amber-700" : "bg-gray-100 text-gray-700"}`}>
-                      {r.kind}{r.pending ? " *" : ""}
-                    </span>
-                  </td>
-                  <td className="px-4 py-2.5 text-gray-500">{r.reference || "—"}</td>
-                  <td className="px-4 py-2.5">{r.particulars}</td>
-                  <td className="whitespace-nowrap px-4 py-2.5 text-right font-medium">{r.debit > 0 ? fmt(r.debit) : "—"}</td>
-                  <td className="whitespace-nowrap px-4 py-2.5 text-right font-medium">{r.credit > 0 ? fmt(r.credit) : "—"}</td>
-                  <td className={`whitespace-nowrap px-4 py-2.5 text-right font-semibold ${r.balance >= 0 ? "text-green-600" : "text-red-600"}`}>
-                    {fmt(r.balance)} {r.balance >= 0 ? "Cr" : "Dr"}
+                <tr>
+                  <td colSpan={7} className="px-5 py-10 text-center text-on-surface-variant">
+                    Loading…
                   </td>
                 </tr>
-              ))}
+              ) : data?.rows.length === 0 ? (
+                <tr>
+                  <td colSpan={7} className="px-5 py-10 text-center text-on-surface-variant">
+                    No transactions.
+                  </td>
+                </tr>
+              ) : (
+                data?.rows.map((r) => (
+                  <tr
+                    key={`${r.source}-${r.id}`}
+                    className="transition-colors hover:bg-surface-container-low"
+                  >
+                    <td className="whitespace-nowrap px-5 py-3 text-on-surface">
+                      {r.source === "opening"
+                        ? ""
+                        : new Date(r.date).toLocaleDateString("en-GB", {
+                            day: "2-digit",
+                            month: "short",
+                            year: "numeric",
+                          })}
+                    </td>
+                    <td className="px-5 py-3">
+                      <span
+                        className={`rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase ${
+                          r.pending
+                            ? "bg-amber-100 text-amber-700"
+                            : "bg-primary/5 text-on-surface-variant"
+                        }`}
+                      >
+                        {r.kind}
+                        {r.pending ? " *" : ""}
+                      </span>
+                    </td>
+                    <td className="px-5 py-3 font-mono text-xs text-outline">
+                      {r.reference || "—"}
+                    </td>
+                    <td className="px-5 py-3 text-on-surface">{r.particulars}</td>
+                    <td className="whitespace-nowrap px-5 py-3 text-right tabular-nums text-axis-error">
+                      {r.debit > 0 ? fmt(r.debit) : "—"}
+                    </td>
+                    <td className="whitespace-nowrap px-5 py-3 text-right tabular-nums text-secondary">
+                      {r.credit > 0 ? fmt(r.credit) : "—"}
+                    </td>
+                    <td className="whitespace-nowrap px-5 py-3 text-right font-bold tabular-nums text-on-surface">
+                      {fmt(r.balance)}{" "}
+                      <span className="text-[10px] font-medium text-on-surface-variant">
+                        {r.balance >= 0 ? "Cr" : "Dr"}
+                      </span>
+                    </td>
+                  </tr>
+                ))
+              )}
             </tbody>
           </table>
         </div>
+
         {data && data.total > pageSize && (
-          <div className="flex items-center justify-between border-t border-gray-100 px-4 py-3">
-            <span className="text-sm text-gray-500">Page {page} of {totalPages} ({data.total} entries)</span>
+          <div className="flex items-center justify-between border-t border-outline-variant px-5 py-3">
+            <span className="text-xs text-on-surface-variant">
+              Page {page} of {totalPages} · {data.total} entries
+            </span>
             <div className="flex gap-1">
-              <button onClick={() => setPage(Math.max(1, page - 1))} disabled={page === 1}
-                className="rounded-lg border px-3 py-1.5 text-sm disabled:opacity-40">Previous</button>
-              <button onClick={() => setPage(Math.min(totalPages, page + 1))} disabled={page === totalPages}
-                className="rounded-lg border px-3 py-1.5 text-sm disabled:opacity-40">Next</button>
+              <button
+                onClick={() => setPage(Math.max(1, page - 1))}
+                disabled={page === 1}
+                className="rounded-lg border border-outline-variant px-3 py-1.5 text-xs font-medium text-on-surface-variant transition-colors hover:bg-surface-container disabled:opacity-40"
+              >
+                Previous
+              </button>
+              <button
+                onClick={() => setPage(Math.min(totalPages, page + 1))}
+                disabled={page === totalPages}
+                className="rounded-lg border border-outline-variant px-3 py-1.5 text-xs font-medium text-on-surface-variant transition-colors hover:bg-surface-container disabled:opacity-40"
+              >
+                Next
+              </button>
             </div>
           </div>
         )}
@@ -181,11 +292,34 @@ export default function StatementPage() {
   );
 }
 
-function Stat({ label, value }: { label: string; value: string }) {
+function SummaryCard({
+  label,
+  value,
+  icon,
+  tone,
+}: {
+  label: string;
+  value: string;
+  icon: string;
+  tone: "error" | "secondary" | "muted";
+}) {
+  const iconWrap =
+    tone === "error"
+      ? "bg-axis-error-container/50 text-axis-error"
+      : tone === "secondary"
+        ? "bg-secondary-container/20 text-secondary"
+        : "bg-surface-container text-outline";
   return (
-    <div className="rounded-xl border border-gray-200 bg-white p-4">
-      <p className="text-xs font-medium uppercase tracking-wider text-gray-500">{label}</p>
-      <p className="mt-1.5 text-lg font-semibold text-gray-900">{value}</p>
+    <div className="rounded-xl border border-outline-variant bg-surface-container-lowest p-5 shadow-[0px_4px_12px_rgba(15,23,42,0.03)]">
+      <div className="mb-3 flex items-start justify-between">
+        <span className="text-[11px] font-semibold uppercase tracking-wide text-on-surface-variant">
+          {label}
+        </span>
+        <span className={`flex h-7 w-7 items-center justify-center rounded ${iconWrap}`}>
+          <Icon name={icon} size={18} />
+        </span>
+      </div>
+      <div className="font-display text-xl font-semibold text-primary">{value}</div>
     </div>
   );
 }

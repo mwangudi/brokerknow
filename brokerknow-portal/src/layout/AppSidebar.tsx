@@ -1,357 +1,151 @@
-import { useCallback, useEffect, useRef, useState } from "react";
 import { Link, useLocation } from "react-router";
-
-import {
-  ChevronDownIcon,
-  DollarLineIcon,
-  FileIcon,
-  GridIcon,
-  HorizontaLDots,
-  ListIcon,
-  PageIcon,
-  PaperPlaneIcon,
-  UserCircleIcon,
-} from "../icons";
 import { useSidebar } from "../context/SidebarContext";
+import { useAuth } from "../context/AuthContext";
+import Icon from "../components/ui/Icon";
 
-type NavItem = {
-  name: string;
-  icon: React.ReactNode;
-  path?: string;
-  subItems?: { name: string; path: string; pro?: boolean; new?: boolean }[];
-};
+type NavItem = { name: string; icon: string; path: string };
 
 const navItems: NavItem[] = [
-  {
-    icon: <GridIcon />,
-    name: "Dashboard",
-    path: "/",
-  },
-  {
-    icon: <UserCircleIcon />,
-    name: "My Profile",
-    path: "/profile",
-  },
-  {
-    icon: <PageIcon />,
-    name: "Statement",
-    path: "/statement",
-  },
-  {
-    icon: <ListIcon />,
-    name: "My Orders",
-    path: "/orders",
-  },
-  {
-    icon: <FileIcon />,
-    name: "Contract Notes",
-    path: "/contracts",
-  },
-  {
-    icon: <PageIcon />,
-    name: "My Documents",
-    path: "/documents",
-  },
-  {
-    icon: <DollarLineIcon />,
-    name: "Market Prices",
-    path: "/market-prices",
-  },
-  {
-    icon: <PaperPlaneIcon />,
-    name: "Request Payment",
-    path: "/request-payment",
-  },
+  { name: "Dashboard", icon: "dashboard", path: "/" },
+  { name: "Orders", icon: "swap_horiz", path: "/orders" },
+  { name: "Statement", icon: "receipt_long", path: "/statement" },
+  { name: "Profile", icon: "person", path: "/profile" },
 ];
 
-const othersItems: NavItem[] = [];
-
 const AppSidebar: React.FC = () => {
-  const { isExpanded, isMobileOpen, isHovered, setIsHovered } = useSidebar();
+  const { isMobileOpen, toggleMobileSidebar } = useSidebar();
+  const { user, logout } = useAuth();
   const location = useLocation();
 
-  const filteredNavItems = navItems;
-  const filteredOthersItems = othersItems;
+  const isActive = (path: string) =>
+    path === "/"
+      ? location.pathname === "/"
+      : location.pathname.startsWith(path);
 
-  const [openSubmenu, setOpenSubmenu] = useState<{
-    type: "main" | "others";
-    index: number;
-  } | null>(null);
-  const [subMenuHeight, setSubMenuHeight] = useState<Record<string, number>>(
-    {}
-  );
-  const subMenuRefs = useRef<Record<string, HTMLDivElement | null>>({});
-
-  // const isActive = (path: string) => location.pathname === path;
-  const isActive = useCallback(
-    (path: string) =>
-      location.pathname === path ||
-      location.pathname.startsWith(path + "/"),
-    [location.pathname]
-  );
-
-  useEffect(() => {
-    let submenuMatched = false;
-    ["main", "others"].forEach((menuType) => {
-      const items = menuType === "main" ? filteredNavItems : filteredOthersItems;
-      items.forEach((nav, index) => {
-        if (nav.subItems) {
-          nav.subItems.forEach((subItem) => {
-            // Use prefix match so child routes (e.g. /clients/XXX/statement)
-            // still highlight the parent menu item (/clients).
-            if (
-              isActive(subItem.path) ||
-              location.pathname.startsWith(subItem.path + "/")
-            ) {
-              setOpenSubmenu({
-                type: menuType as "main" | "others",
-                index,
-              });
-              submenuMatched = true;
-            }
-          });
-        }
-      });
-    });
-
-    if (!submenuMatched) {
-      setOpenSubmenu(null);
-    }
-  }, [location, isActive]);
-
-  useEffect(() => {
-    if (openSubmenu !== null) {
-      const key = `${openSubmenu.type}-${openSubmenu.index}`;
-      if (subMenuRefs.current[key]) {
-        setSubMenuHeight((prevHeights) => ({
-          ...prevHeights,
-          [key]: subMenuRefs.current[key]?.scrollHeight || 0,
-        }));
-      }
-    }
-  }, [openSubmenu]);
-
-  const handleSubmenuToggle = (index: number, menuType: "main" | "others") => {
-    setOpenSubmenu((prevOpenSubmenu) => {
-      if (
-        prevOpenSubmenu &&
-        prevOpenSubmenu.type === menuType &&
-        prevOpenSubmenu.index === index
-      ) {
-        return null;
-      }
-      return { type: menuType, index };
-    });
+  const closeOnMobile = () => {
+    if (isMobileOpen) toggleMobileSidebar();
   };
 
-  const renderMenuItems = (items: NavItem[], menuType: "main" | "others") => (
-    <ul className="flex flex-col gap-4">
-      {items.map((nav, index) => (
-        <li key={nav.name}>
-          {nav.subItems ? (
-            <button
-              onClick={() => handleSubmenuToggle(index, menuType)}
-              className={`menu-item group ${
-                openSubmenu?.type === menuType && openSubmenu?.index === index
-                  ? "menu-item-active"
-                  : "menu-item-inactive"
-              } cursor-pointer ${
-                !isExpanded && !isHovered
-                  ? "lg:justify-center"
-                  : "lg:justify-start"
-              }`}
-            >
-              <span
-                className={`menu-item-icon-size  ${
-                  openSubmenu?.type === menuType && openSubmenu?.index === index
-                    ? "menu-item-icon-active"
-                    : "menu-item-icon-inactive"
-                }`}
-              >
-                {nav.icon}
-              </span>
-              {(isExpanded || isHovered || isMobileOpen) && (
-                <span className="menu-item-text">{nav.name}</span>
-              )}
-              {(isExpanded || isHovered || isMobileOpen) && (
-                <ChevronDownIcon
-                  className={`ml-auto w-5 h-5 transition-transform duration-200 ${
-                    openSubmenu?.type === menuType &&
-                    openSubmenu?.index === index
-                      ? "rotate-180 text-brand-500"
-                      : ""
-                  }`}
-                />
-              )}
-            </button>
-          ) : (
-            nav.path && (
-              <Link
-                to={nav.path}
-                onClick={() => {}}
-                onFocus={() => {}}
-                className={`menu-item group ${
-                  isActive(nav.path) ? "menu-item-active" : "menu-item-inactive"
-                }`}
-              >
-                <span
-                  className={`menu-item-icon-size ${
-                    isActive(nav.path)
-                      ? "menu-item-icon-active"
-                      : "menu-item-icon-inactive"
-                  }`}
-                >
-                  {nav.icon}
-                </span>
-                {(isExpanded || isHovered || isMobileOpen) && (
-                  <span className="menu-item-text">{nav.name}</span>
-                )}
-              </Link>
-            )
-          )}
-          {nav.subItems && (isExpanded || isHovered || isMobileOpen) && (
-            <div
-              ref={(el) => {
-                subMenuRefs.current[`${menuType}-${index}`] = el;
-              }}
-              className="overflow-hidden transition-all duration-300"
-              style={{
-                height:
-                  openSubmenu?.type === menuType && openSubmenu?.index === index
-                    ? `${subMenuHeight[`${menuType}-${index}`]}px`
-                    : "0px",
-              }}
-            >
-              <ul className="mt-2 space-y-1 ml-9">
-                {nav.subItems.map((subItem) => (
-                  <li key={subItem.name}>
-                    <Link
-                      to={subItem.path}
-                      onMouseEnter={() => {}}
-                      onFocus={() => {}}
-                      className={`menu-dropdown-item ${
-                        isActive(subItem.path)
-                          ? "menu-dropdown-item-active"
-                          : "menu-dropdown-item-inactive"
-                      }`}
-                    >
-                      {subItem.name}
-                      <span className="flex items-center gap-1 ml-auto">
-                        {subItem.new && (
-                          <span
-                            className={`ml-auto ${
-                              isActive(subItem.path)
-                                ? "menu-dropdown-badge-active"
-                                : "menu-dropdown-badge-inactive"
-                            } menu-dropdown-badge`}
-                          >
-                            new
-                          </span>
-                        )}
-                        {subItem.pro && (
-                          <span
-                            className={`ml-auto ${
-                              isActive(subItem.path)
-                                ? "menu-dropdown-badge-active"
-                                : "menu-dropdown-badge-inactive"
-                            } menu-dropdown-badge`}
-                          >
-                            pro
-                          </span>
-                        )}
-                      </span>
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
-        </li>
-      ))}
-    </ul>
-  );
+  const initials =
+    `${user?.firstName?.[0] ?? ""}${user?.lastName?.[0] ?? ""}`.toUpperCase() ||
+    "AX";
+  const fullName = user
+    ? `${user.firstName} ${user.lastName}`.trim()
+    : "Account";
 
   return (
-    <aside
-      className={`fixed mt-16 flex flex-col lg:mt-0 top-0 px-5 left-0 bg-white dark:bg-gray-900 dark:border-gray-800 text-gray-900 h-screen transition-all duration-300 ease-in-out z-50 border-r border-gray-200 
-        ${
-          isExpanded || isMobileOpen
-            ? "w-[290px]"
-            : isHovered
-            ? "w-[290px]"
-            : "w-[90px]"
-        }
-        ${isMobileOpen ? "translate-x-0" : "-translate-x-full"}
-        lg:translate-x-0`}
-      onMouseEnter={() => !isExpanded && setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
-    >
-      <div
-        className="pt-3 pb-4 flex justify-center"
+    <>
+      <aside
+        className={`fixed left-0 top-0 z-50 flex h-screen w-64 flex-col border-r border-outline-variant bg-surface-container-low transition-transform duration-300 ease-in-out lg:translate-x-0 ${
+          isMobileOpen ? "translate-x-0" : "-translate-x-full"
+        }`}
       >
-        <Link to="/">
-          {isExpanded || isHovered || isMobileOpen ? (
-            <img
-              src="/images/logo/cedar-logo.png"
-              alt="Cedar Capital"
-              width={120}
-              height={70}
-              className="object-contain"
-            />
-          ) : (
-            <img
-              src="/images/logo/brokerknow-icon.svg"
-              alt="Axis"
-              width={32}
-              height={32}
-            />
-          )}
-        </Link>
-      </div>
-      <div className="-mt-2 flex flex-col overflow-y-auto duration-300 ease-linear no-scrollbar">
-        <nav className="mb-6">
-          <div className="flex flex-col gap-4">
-            <div>
-              {!isExpanded && !isHovered && !isMobileOpen && (
-                <h2 className="mb-2 flex justify-center text-xs uppercase leading-[20px] text-gray-400">
-                  <HorizontaLDots className="size-6" />
-                </h2>
-              )}
-              {renderMenuItems(filteredNavItems, "main")}
-            </div>
-            <div className="">
-              {!isExpanded && !isHovered && !isMobileOpen && (
-                <h2 className="mb-2 flex justify-center text-xs uppercase leading-[20px] text-gray-400">
-                  <HorizontaLDots />
-                </h2>
-              )}
-              {renderMenuItems(filteredOthersItems, "others")}
-            </div>
-          </div>
-        </nav>
-      </div>
+        {/* Brand */}
+        <div className="px-6 pb-5 pt-6">
+          <Link to="/" onClick={closeOnMobile} className="flex flex-col gap-3">
+            <span className="inline-flex w-fit rounded bg-white p-1.5 ring-1 ring-outline-variant">
+              <img
+                src="/images/logo/martens-logo.png"
+                alt="Martens Africa"
+                className="h-6 w-auto object-contain"
+              />
+            </span>
+            <span className="leading-tight">
+              <span className="block font-display text-lg font-bold tracking-tight text-primary">
+                Axis
+              </span>
+              <span className="block text-xs text-on-surface-variant opacity-70">
+                Institutional Portal
+              </span>
+            </span>
+          </Link>
+        </div>
 
-      {(isExpanded || isHovered || isMobileOpen) && (
-        <a
-          href="https://www.martensafrica.com/"
-          target="_blank"
-          rel="noopener noreferrer"
-          aria-label="Axis by Martens Africa"
-          className="mt-auto flex items-center gap-2 border-t border-gray-200 py-3 dark:border-gray-800"
-        >
-          <span className="shrink-0 text-[10px] font-medium uppercase tracking-wide text-gray-400">
-            Axis by
-          </span>
-          <span className="inline-flex rounded dark:bg-white/95 dark:p-1">
-            <img
-              src="/images/logo/martens-logo.png"
-              alt="Martens Africa"
-              className="h-4 w-auto object-contain"
-            />
-          </span>
-        </a>
+        {/* New Trade */}
+        <div className="px-4 pb-4">
+          <Link
+            to="/orders/new"
+            onClick={closeOnMobile}
+            className="flex items-center justify-center gap-2 rounded-lg bg-secondary px-4 py-2.5 text-xs font-semibold uppercase tracking-wide text-on-secondary transition-colors hover:bg-on-secondary-fixed-variant"
+          >
+            <Icon name="add" size={18} />
+            New Trade
+          </Link>
+        </div>
+
+        {/* Primary nav */}
+        <nav className="custom-scrollbar flex-1 space-y-1 overflow-y-auto px-3 py-2">
+          {navItems.map((item) => {
+            const active = isActive(item.path);
+            return (
+              <Link
+                key={item.name}
+                to={item.path}
+                onClick={closeOnMobile}
+                className={`group flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm transition-colors ${
+                  active
+                    ? "border-r-2 border-secondary bg-surface-container font-bold text-secondary"
+                    : "text-on-surface-variant hover:bg-surface-container hover:text-on-surface"
+                }`}
+              >
+                <Icon name={item.icon} filled={active} />
+                <span>{item.name}</span>
+              </Link>
+            );
+          })}
+        </nav>
+
+        {/* Footer: Settings / Support + user block */}
+        <div className="border-t border-outline-variant px-3 py-3">
+          <Link
+            to="/change-password"
+            onClick={closeOnMobile}
+            className="flex items-center gap-3 rounded-lg px-3 py-2 text-sm text-on-surface-variant transition-colors hover:bg-surface-container"
+          >
+            <Icon name="settings" size={20} />
+            <span>Settings</span>
+          </Link>
+          <a
+            href="mailto:support@cedarcapital.mw"
+            className="flex items-center gap-3 rounded-lg px-3 py-2 text-sm text-on-surface-variant transition-colors hover:bg-surface-container"
+          >
+            <Icon name="help" size={20} />
+            <span>Support</span>
+          </a>
+
+          <div className="mt-2 flex items-center gap-3 border-t border-outline-variant/60 px-3 pt-3">
+            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-primary-container text-xs font-bold text-on-primary-fixed">
+              {initials}
+            </div>
+            <div className="min-w-0 flex-1">
+              <p className="truncate text-sm font-semibold text-on-surface">
+                {fullName}
+              </p>
+              <p className="truncate text-[10px] uppercase tracking-wide text-on-surface-variant">
+                {user?.role || "Client"}
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={logout}
+              aria-label="Sign out"
+              className="rounded-lg p-1.5 text-on-surface-variant transition-colors hover:bg-surface-container hover:text-axis-error"
+            >
+              <Icon name="logout" size={20} />
+            </button>
+          </div>
+        </div>
+      </aside>
+
+      {/* Mobile backdrop */}
+      {isMobileOpen && (
+        <button
+          aria-label="Close menu"
+          onClick={toggleMobileSidebar}
+          className="fixed inset-0 z-40 bg-inverse-surface/40 backdrop-blur-sm lg:hidden"
+        />
       )}
-    </aside>
+    </>
   );
 };
 

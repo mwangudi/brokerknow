@@ -1,27 +1,17 @@
-import { SidebarProvider, useSidebar } from "../context/SidebarContext";
+import { SidebarProvider } from "../context/SidebarContext";
 import { Outlet } from "react-router";
 import AppHeader from "./AppHeader";
-import Backdrop from "./Backdrop";
 import AppSidebar from "./AppSidebar";
 
 const LayoutContent: React.FC = () => {
-  const { isExpanded, isHovered, isMobileOpen } = useSidebar();
-
   return (
-    <div className="min-h-screen xl:flex">
-      <div>
-        <AppSidebar />
-        <Backdrop />
-      </div>
-      <div
-        className={`flex-1 transition-all duration-300 ease-in-out ${
-          isExpanded || isHovered ? "lg:ml-[290px]" : "lg:ml-[90px]"
-        } ${isMobileOpen ? "ml-0" : ""}`}
-      >
+    <div className="min-h-screen bg-background">
+      <AppSidebar />
+      <div className="flex min-h-screen flex-col lg:ml-64">
         <AppHeader />
-        <div className="p-4 mx-auto max-w-(--breakpoint-2xl) md:p-6">
+        <main className="flex-1 p-4 md:p-6">
           <Outlet />
-        </div>
+        </main>
       </div>
     </div>
   );

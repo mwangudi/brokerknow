@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router";
 import api from "../lib/api";
-import Badge from "../components/ui/badge/Badge";
+import Icon from "../components/ui/Icon";
 
 interface OrderItem {
   security: string;
@@ -26,36 +26,35 @@ interface OrderDetail {
   items: OrderItem[];
 }
 
-/** Buy/Sell side colour: Purchase = green, Sale = red — matches the back office. */
-function sideColor(type: string): "success" | "error" | "primary" {
+function sideTone(type: string) {
   const t = (type || "").toLowerCase();
-  if (t.startsWith("purchase") || t.startsWith("buy")) return "success";
-  if (t.startsWith("sale") || t.startsWith("sell")) return "error";
-  return "primary";
+  if (t.startsWith("purchase") || t.startsWith("buy"))
+    return "bg-secondary-container/20 text-on-secondary-container";
+  if (t.startsWith("sale") || t.startsWith("sell"))
+    return "bg-axis-error-container/40 text-on-axis-error-container";
+  return "bg-surface-container text-on-surface-variant";
 }
 
-function statusColor(status: string): "success" | "error" | "warning" | "info" | "light" {
+function statusTone(status: string) {
   switch (status) {
-    case "Canceled": return "error";
-    case "Held": return "warning";
-    case "Traded": return "success";
-    case "Released": return "info";
-    default: return "light";
+    case "Traded":
+      return "bg-secondary/10 text-secondary";
+    case "Held":
+      return "bg-amber-100 text-amber-700";
+    case "Canceled":
+      return "bg-axis-error/10 text-axis-error";
+    case "Released":
+      return "bg-primary/5 text-on-surface-variant";
+    default:
+      return "bg-surface-container text-on-surface-variant";
   }
 }
 
 function fmt(n: number) {
-  return n.toLocaleString("en", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-}
-
-function StatTile({ label, value, sub, emphasis }: { label: string; value: string; sub?: string; emphasis?: boolean }) {
-  return (
-    <div className={`rounded-xl border p-4 ${emphasis ? "border-blue-200 bg-blue-50" : "border-gray-200 bg-white"}`}>
-      <p className="text-xs font-medium uppercase tracking-wide text-gray-500">{label}</p>
-      <p className={`mt-1 text-lg font-semibold ${emphasis ? "text-blue-700" : "text-gray-900"}`}>{value}</p>
-      {sub && <p className="mt-0.5 text-xs text-gray-500">{sub}</p>}
-    </div>
-  );
+  return n.toLocaleString("en", {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  });
 }
 
 export default function OrderDetailPage() {
@@ -66,105 +65,163 @@ export default function OrderDetailPage() {
 
   useEffect(() => {
     setLoading(true);
-    api.get<OrderDetail>(`/portal/orders/${id}`)
+    api
+      .get<OrderDetail>(`/portal/orders/${id}`)
       .then((r) => setOrder(r.data))
       .catch(() => setError("Could not load this order."))
       .finally(() => setLoading(false));
   }, [id]);
 
-  if (loading) return <p className="text-sm text-gray-500">Loading...</p>;
-  if (error || !order) return <p className="text-sm text-rose-600">{error ?? "Order not found."}</p>;
+  if (loading) return <p className="text-sm text-on-surface-variant">Loading…</p>;
+  if (error || !order)
+    return (
+      <p className="text-sm text-axis-error">{error ?? "Order not found."}</p>
+    );
 
-  const totalQty = order.items.reduce((s, it) => s + (it.best ? 0 : it.ordDetailQty), 0);
+  const totalQty = order.items.reduce(
+    (s, it) => s + (it.best ? 0 : it.ordDetailQty),
+    0,
+  );
   const filledQty = order.items.reduce((s, it) => s + it.filledQty, 0);
   const grossValue = order.items.reduce(
-    (s, it) => s + (it.amount ?? (it.best ? 0 : it.ordDetailQty * parseFloat(it.ordDetailPrice || "0"))),
+    (s, it) =>
+      s +
+      (it.amount ??
+        (it.best ? 0 : it.ordDetailQty * parseFloat(it.ordDetailPrice || "0"))),
     0,
   );
 
   return (
-    <div>
-      <div className="mb-6 flex items-center justify-between">
+    <div className="space-y-6">
+      {/* Header */}
+      <div className="flex flex-col items-start justify-between gap-3 md:flex-row md:items-center">
         <div className="flex flex-wrap items-center gap-2">
-          <h2 className="text-2xl font-bold text-gray-900">Order #{order.orderDpa}</h2>
-          <Badge size="sm" color={sideColor(order.orderType)}>{order.orderType}</Badge>
-          <Badge size="sm" color={statusColor(order.status)}>{order.status}</Badge>
-          {order.isCustodian && <Badge size="sm" color="info">Custodian</Badge>}
-          {order.interBank && <Badge size="sm" color="info">Interbank</Badge>}
+          <h1 className="font-display text-2xl font-semibold text-primary">
+            Order #{order.orderDpa}
+          </h1>
+          <span
+            className={`rounded px-2 py-0.5 text-[10px] font-semibold uppercase ${sideTone(order.orderType)}`}
+          >
+            {order.orderType}
+          </span>
+          <span
+            className={`rounded px-2 py-0.5 text-[10px] font-semibold uppercase ${statusTone(order.status)}`}
+          >
+            {order.status}
+          </span>
+          {order.isCustodian && (
+            <span className="rounded bg-primary/5 px-2 py-0.5 text-[10px] font-semibold uppercase text-on-surface-variant">
+              Custodian
+            </span>
+          )}
+          {order.interBank && (
+            <span className="rounded bg-primary/5 px-2 py-0.5 text-[10px] font-semibold uppercase text-on-surface-variant">
+              Interbank
+            </span>
+          )}
         </div>
-        <Link to="/orders" className="text-sm font-medium text-blue-600 hover:underline">
-          ← Back to orders
+        <Link
+          to="/orders"
+          className="inline-flex items-center gap-1 text-sm font-semibold text-secondary hover:underline"
+        >
+          <Icon name="arrow_back" size={16} />
+          Back to orders
         </Link>
       </div>
 
       {/* Summary tiles */}
-      <div className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <StatTile label="Items" value={String(order.items.length)} />
-        <StatTile label="Total Qty" value={totalQty.toLocaleString("en")} />
-        <StatTile
-          label="Filled Qty"
+      <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
+        <Tile label="Items" value={String(order.items.length)} icon="list" />
+        <Tile
+          label="Total Qty"
+          value={totalQty.toLocaleString("en")}
+          icon="numbers"
+        />
+        <Tile
+          label="Filled"
           value={`${filledQty.toLocaleString("en")} / ${totalQty.toLocaleString("en")}`}
           sub={totalQty ? `${Math.round((filledQty / totalQty) * 100)}% filled` : undefined}
+          icon="task_alt"
         />
-        <StatTile label="Gross Value" value={`MWK ${fmt(grossValue)}`} emphasis />
+        <Tile
+          label="Gross Value"
+          value={`MWK ${fmt(grossValue)}`}
+          icon="payments"
+          emphasis
+        />
       </div>
 
-      <div className="mb-6 grid grid-cols-1 gap-4 rounded-xl border border-gray-200 bg-white p-6 sm:grid-cols-2 lg:grid-cols-4">
-        <div>
-          <p className="text-xs font-medium uppercase text-gray-500">Date</p>
-          <p className="mt-1 text-sm text-gray-900">
-            {new Date(order.orderDate).toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" })}
-          </p>
-        </div>
-        <div>
-          <p className="text-xs font-medium uppercase text-gray-500">Side</p>
-          <p className="mt-1"><Badge size="sm" color={sideColor(order.orderType)}>{order.orderType}</Badge></p>
-        </div>
-        <div>
-          <p className="text-xs font-medium uppercase text-gray-500">Security type</p>
-          <p className="mt-1 text-sm text-gray-900">{order.secType}</p>
-        </div>
-        <div>
-          <p className="text-xs font-medium uppercase text-gray-500">Status</p>
-          <p className="mt-1"><Badge size="sm" color={statusColor(order.status)}>{order.status}</Badge></p>
-        </div>
-        <div>
-          <p className="text-xs font-medium uppercase text-gray-500">Reference</p>
-          <p className="mt-1 text-sm text-gray-900">{order.orderRef || "—"}</p>
-        </div>
+      {/* Detail grid */}
+      <div className="grid grid-cols-1 gap-x-6 gap-y-5 rounded-xl border border-outline-variant bg-surface-container-lowest p-6 shadow-[0px_4px_12px_rgba(15,23,42,0.03)] sm:grid-cols-2 lg:grid-cols-4">
+        <Detail
+          label="Date"
+          value={new Date(order.orderDate).toLocaleDateString("en-GB", {
+            day: "2-digit",
+            month: "short",
+            year: "numeric",
+          })}
+        />
+        <Detail label="Side" value={order.orderType} />
+        <Detail label="Security Type" value={order.secType} />
+        <Detail label="Status" value={order.status} />
+        <Detail label="Reference" value={order.orderRef || "—"} />
         <div className="sm:col-span-2 lg:col-span-3">
-          <p className="text-xs font-medium uppercase text-gray-500">Remarks</p>
-          <p className="mt-1 text-sm text-gray-900">{order.remarks || "—"}</p>
+          <dt className="mb-1 text-[11px] font-semibold uppercase tracking-wider text-outline">
+            Remarks
+          </dt>
+          <dd className="text-sm text-on-surface">{order.remarks || "—"}</dd>
         </div>
       </div>
 
-      <div className="rounded-xl border border-gray-200 bg-white">
+      {/* Items table */}
+      <div className="overflow-hidden rounded-xl border border-outline-variant bg-surface-container-lowest shadow-[0px_4px_12px_rgba(15,23,42,0.03)]">
+        <div className="border-b border-outline-variant px-5 py-4">
+          <h3 className="font-display text-base font-semibold text-primary">
+            Order Items
+          </h3>
+        </div>
         <div className="overflow-x-auto">
-          <table className="min-w-full text-sm">
+          <table className="w-full text-left text-sm">
             <thead>
-              <tr className="border-b border-gray-100 text-left text-xs font-medium uppercase text-gray-500">
-                <th className="px-4 py-3">Security</th>
-                <th className="px-4 py-3">Quantity</th>
-                <th className="px-4 py-3">Price</th>
-                <th className="px-4 py-3">Max amount</th>
-                <th className="px-4 py-3">Filled</th>
-                <th className="px-4 py-3">Best</th>
+              <tr className="border-b border-outline-variant bg-surface-container-low text-[11px] uppercase tracking-wider text-on-surface-variant">
+                <th className="px-5 py-3 font-semibold">Security</th>
+                <th className="px-5 py-3 text-right font-semibold">Quantity</th>
+                <th className="px-5 py-3 text-right font-semibold">Price</th>
+                <th className="px-5 py-3 text-right font-semibold">Max Amount</th>
+                <th className="px-5 py-3 text-right font-semibold">Filled</th>
+                <th className="px-5 py-3 font-semibold">Best</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-100">
+            <tbody className="divide-y divide-outline-variant">
               {order.items.map((it, i) => (
-                <tr key={i} className={i % 2 === 0 ? "bg-blue-50/50" : ""}>
-                  <td className="px-4 py-2.5 text-gray-900">{it.security}</td>
-                  <td className="px-4 py-2.5 text-gray-700">
-                    {it.best ? "Best (market)" : it.ordDetailQty.toLocaleString()}
+                <tr key={i} className="transition-colors hover:bg-surface-container-low">
+                  <td className="px-5 py-3 font-medium text-on-surface">
+                    {it.security}
                   </td>
-                  <td className="px-4 py-2.5 text-gray-700">{it.best ? "Best" : it.ordDetailPrice}</td>
-                  <td className="px-4 py-2.5 text-gray-700">
-                    {it.amount != null ? it.amount.toLocaleString(undefined, { minimumFractionDigits: 2 }) : "—"}
+                  <td className="px-5 py-3 text-right tabular-nums text-on-surface">
+                    {it.best ? "Best" : it.ordDetailQty.toLocaleString()}
                   </td>
-                  <td className="px-4 py-2.5 text-gray-700">{it.filledQty.toLocaleString()}</td>
-                  <td className="px-4 py-2.5">
-                    {it.best ? <Badge size="sm" color="success">Best</Badge> : <span className="text-gray-400">—</span>}
+                  <td className="px-5 py-3 text-right tabular-nums text-on-surface">
+                    {it.best ? "Market" : it.ordDetailPrice}
+                  </td>
+                  <td className="px-5 py-3 text-right tabular-nums text-on-surface">
+                    {it.amount != null
+                      ? it.amount.toLocaleString(undefined, {
+                          minimumFractionDigits: 2,
+                        })
+                      : "—"}
+                  </td>
+                  <td className="px-5 py-3 text-right tabular-nums text-on-surface">
+                    {it.filledQty.toLocaleString()}
+                  </td>
+                  <td className="px-5 py-3">
+                    {it.best ? (
+                      <span className="rounded px-2 py-0.5 text-[10px] font-semibold uppercase bg-secondary/10 text-secondary">
+                        Best
+                      </span>
+                    ) : (
+                      <span className="text-outline">—</span>
+                    )}
                   </td>
                 </tr>
               ))}
@@ -172,6 +229,54 @@ export default function OrderDetailPage() {
           </table>
         </div>
       </div>
+    </div>
+  );
+}
+
+function Tile({
+  label,
+  value,
+  sub,
+  icon,
+  emphasis,
+}: {
+  label: string;
+  value: string;
+  sub?: string;
+  icon: string;
+  emphasis?: boolean;
+}) {
+  return (
+    <div
+      className={`rounded-xl border p-4 shadow-[0px_4px_12px_rgba(15,23,42,0.03)] ${
+        emphasis
+          ? "border-secondary/30 bg-secondary-container/10"
+          : "border-outline-variant bg-surface-container-lowest"
+      }`}
+    >
+      <div className="mb-2 flex items-center justify-between">
+        <span className="text-[11px] font-semibold uppercase tracking-wide text-on-surface-variant">
+          {label}
+        </span>
+        <Icon
+          name={icon}
+          size={18}
+          className={emphasis ? "text-secondary" : "text-outline"}
+        />
+      </div>
+      <p className="font-display text-lg font-semibold text-primary">{value}</p>
+      {sub && <p className="mt-0.5 text-xs text-on-surface-variant">{sub}</p>}
+    </div>
+  );
+}
+
+function Detail({ label, value }: { label: string; value: string }) {
+  return (
+    <div>
+      <dt className="mb-1 text-[11px] font-semibold uppercase tracking-wider text-outline">
+        {label}
+      </dt>
+      <dd className="text-sm text-on-surface">{value}</dd>
     </div>
   );
 }
