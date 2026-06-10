@@ -25,46 +25,63 @@ export default function LoginPage() {
 
   return (
     <div className="flex min-h-screen bg-background">
-      {/* Brand panel */}
+      {/* Brand panel — Axis showcase + Martens vendor lockup */}
       <div className="relative hidden w-1/2 flex-col justify-between overflow-hidden bg-primary-container p-12 lg:flex">
-        <div className="pointer-events-none absolute -right-16 -top-16 h-64 w-64 rounded-full bg-secondary/10" />
+        <div className="pointer-events-none absolute -right-20 -top-20 h-72 w-72 rounded-full bg-secondary/10" />
+        <div className="pointer-events-none absolute -bottom-24 -left-16 h-64 w-64 rounded-full bg-secondary/5" />
+
+        {/* Product wordmark */}
         <div className="relative">
-          <span className="inline-flex rounded bg-white p-2 ring-1 ring-white/20">
+          <span className="font-display text-2xl font-bold tracking-tight text-white">
+            Axis
+          </span>
+          <p className="mt-1 text-[11px] font-medium uppercase tracking-[0.2em] text-on-primary-container/60">
+            Institutional Portal
+          </p>
+        </div>
+
+        {/* Headline */}
+        <div className="relative max-w-md">
+          <h1 className="font-display text-4xl font-bold leading-tight text-white">
+            Trade with institutional confidence.
+          </h1>
+          <p className="mt-3 text-on-primary-container/80">
+            Monitor your portfolio, place orders, and track settlement — all in
+            one secure place.
+          </p>
+        </div>
+
+        {/* Vendor lockup — Built by Martens Africa */}
+        <div className="relative flex items-center gap-3">
+          <span className="inline-flex items-center justify-center rounded-lg bg-white px-3 py-2 shadow-sm">
             <img
               src="/images/logo/martens-logo.png"
               alt="Martens Africa"
-              className="h-7 w-auto object-contain"
+              className="h-6 w-auto object-contain"
             />
           </span>
+          <div className="text-[11px] leading-tight text-on-primary-container/70">
+            <p className="font-semibold text-on-primary-container">
+              Built by Martens Africa
+            </p>
+            <p>© {new Date().getFullYear()} · All rights reserved</p>
+          </div>
         </div>
-        <div className="relative">
-          <h1 className="font-display text-4xl font-bold tracking-tight text-white">
-            Axis
-          </h1>
-          <p className="mt-2 max-w-sm text-on-primary-container">
-            The institutional trading portal by Martens Africa. Monitor your
-            portfolio, place orders, and track settlement — all in one place.
-          </p>
-        </div>
-        <p className="relative text-xs text-on-primary-container/60">
-          © {new Date().getFullYear()} Martens Africa · Powered by Axis
-        </p>
       </div>
 
       {/* Form panel */}
-      <div className="flex w-full items-center justify-center px-4 lg:w-1/2">
+      <div className="flex w-full flex-col items-center justify-center px-4 py-10 lg:w-1/2">
         <div className="w-full max-w-md">
-          <div className="mb-8 lg:hidden">
-            <span className="inline-flex rounded bg-white p-1.5 ring-1 ring-outline-variant">
-              <img
-                src="/images/logo/martens-logo.png"
-                alt="Martens Africa"
-                className="h-6 w-auto object-contain"
-              />
-            </span>
-            <h1 className="mt-3 font-display text-2xl font-bold text-primary">
-              Axis
-            </h1>
+          {/* Cedar Capital — client brand, above the Sign in card */}
+          <div className="mb-6 flex flex-col items-center text-center">
+            <img
+              src="/images/logo/cedar-logo.png"
+              alt="Cedar Capital"
+              className="h-20 w-auto object-contain"
+            />
+            <p className="mt-2 text-[11px] font-semibold uppercase tracking-[0.15em] text-on-surface-variant">
+              Client Portal
+            </p>
           </div>
 
           <form
@@ -130,6 +147,12 @@ export default function LoginPage() {
               </Link>
             </p>
           </form>
+
+          {/* Vendor line — visible on mobile where the brand panel is hidden */}
+          <p className="mt-6 flex items-center justify-center gap-1.5 text-[11px] text-on-surface-variant lg:hidden">
+            Powered by <span className="font-semibold text-primary">Axis</span> ·
+            Built by Martens Africa
+          </p>
         </div>
       </div>
     </div>
