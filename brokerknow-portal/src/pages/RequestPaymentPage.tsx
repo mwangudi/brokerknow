@@ -1,5 +1,6 @@
 import { useEffect, useState, type FormEvent } from "react";
 import api from "../lib/api";
+import Icon from "../components/ui/Icon";
 
 interface PaymentRequestRow {
   id: number;
@@ -34,27 +35,33 @@ interface BankAccountOption {
 }
 
 function fmtMoney(n: number) {
-  return n.toLocaleString("en", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  return n.toLocaleString("en", {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  });
 }
 
 function fmtDate(iso: string) {
   return new Date(iso).toLocaleString("en-GB", {
-    day: "2-digit", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit",
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
   });
 }
 
-function statusBadge(status: string) {
-  const map: Record<string, string> = {
-    Pending:  "bg-amber-100 text-amber-800 ring-amber-200",
-    Approved: "bg-emerald-100 text-emerald-800 ring-emerald-200",
-    Rejected: "bg-rose-100 text-rose-800 ring-rose-200",
-  };
-  const cls = map[status] ?? "bg-gray-100 text-gray-700 ring-gray-200";
-  return (
-    <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ring-1 ring-inset ${cls}`}>
-      {status}
-    </span>
-  );
+function statusTone(status: string) {
+  switch (status) {
+    case "Approved":
+      return "bg-secondary/10 text-secondary";
+    case "Rejected":
+      return "bg-axis-error/10 text-axis-error";
+    case "Pending":
+      return "bg-amber-100 text-amber-700";
+    default:
+      return "bg-surface-container text-on-surface-variant";
+  }
 }
 
 export default function RequestPaymentPage() {
@@ -83,7 +90,7 @@ export default function RequestPaymentPage() {
     parsedAmount > balance.withdrawable;
 
   // Withdrawals require a bank account when the client has one or more on
-  // file. If they have none, the back office will use the free-text reference.
+  // file. If they have none, the back office uses the free-text reference.
   const needsBankAccount =
     requestType === "Withdrawal" && bankAccounts.length > 0;
   const missingBankAccount = needsBankAccount && !bankAccountId;
@@ -111,14 +118,17 @@ export default function RequestPaymentPage() {
     }
   }
 
-  useEffect(() => { void refresh(); }, []);
+  useEffect(() => {
+    void refresh();
+  }, []);
 
   async function viewProof(id: number) {
     try {
-      const resp = await api.get(`/portal/payment-requests/${id}/proof`, { responseType: "blob" });
+      const resp = await api.get(`/portal/payment-requests/${id}/proof`, {
+        responseType: "blob",
+      });
       const url = window.URL.createObjectURL(resp.data as Blob);
       window.open(url, "_blank", "noopener,noreferrer");
-      // Revoke shortly after to free memory; the new tab keeps its own ref.
       setTimeout(() => window.URL.revokeObjectURL(url), 60_000);
     } catch {
       setError("Could not open the proof file.");
@@ -143,8 +153,6 @@ export default function RequestPaymentPage() {
       setSubmitError("Narrative can be at most 500 characters.");
       return;
     }
-    // Pre-flight balance check for withdrawals — the server will re-check, but
-    // catching it here is faster and clearer for the client.
     if (requestType === "Withdrawal" && balance && amt > balance.withdrawable) {
       setSubmitError(
         `You can withdraw at most MWK ${fmtMoney(balance.withdrawable)} right now.`,
@@ -164,21 +172,26 @@ export default function RequestPaymentPage() {
         reference: reference || null,
         narrative: narrative || null,
         clientBankAccountDpa:
-          requestType === "Withdrawal" && bankAccountId ? Number(bankAccountId) : null,
+          requestType === "Withdrawal" && bankAccountId
+            ? Number(bankAccountId)
+            : null,
       });
-      // J5 — upload the proof of deposit if attached.
+      // Upload the proof of deposit if attached.
       if (requestType === "Deposit" && proofFile && created.data?.id) {
         const fd = new FormData();
         fd.append("file", proofFile);
         try {
-          await api.post(`/portal/payment-requests/${created.data.id}/proof`, fd, {
-            headers: { "Content-Type": "multipart/form-data" },
-          });
+          await api.post(
+            `/portal/payment-requests/${created.data.id}/proof`,
+            fd,
+            { headers: { "Content-Type": "multipart/form-data" } },
+          );
         } catch (uploadErr) {
           const ex = uploadErr as { response?: { data?: { error?: string } } };
           setSubmitError(
             "Request saved, but the proof could not be uploaded: " +
-              (ex.response?.data?.error ?? "please try again from the history list."),
+              (ex.response?.data?.error ??
+                "please try again from the history list."),
           );
         }
       }
@@ -195,97 +208,132 @@ export default function RequestPaymentPage() {
       await refresh();
     } catch (err) {
       const ex = err as { response?: { data?: { error?: string } } };
-      setSubmitError(ex.response?.data?.error ?? "Could not submit your request. Please try again.");
+      setSubmitError(
+        ex.response?.data?.error ??
+          "Could not submit your request. Please try again.",
+      );
     } finally {
       setSubmitting(false);
     }
   }
 
+  const inputCls =
+    "w-full rounded-lg border border-outline-variant bg-surface-container-lowest px-3 py-2.5 text-sm text-on-surface focus:border-secondary focus:outline-none focus:ring-1 focus:ring-secondary";
+  const labelCls =
+    "mb-1.5 block text-[11px] font-semibold uppercase tracking-wide text-on-surface-variant";
+
+  const submitDisabled =
+    submitting ||
+    overLimit ||
+    missingBankAccount ||
+    (requestType === "Withdrawal" &&
+      balance != null &&
+      balance.withdrawable <= 0);
+
   return (
-    <div>
-      <div className="mb-6 overflow-hidden rounded-2xl bg-gradient-to-r from-amber-500 to-orange-600 p-6 text-white shadow-lg">
-        <p className="text-sm text-amber-100">Cash management</p>
-        <h2 className="mt-1 text-2xl font-bold">Request a Payment</h2>
-        <p className="mt-2 text-sm text-amber-100">
-          Submit a deposit notice or request a withdrawal of available funds. Your broker
-          will review every request and update your statement once processed.
+    <div className="space-y-6">
+      <div>
+        <h1 className="font-display text-2xl font-semibold text-primary">
+          Payments
+        </h1>
+        <p className="text-sm text-on-surface-variant">
+          Submit a deposit notice or request a withdrawal of available funds.
         </p>
       </div>
 
+      {/* Balance summary bento */}
       {balance && (
-        <div className="mb-6 grid grid-cols-1 gap-3 sm:grid-cols-3">
-          <div className="rounded-xl border border-gray-200 bg-white p-4">
-            <p className="text-xs uppercase tracking-wide text-gray-500">Available balance</p>
-            <p className={`mt-1 text-xl font-bold ${balance.balance >= 0 ? "text-emerald-700" : "text-rose-700"}`}>
-              MWK {fmtMoney(Math.abs(balance.balance))} {balance.balance < 0 ? "Dr" : "Cr"}
-            </p>
-          </div>
-          <div className="rounded-xl border border-gray-200 bg-white p-4">
-            <p className="text-xs uppercase tracking-wide text-gray-500">Withdrawable now</p>
-            <p className={`mt-1 text-xl font-bold ${balance.withdrawable > 0 ? "text-emerald-700" : "text-gray-400"}`}>
-              MWK {fmtMoney(balance.withdrawable)}
-            </p>
-            <p className="mt-0.5 text-[11px] text-gray-500">
-              Cash available after other pending withdrawals.
-            </p>
-          </div>
-          <div className="rounded-xl border border-gray-200 bg-white p-4">
-            <p className="text-xs uppercase tracking-wide text-gray-500">Credit limit</p>
-            <p className="mt-1 text-xl font-bold text-gray-800">MWK {fmtMoney(balance.creditLimit)}</p>
-            <p className="mt-0.5 text-[11px] text-gray-500">
-              Trading facility — not available for withdrawal.
-            </p>
-          </div>
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+          <SummaryCard
+            label="Account Balance"
+            value={`MWK ${fmtMoney(Math.abs(balance.balance))} ${balance.balance < 0 ? "Dr" : "Cr"}`}
+            sub="Current account position"
+            icon="account_balance_wallet"
+            tone={balance.balance < 0 ? "error" : "secondary"}
+          />
+          <SummaryCard
+            label="Withdrawable Now"
+            value={`MWK ${fmtMoney(balance.withdrawable)}`}
+            sub="Cash available to withdraw"
+            icon="payments"
+            tone={balance.withdrawable > 0 ? "secondary" : "muted"}
+          />
+          <SummaryCard
+            label="Credit Limit"
+            value={`MWK ${fmtMoney(balance.creditLimit)}`}
+            sub="Trading facility — not withdrawable"
+            icon="credit_card"
+            tone="muted"
+          />
         </div>
       )}
 
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-        {/* ── Form ────────────────────────────────────────── */}
+      <div className="grid grid-cols-12 gap-6">
+        {/* Form */}
         <form
           onSubmit={handleSubmit}
-          className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm"
+          className="col-span-12 rounded-xl border border-outline-variant bg-surface-container-lowest p-6 shadow-[0px_4px_12px_rgba(15,23,42,0.03)] lg:col-span-6"
         >
-          <h3 className="mb-4 text-base font-semibold text-gray-800">New request</h3>
+          <div className="mb-5 flex items-center justify-between border-b border-outline-variant pb-4">
+            <h3 className="font-display text-lg font-semibold text-primary">
+              New Request
+            </h3>
+            <Icon name="currency_exchange" size={20} className="text-secondary" />
+          </div>
 
           {submitOk && (
-            <div className="mb-4 rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm text-emerald-800">
-              {submitOk}
+            <div className="mb-4 flex items-start gap-2 rounded-lg border border-secondary/30 bg-secondary/5 px-3 py-2 text-sm text-secondary">
+              <Icon name="check_circle" size={18} filled className="mt-0.5 shrink-0" />
+              <span>{submitOk}</span>
             </div>
           )}
           {submitError && (
-            <div className="mb-4 rounded-lg border border-rose-200 bg-rose-50 px-3 py-2 text-sm text-rose-800">
+            <div className="mb-4 rounded-lg border border-axis-error/30 bg-axis-error/5 px-3 py-2 text-sm text-axis-error">
               {submitError}
             </div>
           )}
 
-          <div className="space-y-4">
-            <div>
-              <label className="mb-1.5 block text-sm font-medium text-gray-700">Request type</label>
-              <div className="inline-flex rounded-lg border border-gray-200 bg-gray-50 p-1">
-                {(["Deposit", "Withdrawal"] as const).map((t) => (
+          <div className="space-y-5">
+            {/* Type toggle */}
+            <div className="grid grid-cols-2 gap-4">
+              {(["Deposit", "Withdrawal"] as const).map((t) => {
+                const active = requestType === t;
+                return (
                   <button
                     key={t}
                     type="button"
                     onClick={() => setRequestType(t)}
-                    className={`rounded-md px-4 py-1.5 text-sm font-medium transition-colors ${
-                      requestType === t
-                        ? "bg-amber-500 text-white shadow-sm"
-                        : "text-gray-600 hover:text-gray-800"
+                    className={`flex items-center justify-center gap-2 rounded-lg border-2 py-3 transition-all ${
+                      active
+                        ? "border-secondary bg-secondary-container/10"
+                        : "border-outline-variant hover:border-secondary/50"
                     }`}
                   >
-                    {t}
+                    <Icon
+                      name={t === "Deposit" ? "south_east" : "north_east"}
+                      size={20}
+                      className={active ? "text-secondary" : "text-on-surface-variant"}
+                    />
+                    <span
+                      className={`text-xs font-semibold uppercase tracking-widest ${
+                        active ? "text-secondary" : "text-on-surface-variant"
+                      }`}
+                    >
+                      {t}
+                    </span>
                   </button>
-                ))}
-              </div>
-              <p className="mt-1.5 text-xs text-gray-500">
-                {requestType === "Deposit"
-                  ? "Tell us you have sent funds (cash, cheque or bank transfer) so we can credit your account."
-                  : "Ask us to release available cash from your trading account to your bank."}
-              </p>
+                );
+              })}
             </div>
+            <p className="text-xs text-on-surface-variant">
+              {requestType === "Deposit"
+                ? "Tell us you have sent funds (cash, cheque or bank transfer) so we can credit your account."
+                : "Ask us to release available cash from your trading account to your bank."}
+            </p>
 
+            {/* Amount */}
             <div>
-              <label className="mb-1.5 block text-sm font-medium text-gray-700">Amount (MWK) *</label>
+              <label className={labelCls}>Amount (MWK)</label>
               <input
                 type="number"
                 step="0.01"
@@ -293,34 +341,34 @@ export default function RequestPaymentPage() {
                 value={amount}
                 onChange={(e) => setAmount(e.target.value)}
                 placeholder="0.00"
-                className="w-full rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm text-gray-700 focus:border-amber-400 focus:outline-none focus:ring-4 focus:ring-amber-200"
+                className={`${inputCls} text-right`}
                 required
               />
               {requestType === "Withdrawal" && balance && (
-                <p className={`mt-1.5 text-xs ${overLimit ? "text-rose-600" : "text-gray-500"}`}>
-                  You can withdraw up to <strong>MWK {fmtMoney(balance.withdrawable)}</strong> right now.
+                <p className={`mt-1.5 text-xs ${overLimit ? "text-axis-error" : "text-on-surface-variant"}`}>
+                  You can withdraw up to{" "}
+                  <strong>MWK {fmtMoney(balance.withdrawable)}</strong> right now.
                   {balance.withdrawable <= 0 && " There is no cash available to withdraw."}
                 </p>
               )}
             </div>
 
+            {/* Bank account (withdrawal) */}
             {requestType === "Withdrawal" && (
               <div>
-                <label className="mb-1.5 block text-sm font-medium text-gray-700">
-                  Send funds to *
-                </label>
+                <label className={labelCls}>Send Funds To</label>
                 {bankAccounts.length === 0 ? (
-                  <p className="rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-800">
+                  <p className="rounded-lg border border-amber-300 bg-amber-50 px-3 py-2 text-xs text-amber-800">
                     We don't have any of your bank accounts on file. Please contact
-                    your broker to register one — for now, type the destination
-                    bank and account number in the reference field below.
+                    your broker to register one — for now, type the destination bank
+                    and account number in the reference field below.
                   </p>
                 ) : (
                   <>
                     <select
                       value={bankAccountId}
                       onChange={(e) => setBankAccountId(e.target.value)}
-                      className="w-full rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm text-gray-700 focus:border-amber-400 focus:outline-none focus:ring-4 focus:ring-amber-200"
+                      className={inputCls}
                       required
                     >
                       <option value="">— Select your bank account —</option>
@@ -331,7 +379,7 @@ export default function RequestPaymentPage() {
                         </option>
                       ))}
                     </select>
-                    <p className="mt-1.5 text-xs text-gray-500">
+                    <p className="mt-1.5 text-xs text-on-surface-variant">
                       The broker will release the funds to this account on file.
                     </p>
                   </>
@@ -339,127 +387,197 @@ export default function RequestPaymentPage() {
               </div>
             )}
 
+            {/* Reference */}
             <div>
-              <label className="mb-1.5 block text-sm font-medium text-gray-700">
-                {requestType === "Deposit" ? "Bank / cheque reference" : "Bank account / reference"}
+              <label className={labelCls}>
+                {requestType === "Deposit"
+                  ? "Bank / Cheque Reference"
+                  : "Bank Account / Reference"}
               </label>
               <input
                 value={reference}
                 onChange={(e) => setReference(e.target.value)}
-                placeholder={requestType === "Deposit"
-                  ? "e.g. NBM transfer ref TX12345"
-                  : "e.g. NBM 0123456789"}
+                placeholder={
+                  requestType === "Deposit"
+                    ? "e.g. NBM transfer ref TX12345"
+                    : "e.g. NBM 0123456789"
+                }
                 maxLength={50}
-                className="w-full rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm text-gray-700 focus:border-amber-400 focus:outline-none focus:ring-4 focus:ring-amber-200"
+                className={inputCls}
               />
             </div>
 
+            {/* Notes */}
             <div>
-              <label className="mb-1.5 block text-sm font-medium text-gray-700">Notes</label>
+              <label className={labelCls}>Notes</label>
               <textarea
                 value={narrative}
                 onChange={(e) => setNarrative(e.target.value)}
                 rows={3}
                 maxLength={500}
-                placeholder={requestType === "Deposit"
-                  ? "Any extra information to help us match the funds (date sent, paying bank, etc.)"
-                  : "Reason for the withdrawal (optional)."}
-                className="w-full rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm text-gray-700 focus:border-amber-400 focus:outline-none focus:ring-4 focus:ring-amber-200"
+                placeholder={
+                  requestType === "Deposit"
+                    ? "Any extra information to help us match the funds (date sent, paying bank, etc.)"
+                    : "Reason for the withdrawal (optional)."
+                }
+                className={inputCls}
               />
             </div>
 
+            {/* Proof (deposit) */}
             {requestType === "Deposit" && (
               <div>
-                <label className="mb-1.5 block text-sm font-medium text-gray-700">
-                  Proof of deposit
+                <label className={labelCls}>Proof of Deposit</label>
+                <label className="flex cursor-pointer items-center gap-3 rounded-lg border border-dashed border-outline-variant bg-surface-container-low px-3 py-3 transition-colors hover:border-secondary">
+                  <Icon name="upload" size={20} className="text-on-surface-variant" />
+                  <span className="min-w-0 flex-1 truncate text-sm text-on-surface-variant">
+                    {proofFile ? proofFile.name : "Attach a bank slip or receipt…"}
+                  </span>
+                  <input
+                    type="file"
+                    accept=".pdf,.jpg,.jpeg,.png,.webp"
+                    onChange={(e) => setProofFile(e.target.files?.[0] ?? null)}
+                    className="hidden"
+                  />
                 </label>
-                <input
-                  type="file"
-                  accept=".pdf,.jpg,.jpeg,.png,.webp"
-                  onChange={(e) => setProofFile(e.target.files?.[0] ?? null)}
-                  className="block w-full text-sm text-gray-700 file:mr-3 file:rounded-md file:border-0 file:bg-amber-50 file:px-3 file:py-2 file:text-sm file:font-medium file:text-amber-700 hover:file:bg-amber-100"
-                />
-                <p className="mt-1.5 text-xs text-gray-500">
-                  Optional. Attach a bank slip or transfer receipt (PDF, JPG, PNG or WEBP, max 10 MB).
+                <p className="mt-1.5 text-xs text-on-surface-variant">
+                  Optional. PDF, JPG, PNG or WEBP, max 10 MB.
                 </p>
               </div>
             )}
 
-            <div className="flex justify-end">
-              <button
-                type="submit"
-                disabled={submitting || overLimit || missingBankAccount || (requestType === "Withdrawal" && balance != null && balance.withdrawable <= 0)}
-                className="rounded-lg bg-amber-500 px-5 py-2.5 text-sm font-medium text-white shadow-sm hover:bg-amber-600 disabled:cursor-not-allowed disabled:opacity-50"
-              >
-                {submitting ? "Submitting..." : "Submit request"}
-              </button>
-            </div>
+            <button
+              type="submit"
+              disabled={submitDisabled}
+              className="w-full rounded-lg bg-primary py-3 text-sm font-semibold uppercase tracking-wide text-on-primary transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              {submitting ? "Submitting…" : "Submit Request"}
+            </button>
           </div>
         </form>
 
-        {/* ── History ─────────────────────────────────────── */}
-        <div className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
-          <h3 className="mb-4 text-base font-semibold text-gray-800">Your requests</h3>
+        {/* History */}
+        <div className="col-span-12 overflow-hidden rounded-xl border border-outline-variant bg-surface-container-lowest shadow-[0px_4px_12px_rgba(15,23,42,0.03)] lg:col-span-6">
+          <div className="flex items-center justify-between border-b border-outline-variant px-5 py-4">
+            <h3 className="font-display text-lg font-semibold text-primary">
+              Your Requests
+            </h3>
+            {rows && rows.length > 0 && (
+              <span className="text-xs font-semibold text-on-surface-variant">
+                {rows.length} total
+              </span>
+            )}
+          </div>
 
-          {loading ? (
-            <p className="text-sm text-gray-500">Loading...</p>
-          ) : error ? (
-            <p className="text-sm text-rose-600">{error}</p>
-          ) : !rows || rows.length === 0 ? (
-            <div className="rounded-lg border border-dashed border-gray-300 bg-gray-50 p-6 text-center text-sm text-gray-500">
-              You haven't raised any payment requests yet.
-            </div>
-          ) : (
-            <ul className="divide-y divide-gray-100">
-              {rows.map((r) => (
-                <li key={r.id} className="py-3">
-                  <div className="flex items-start justify-between gap-3">
-                    <div className="min-w-0">
-                      <div className="flex flex-wrap items-center gap-2">
-                        <span className="text-sm font-semibold text-gray-800">
-                          {r.requestType} · MWK {fmtMoney(r.amount)}
-                        </span>
-                        {statusBadge(r.status)}
-                      </div>
-                      <p className="mt-0.5 text-xs text-gray-500">
-                        Submitted {fmtDate(r.createdAt)}
-                        {r.processedAt && (
-                          <> · Processed {fmtDate(r.processedAt)}</>
-                        )}
-                      </p>
-                      {r.reference && (
-                        <p className="mt-1 text-xs text-gray-600">Ref: {r.reference}</p>
-                      )}
-                      {r.clientBankAccount && (
-                        <p className="mt-1 text-xs text-gray-600">To: {r.clientBankAccount}</p>
-                      )}
-                      {r.narrative && (
-                        <p className="mt-1 text-xs text-gray-600">{r.narrative}</p>
-                      )}
-                      {r.status === "Rejected" && r.rejectReason && (
-                        <p className="mt-1 text-xs text-rose-700">
-                          Rejected: {r.rejectReason}
+          <div className="p-5">
+            {loading ? (
+              <p className="text-sm text-on-surface-variant">Loading…</p>
+            ) : error ? (
+              <p className="text-sm text-axis-error">{error}</p>
+            ) : !rows || rows.length === 0 ? (
+              <div className="rounded-lg border border-dashed border-outline-variant bg-surface-container-low px-4 py-10 text-center text-sm text-on-surface-variant">
+                You haven't raised any payment requests yet.
+              </div>
+            ) : (
+              <ul className="space-y-3">
+                {rows.map((r) => (
+                  <li
+                    key={r.id}
+                    className="rounded-lg border border-outline-variant p-4 transition-colors hover:border-secondary/50"
+                  >
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="min-w-0">
+                        <div className="flex flex-wrap items-center gap-2">
+                          <span className="flex items-center gap-1.5 text-sm font-semibold text-on-surface">
+                            <Icon
+                              name={r.requestType === "Deposit" ? "south_east" : "north_east"}
+                              size={16}
+                              className="text-on-surface-variant"
+                            />
+                            {r.requestType} · MWK {fmtMoney(r.amount)}
+                          </span>
+                          <span
+                            className={`rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase ${statusTone(r.status)}`}
+                          >
+                            {r.status}
+                          </span>
+                        </div>
+                        <p className="mt-1 text-[11px] text-on-surface-variant">
+                          Submitted {fmtDate(r.createdAt)}
+                          {r.processedAt && <> · Processed {fmtDate(r.processedAt)}</>}
                         </p>
-                      )}
-                      {r.hasProof && (
-                        <p className="mt-1">
+                        {r.reference && (
+                          <p className="mt-1 text-xs text-on-surface-variant">
+                            Ref: {r.reference}
+                          </p>
+                        )}
+                        {r.clientBankAccount && (
+                          <p className="mt-1 text-xs text-on-surface-variant">
+                            To: {r.clientBankAccount}
+                          </p>
+                        )}
+                        {r.narrative && (
+                          <p className="mt-1 text-xs text-on-surface-variant">
+                            {r.narrative}
+                          </p>
+                        )}
+                        {r.status === "Rejected" && r.rejectReason && (
+                          <p className="mt-1 text-xs text-axis-error">
+                            Rejected: {r.rejectReason}
+                          </p>
+                        )}
+                        {r.hasProof && (
                           <button
                             type="button"
                             onClick={() => void viewProof(r.id)}
-                            className="text-xs font-medium text-amber-700 hover:underline"
+                            className="mt-2 inline-flex items-center gap-1 text-xs font-semibold text-secondary hover:underline"
                           >
+                            <Icon name="visibility" size={14} />
                             View proof of deposit
                           </button>
-                        </p>
-                      )}
+                        )}
+                      </div>
                     </div>
-                  </div>
-                </li>
-              ))}
-            </ul>
-          )}
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
         </div>
       </div>
+    </div>
+  );
+}
+
+function SummaryCard({
+  label,
+  value,
+  sub,
+  icon,
+  tone,
+}: {
+  label: string;
+  value: string;
+  sub: string;
+  icon: string;
+  tone: "secondary" | "error" | "muted";
+}) {
+  const toneCls =
+    tone === "secondary"
+      ? "text-secondary"
+      : tone === "error"
+        ? "text-axis-error"
+        : "text-on-surface-variant";
+  return (
+    <div className="rounded-xl border border-outline-variant bg-surface-container-lowest p-5 shadow-[0px_4px_12px_rgba(15,23,42,0.03)]">
+      <div className="mb-2 flex items-start justify-between">
+        <span className="text-[11px] font-semibold uppercase tracking-wider text-on-surface-variant">
+          {label}
+        </span>
+        <Icon name={icon} size={20} className={toneCls} />
+      </div>
+      <div className="font-display text-xl font-semibold text-primary">{value}</div>
+      <p className="mt-1 text-xs text-on-surface-variant">{sub}</p>
     </div>
   );
 }

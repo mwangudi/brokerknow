@@ -1,35 +1,40 @@
+import { ICON_CODEPOINTS } from "./material-symbols-codepoints";
+
 type IconProps = {
-  /** Material Symbols Outlined ligature name, e.g. "dashboard", "swap_horiz". */
+  /** Material Symbols Outlined name, e.g. "dashboard", "swap_horiz". */
   name: string;
   /** Render the filled variant. */
   filled?: boolean;
   /** Pixel size (defaults to inherited font-size). */
   size?: number;
-  weight?: number;
   className?: string;
 };
 
 /**
- * Thin wrapper over the Material Symbols Outlined icon font used by the Axis
- * design language. Loaded once from index.html.
+ * Renders a Material Symbols Outlined glyph from the SELF-HOSTED subset
+ * (src/fonts/material-symbols-subset.woff2 — same-origin, ~14 KB, no Google
+ * CDN). We render the glyph by its codepoint rather than the ligature name so
+ * the font can be subset to just the icons in use; an unknown name renders
+ * nothing instead of leaking the literal text. To add an icon, add it to
+ * scripts/subset-icons.py, re-run it, and rebuild (see scripts/README.md).
  */
 export default function Icon({
   name,
   filled = false,
   size,
-  weight = 400,
   className = "",
 }: IconProps) {
+  const glyph = ICON_CODEPOINTS[name] ?? "";
   return (
     <span
       className={`material-symbols-outlined ${className}`}
       aria-hidden="true"
       style={{
         fontSize: size ? `${size}px` : undefined,
-        fontVariationSettings: `'FILL' ${filled ? 1 : 0}, 'wght' ${weight}, 'GRAD' 0, 'opsz' 24`,
+        fontVariationSettings: `'FILL' ${filled ? 1 : 0}`,
       }}
     >
-      {name}
+      {glyph}
     </span>
   );
 }

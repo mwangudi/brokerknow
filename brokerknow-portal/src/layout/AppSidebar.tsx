@@ -9,6 +9,7 @@ const navItems: NavItem[] = [
   { name: "Dashboard", icon: "dashboard", path: "/" },
   { name: "Orders", icon: "swap_horiz", path: "/orders" },
   { name: "Statement", icon: "receipt_long", path: "/statement" },
+  { name: "Payments", icon: "payments", path: "/request-payment" },
   { name: "Profile", icon: "person", path: "/profile" },
 ];
 
