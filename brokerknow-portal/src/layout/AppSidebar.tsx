@@ -40,19 +40,19 @@ const AppSidebar: React.FC = () => {
           isMobileOpen ? "translate-x-0" : "-translate-x-full"
         }`}
       >
-        {/* Brand */}
+        {/* Brand — Cedar Capital (client), mirrors the admin back office */}
         <div className="px-6 pb-5 pt-6">
-          <Link to="/" onClick={closeOnMobile} className="flex flex-col gap-3">
-            <span className="inline-flex w-fit rounded bg-white p-1.5 ring-1 ring-outline-variant">
+          <Link to="/" onClick={closeOnMobile} className="flex items-center gap-3">
+            <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-white p-1 ring-1 ring-outline-variant">
               <img
-                src="/images/logo/martens-logo.png"
-                alt="Martens Africa"
-                className="h-6 w-auto object-contain"
+                src="/images/logo/cedar-logo.png"
+                alt="Cedar Capital"
+                className="h-full w-full object-contain"
               />
             </span>
-            <span className="leading-tight">
-              <span className="block font-display text-lg font-bold tracking-tight text-primary">
-                Axis
+            <span className="min-w-0 leading-tight">
+              <span className="block font-display text-base font-bold tracking-tight text-primary">
+                Cedar Capital
               </span>
               <span className="block text-xs text-on-surface-variant opacity-70">
                 Institutional Portal
@@ -135,6 +135,26 @@ const AppSidebar: React.FC = () => {
             </button>
           </div>
         </div>
+
+        {/* Vendor attribution — Axis by Martens Africa (matches the admin back office) */}
+        <a
+          href="https://www.martensafrica.com/"
+          target="_blank"
+          rel="noopener noreferrer"
+          aria-label="Axis by Martens Africa"
+          className="flex items-center gap-2 border-t border-outline-variant px-6 py-3 transition-colors hover:bg-surface-container"
+        >
+          <span className="shrink-0 text-[10px] font-medium uppercase tracking-wide text-on-surface-variant opacity-75">
+            Axis by
+          </span>
+          <span className="inline-flex rounded dark:bg-white/95 dark:p-1">
+            <img
+              src="/images/logo/martens-logo.png"
+              alt="Martens Africa"
+              className="h-5 w-auto object-contain"
+            />
+          </span>
+        </a>
       </aside>
 
       {/* Mobile backdrop */}
