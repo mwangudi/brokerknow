@@ -168,7 +168,7 @@ export default function DashboardPage() {
               {market.loading
                 ? "Loading market session…"
                 : market.isOpen
-                  ? "The MSE is open. Place a buy or sell order with the trading desk."
+                  ? `The ${brand.exchange} is open. Place a buy or sell order with the trading desk.`
                   : market.reason === "holiday"
                     ? `Closed${market.holidayName ? ` — ${market.holidayName}` : ""}.${market.nextOpen ? ` Reopens ${new Date(market.nextOpen).toLocaleDateString("en-GB", { day: "2-digit", month: "short" })}.` : ""}`
                     : "The market is currently closed. You can still queue an order."}

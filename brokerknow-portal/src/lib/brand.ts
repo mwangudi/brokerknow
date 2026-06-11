@@ -18,4 +18,6 @@ export const brand = {
     (import.meta.env.VITE_SUPPORT_EMAIL as string) || "support@cedarcapital.mw",
   /** Currency code/prefix shown before monetary amounts (e.g. MWK, FC, USD). */
   currency: (import.meta.env.VITE_CURRENCY as string) || "MWK",
+  /** Short name of the home stock exchange (e.g. MSE, RSE) shown in copy. */
+  exchange: (import.meta.env.VITE_BRAND_EXCHANGE as string) || "MSE",
 } as const;
