@@ -13,7 +13,7 @@ GO
 /* ---- Idempotency: clear prior demo rows (fixed demo keys) ---------- */
 DELETE FROM ClientBalances WHERE client_DPA_ = 1001;
 DELETE FROM Payment        WHERE Payment_DPA_ IN (5001, 5002, 5003);
-DELETE FROM PortalUsers    WHERE Email = 'demo@aar.bsp.rw';
+DELETE FROM PortalUsers    WHERE Email IN ('demo@aar.bsp.rw', 'admin@aar.bsp.rw');
 DELETE FROM MarketQuotes   WHERE SecurityDpa BETWEEN 1 AND 6;
 DELETE FROM Client         WHERE Client_DPA_ = 1001;
 DELETE FROM Security       WHERE Security_DPA_ BETWEEN 1 AND 6;
@@ -81,6 +81,17 @@ VALUES
   '$2a$11$vldeisofY8uqVfUkn7vjDuXqWQpYiU/Hn.TqjpY897cfLWBAP3W5O',  -- Demo@2026
   'Jean-Bosco', 'Habimana', 'Client', 'Approved', 1, SYSUTCDATETIME(),
   SYSUTCDATETIME(), 1001, 0, SYSUTCDATETIME(), '+250 788 123 456', 'RW-CDS-100123');
+GO
+
+/* ---- Back-office admin login (Role=Administrators -> full access) -- */
+INSERT INTO PortalUsers
+ (Email, PasswordHash, FirstName, LastName, Role, Status, Active, CreatedAt,
+  ApprovedAt, ClientDpa, MustChangePassword, PasswordChangedAt, Phone)
+VALUES
+ ('admin@aar.bsp.rw',
+  '$2a$11$ZvOoeM2CRMdhffyo6.A35uiZofi4oeXfk34tCU1vUab3X.YkzfULe',  -- Admin@2026
+  'Aline', 'Uwase', 'Administrators', 'Approved', 1, SYSUTCDATETIME(),
+  SYSUTCDATETIME(), NULL, 0, SYSUTCDATETIME(), '+250 788 654 321');
 GO
 
 /* ---- Cash movements (statement + balance) ------------------------- */
