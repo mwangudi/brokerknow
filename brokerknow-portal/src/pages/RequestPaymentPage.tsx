@@ -1,6 +1,7 @@
 import { useEffect, useState, type FormEvent } from "react";
 import api from "../lib/api";
 import Icon from "../components/ui/Icon";
+import { brand } from "../lib/brand";
 
 interface PaymentRequestRow {
   id: number;
@@ -155,7 +156,7 @@ export default function RequestPaymentPage() {
     }
     if (requestType === "Withdrawal" && balance && amt > balance.withdrawable) {
       setSubmitError(
-        `You can withdraw at most MWK ${fmtMoney(balance.withdrawable)} right now.`,
+        `You can withdraw at most ${brand.currency} ${fmtMoney(balance.withdrawable)} right now.`,
       );
       return;
     }
@@ -246,21 +247,21 @@ export default function RequestPaymentPage() {
         <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
           <SummaryCard
             label="Account Balance"
-            value={`MWK ${fmtMoney(Math.abs(balance.balance))} ${balance.balance < 0 ? "Dr" : "Cr"}`}
+            value={`${brand.currency} ${fmtMoney(Math.abs(balance.balance))} ${balance.balance < 0 ? "Dr" : "Cr"}`}
             sub="Current account position"
             icon="account_balance_wallet"
             tone={balance.balance < 0 ? "error" : "secondary"}
           />
           <SummaryCard
             label="Withdrawable Now"
-            value={`MWK ${fmtMoney(balance.withdrawable)}`}
+            value={`${brand.currency} ${fmtMoney(balance.withdrawable)}`}
             sub="Cash available to withdraw"
             icon="payments"
             tone={balance.withdrawable > 0 ? "secondary" : "muted"}
           />
           <SummaryCard
             label="Credit Limit"
-            value={`MWK ${fmtMoney(balance.creditLimit)}`}
+            value={`${brand.currency} ${fmtMoney(balance.creditLimit)}`}
             sub="Trading facility — not withdrawable"
             icon="credit_card"
             tone="muted"
@@ -333,7 +334,7 @@ export default function RequestPaymentPage() {
 
             {/* Amount */}
             <div>
-              <label className={labelCls}>Amount (MWK)</label>
+              <label className={labelCls}>Amount ({brand.currency})</label>
               <input
                 type="number"
                 step="0.01"
@@ -347,7 +348,7 @@ export default function RequestPaymentPage() {
               {requestType === "Withdrawal" && balance && (
                 <p className={`mt-1.5 text-xs ${overLimit ? "text-axis-error" : "text-on-surface-variant"}`}>
                   You can withdraw up to{" "}
-                  <strong>MWK {fmtMoney(balance.withdrawable)}</strong> right now.
+                  <strong>{brand.currency} {fmtMoney(balance.withdrawable)}</strong> right now.
                   {balance.withdrawable <= 0 && " There is no cash available to withdraw."}
                 </p>
               )}
@@ -494,7 +495,7 @@ export default function RequestPaymentPage() {
                               size={16}
                               className="text-on-surface-variant"
                             />
-                            {r.requestType} · MWK {fmtMoney(r.amount)}
+                            {r.requestType} · {brand.currency} {fmtMoney(r.amount)}
                           </span>
                           <span
                             className={`rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase ${statusTone(r.status)}`}

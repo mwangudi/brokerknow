@@ -1,6 +1,7 @@
 import { useState, type FormEvent } from "react";
 import { useNavigate, Link } from "react-router";
 import { useAuth } from "../context/AuthContext";
+import { brand } from "../lib/brand";
 
 export default function LoginPage() {
   const { login, loading } = useAuth();
@@ -72,11 +73,11 @@ export default function LoginPage() {
       {/* Form panel */}
       <div className="flex w-full flex-col items-center justify-center px-4 py-10 lg:w-1/2">
         <div className="w-full max-w-md">
-          {/* Cedar Capital — client brand, above the Sign in card */}
+          {/* Client brand, above the Sign in card */}
           <div className="mb-6 flex flex-col items-center text-center">
             <img
-              src="/images/logo/cedar-logo.png"
-              alt="Cedar Capital"
+              src={brand.logo}
+              alt={brand.name}
               className="h-20 w-auto object-contain"
             />
             <p className="mt-2 text-[11px] font-semibold uppercase tracking-[0.15em] text-on-surface-variant">

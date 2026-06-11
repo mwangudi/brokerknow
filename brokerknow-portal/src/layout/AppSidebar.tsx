@@ -2,6 +2,7 @@ import { Link, useLocation } from "react-router";
 import { useSidebar } from "../context/SidebarContext";
 import { useAuth } from "../context/AuthContext";
 import Icon from "../components/ui/Icon";
+import { brand } from "../lib/brand";
 
 type NavItem = { name: string; icon: string; path: string };
 
@@ -41,22 +42,22 @@ const AppSidebar: React.FC = () => {
           isMobileOpen ? "translate-x-0" : "-translate-x-full"
         }`}
       >
-        {/* Brand — Cedar Capital (client), mirrors the admin back office */}
+        {/* Brand — client logo + name, mirrors the admin back office */}
         <div className="px-6 pb-5 pt-6">
           <Link to="/" onClick={closeOnMobile} className="flex items-center gap-3">
             <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-white p-1 ring-1 ring-outline-variant">
               <img
-                src="/images/logo/cedar-logo.png"
-                alt="Cedar Capital"
+                src={brand.logo}
+                alt={brand.name}
                 className="h-full w-full object-contain"
               />
             </span>
             <span className="min-w-0 leading-tight">
               <span className="block font-display text-base font-bold tracking-tight text-primary">
-                Cedar Capital
+                {brand.name}
               </span>
               <span className="block text-xs text-on-surface-variant opacity-70">
-                Institutional Portal
+                {brand.tagline}
               </span>
             </span>
           </Link>
@@ -107,7 +108,7 @@ const AppSidebar: React.FC = () => {
             <span>Settings</span>
           </Link>
           <a
-            href="mailto:support@cedarcapital.mw"
+            href={`mailto:${brand.supportEmail}`}
             className="flex items-center gap-3 rounded-lg px-3 py-2 text-sm text-on-surface-variant transition-colors hover:bg-surface-container"
           >
             <Icon name="help" size={20} />

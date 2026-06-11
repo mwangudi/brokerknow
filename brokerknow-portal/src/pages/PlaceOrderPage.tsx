@@ -4,6 +4,7 @@ import api from "../lib/api";
 import { useMarketToday } from "../hooks/useMarketToday";
 import Icon from "../components/ui/Icon";
 import OrderTabs from "../components/orders/OrderTabs";
+import { brand } from "../lib/brand";
 
 interface LookupOption {
   value: number;
@@ -394,7 +395,7 @@ export default function PlaceOrderPage() {
             {/* Price (limit) or amount (best purchase) */}
             {!best ? (
               <div>
-                <label className={labelCls}>Price (MWK)</label>
+                <label className={labelCls}>Price ({brand.currency})</label>
                 <input
                   type="text"
                   value={price}
@@ -406,7 +407,7 @@ export default function PlaceOrderPage() {
             ) : (
               isPurchase && (
                 <div>
-                  <label className={labelCls}>Maximum Amount (MWK)</label>
+                  <label className={labelCls}>Maximum Amount ({brand.currency})</label>
                   <input
                     type="number"
                     step="0.01"
@@ -457,7 +458,7 @@ export default function PlaceOrderPage() {
               <Row label="Side" value={isPurchase ? "Purchase" : "Sale"} />
               <Row
                 label="Estimated Price"
-                value={best ? "Market" : price ? `MWK ${price}` : "—"}
+                value={best ? "Market" : price ? `${brand.currency} ${price}` : "—"}
               />
               <Row
                 label="Total Quantity"
@@ -475,7 +476,7 @@ export default function PlaceOrderPage() {
                     {best ? "Max. Exposure" : "Est. Total Exposure"}
                   </span>
                   <span className="font-display text-xl font-bold text-secondary-fixed">
-                    {exposure != null ? `MWK ${fmtMoney(exposure)}` : "—"}
+                    {exposure != null ? `${brand.currency} ${fmtMoney(exposure)}` : "—"}
                   </span>
                 </div>
               </div>

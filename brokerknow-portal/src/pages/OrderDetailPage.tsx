@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router";
 import api from "../lib/api";
 import Icon from "../components/ui/Icon";
+import { brand } from "../lib/brand";
 
 interface OrderItem {
   security: string;
@@ -145,7 +146,7 @@ export default function OrderDetailPage() {
         />
         <Tile
           label="Gross Value"
-          value={`MWK ${fmt(grossValue)}`}
+          value={`${brand.currency} ${fmt(grossValue)}`}
           icon="payments"
           emphasis
         />

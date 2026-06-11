@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import api from "../lib/api";
+import { brand } from "../lib/brand";
 
 interface ContractRow {
   contractDpa: number;
@@ -102,7 +103,7 @@ export default function ContractsPage() {
                 <th className="px-4 py-3">Side</th>
                 <th className="px-4 py-3">Security</th>
                 <th className="px-4 py-3 text-right">Quantity</th>
-                <th className="px-4 py-3 text-right">Gross (MWK)</th>
+                <th className="px-4 py-3 text-right">Gross ({brand.currency})</th>
                 <th className="px-4 py-3"></th>
               </tr>
             </thead>

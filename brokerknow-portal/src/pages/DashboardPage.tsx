@@ -4,6 +4,7 @@ import api from "../lib/api";
 import { useAuth } from "../context/AuthContext";
 import { useMarketToday } from "../hooks/useMarketToday";
 import Icon from "../components/ui/Icon";
+import { brand } from "../lib/brand";
 
 interface Balance {
   openingBalance: number;
@@ -109,7 +110,7 @@ export default function DashboardPage() {
         <div className="col-span-12 grid grid-cols-1 gap-4 md:grid-cols-3 lg:col-span-8 lg:gap-6">
           <StatCard
             label="Account Balance"
-            value={`MWK ${balance ? fmt(balance.balance) : "—"}`}
+            value={`${brand.currency} ${balance ? fmt(balance.balance) : "\u2014"}`}
             sub={
               balance
                 ? balance.balance >= 0
@@ -122,14 +123,14 @@ export default function DashboardPage() {
           />
           <StatCard
             label="Outstanding"
-            value={`MWK ${balance ? fmt(balance.outstanding) : "—"}`}
+            value={`${brand.currency} ${balance ? fmt(balance.outstanding) : "\u2014"}`}
             sub="Settlement due"
             tone="error"
             icon="warning"
           />
           <StatCard
             label="Credit Limit"
-            value={`MWK ${balance ? fmt(balance.creditLimit) : "—"}`}
+            value={`${brand.currency} ${balance ? fmt(balance.creditLimit) : "\u2014"}`}
             sub="Approved facility"
             tone="muted"
             icon="verified_user"

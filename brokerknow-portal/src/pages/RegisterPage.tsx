@@ -3,6 +3,7 @@ import { Link } from "react-router";
 import { useAuth } from "../context/AuthContext";
 import api from "../lib/api";
 import DatePicker from "../components/form/DatePicker";
+import { brand } from "../lib/brand";
 
 // ─── Types ──────────────────────────────────────────────────────────
 type ClientKind = "existing" | "new" | null;
@@ -357,19 +358,19 @@ export default function RegisterPage() {
         {step === 0 && (
           <div>
             <h2 className="mb-1 text-xl font-semibold text-gray-900">
-              Welcome to Cedar Capital, let's get you started.
+              Welcome to {brand.name}, let's get you started.
             </h2>
             <p className="mb-6 text-sm text-gray-500">
               Tell us which best describes you so we can take you down the right path.
             </p>
             <div className="grid gap-4 sm:grid-cols-2">
               <ChoiceCard
-                title="I am already a Cedar Capital Client"
+                title={`I am already a ${brand.name} Client`}
                 description="You already have a CSD account with us and just need an online portal login. We'll verify your CSD number and link this login to your existing client record."
                 onClick={() => chooseKind("existing")}
               />
               <ChoiceCard
-                title="I am new, I would like to be a Cedar Client"
+                title={`I am new, I would like to be a ${brand.name} Client`}
                 description="You don't yet have a CSD account. Complete the full application below and our onboarding team will set you up."
                 onClick={() => chooseKind("new")}
               />
@@ -491,7 +492,7 @@ export default function RegisterPage() {
               KYC documents
             </h2>
             <p className="mb-4 text-sm text-gray-500">
-              In line with FIU / Cedar Capital onboarding requirements, please
+              In line with FIU / {brand.name} onboarding requirements, please
               attach the following. Certified copies dated within the last
               three months are preferred.
             </p>

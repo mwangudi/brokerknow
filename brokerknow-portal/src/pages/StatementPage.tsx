@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import api from "../lib/api";
 import DatePicker from "../components/form/DatePicker";
 import Icon from "../components/ui/Icon";
+import { brand } from "../lib/brand";
 
 interface StatementRow {
   source: string;
@@ -117,13 +118,13 @@ export default function StatementPage() {
         <div className="grid grid-cols-1 gap-4 md:grid-cols-4">
           <SummaryCard
             label="Total Debit"
-            value={`MWK ${fmt(data.summary.totalDebit)}`}
+            value={`${brand.currency} ${fmt(data.summary.totalDebit)}`}
             icon="trending_down"
             tone="error"
           />
           <SummaryCard
             label="Total Credit"
-            value={`MWK ${fmt(data.summary.totalCredit)}`}
+            value={`${brand.currency} ${fmt(data.summary.totalCredit)}`}
             icon="trending_up"
             tone="secondary"
           />
@@ -139,7 +140,7 @@ export default function StatementPage() {
               />
             </div>
             <div className="font-display text-xl font-semibold text-white">
-              MWK {fmt(data.summary.closingBalance)}{" "}
+              {brand.currency} {fmt(data.summary.closingBalance)}{" "}
               <span className="text-sm font-medium text-on-primary-container">
                 {data.summary.closingBalance >= 0 ? "Cr" : "Dr"}
               </span>
