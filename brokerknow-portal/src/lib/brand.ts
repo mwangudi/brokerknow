@@ -20,4 +20,15 @@ export const brand = {
   currency: (import.meta.env.VITE_CURRENCY as string) || "MWK",
   /** Short name of the home stock exchange (e.g. MSE, RSE) shown in copy. */
   exchange: (import.meta.env.VITE_BRAND_EXCHANGE as string) || "MSE",
+  /** Marketing headline on the login brand panel. */
+  loginHeadline:
+    (import.meta.env.VITE_LOGIN_HEADLINE as string) ||
+    "Cedar Capital \u2014 Malawi\u2019s Digital Broker",
+  /** Pipe-separated service list shown under the login headline. */
+  loginServices:
+    (import.meta.env.VITE_LOGIN_SERVICES as string) ||
+    "Stockbroking | Corporate Advisory | Research | Investment Advice",
+  /** Optional hero photo on the login brand panel (path under /public).
+   *  Empty string = no photo, the panel falls back to the brand wash. */
+  loginPhoto: (import.meta.env.VITE_LOGIN_PHOTO as string) ?? "",
 } as const;
