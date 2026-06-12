@@ -26,6 +26,8 @@ DELETE FROM Security       WHERE Security_DPA_ BETWEEN 1 AND 6;
 DELETE FROM OrderSecType   WHERE OrderSecType_DPA_ IN (1, 2);
 DELETE FROM OrderType      WHERE OrderType_DPA_ IN (1, 2);
 DELETE FROM PayType        WHERE PayType_DPA_ IN (1, 2);
+DELETE FROM OrderHoldType  WHERE OrderHoldType_DPA_ IN (1, 2, 3, 4);
+DELETE FROM OrderHoldOptions WHERE OrderHoldOptionID IN (2, 3);
 DELETE FROM EntityType     WHERE EntityType_DPA_ = 1;
 DELETE FROM Residency      WHERE Residency_DPA_ = 1;
 DELETE FROM Commission     WHERE Commission_DPA_ = 1;
@@ -90,6 +92,23 @@ GO
 INSERT INTO OrderSecType (OrderSecType_DPA_, OrderSecTypeDescription, OrderSecTypeDisplayName, DefaultSelection) VALUES
  (1, 'Equity', 'Equity', 1),
  (2, 'Bond',   'Bond',   0);
+GO
+
+/* ---- Order-hold lookups (REQUIRED for placing orders) -------------
+   The portal Place Order flow picks a default OrderHoldOptions row, and the
+   FK-hardened clone enforces FK_tbOrder_OrderHoldType, so OrderHoldType must
+   carry the matching ids. Values mirror prod BrokerKnow exactly. */
+INSERT INTO OrderHoldOptions (OrderHoldOptionID, Description, RequiresDate, DefaultSelection) VALUES
+ (2, 'Awaiting Manual Release', 0, 1),
+ (3, 'Until Given Date',        1, 0);
+GO
+SET IDENTITY_INSERT OrderHoldType ON;
+INSERT INTO OrderHoldType (OrderHoldType_DPA_, OrderHoldTypeName, DefaultSelection) VALUES
+ (1, 'Released',                0),
+ (2, 'Awaiting manual release', 1),
+ (3, 'Awaiting payment',        0),
+ (4, 'Until given date',        0);
+SET IDENTITY_INSERT OrderHoldType OFF;
 GO
 
 /* ---- Securities: Nairobi Securities Exchange listings (KES) ------- */
@@ -173,6 +192,8 @@ UNION ALL SELECT 'EntityType',    COUNT(*) FROM EntityType
 UNION ALL SELECT 'PayType',       COUNT(*) FROM PayType
 UNION ALL SELECT 'OrderType',     COUNT(*) FROM OrderType
 UNION ALL SELECT 'OrderSecType',  COUNT(*) FROM OrderSecType
+UNION ALL SELECT 'OrderHoldOptions', COUNT(*) FROM OrderHoldOptions
+UNION ALL SELECT 'OrderHoldType', COUNT(*) FROM OrderHoldType
 UNION ALL SELECT 'Security',      COUNT(*) FROM Security
 UNION ALL SELECT 'MarketQuotes',  COUNT(*) FROM MarketQuotes
 UNION ALL SELECT 'Client',        COUNT(*) FROM Client

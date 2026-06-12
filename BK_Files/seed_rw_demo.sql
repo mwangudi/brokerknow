@@ -20,6 +20,8 @@ DELETE FROM Security       WHERE Security_DPA_ BETWEEN 1 AND 6;
 DELETE FROM OrderSecType   WHERE OrderSecType_DPA_ IN (1, 2);
 DELETE FROM OrderType      WHERE OrderType_DPA_ IN (1, 2);
 DELETE FROM PayType        WHERE PayType_DPA_ IN (1, 2);
+DELETE FROM OrderHoldType  WHERE OrderHoldType_DPA_ IN (1, 2, 3, 4);
+DELETE FROM OrderHoldOptions WHERE OrderHoldOptionID IN (2, 3);
 GO
 
 /* ---- Lookups: payment types --------------------------------------- */
@@ -38,6 +40,23 @@ GO
 INSERT INTO OrderSecType (OrderSecType_DPA_, OrderSecTypeDescription, OrderSecTypeDisplayName, DefaultSelection) VALUES
  (1, 'Equity', 'Equity', 1),
  (2, 'Bond',   'Bond',   0);
+GO
+
+/* ---- Order-hold lookups (REQUIRED for placing orders) -------------
+   The portal Place Order flow picks a default OrderHoldOptions row; the
+   OrderHoldType ids are the FK target of tbOrder.OrderHoldType_DPA_ on the
+   FK-hardened clone. Values mirror prod BrokerKnow exactly. */
+INSERT INTO OrderHoldOptions (OrderHoldOptionID, Description, RequiresDate, DefaultSelection) VALUES
+ (2, 'Awaiting Manual Release', 0, 1),
+ (3, 'Until Given Date',        1, 0);
+GO
+SET IDENTITY_INSERT OrderHoldType ON;
+INSERT INTO OrderHoldType (OrderHoldType_DPA_, OrderHoldTypeName, DefaultSelection) VALUES
+ (1, 'Released',                0),
+ (2, 'Awaiting manual release', 1),
+ (3, 'Awaiting payment',        0),
+ (4, 'Until given date',        0);
+SET IDENTITY_INSERT OrderHoldType OFF;
 GO
 
 /* ---- Securities: Rwanda Stock Exchange listings ------------------- */
