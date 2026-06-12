@@ -1,9 +1,9 @@
 /* =====================================================================
    BrokerKnow_KE_Demo — synthetic seed data
-   Axis Kenya placeholder white-label demo (isolated DB, KES / NSE).
+   Green Margin Capital placeholder white-label demo (isolated DB, KES / NSE).
    NO real Cedar/Malawi data. Safe to re-run (idempotent deletes first).
-   Demo login:  demo@axis-kenya.demo  /  Demo@2026   (BCrypt wf=11)
-   Admin login: admin@axis-kenya.demo /  Admin@2026
+   Demo login:  demo@greenmargin.demo  /  Demo@2026   (BCrypt wf=11)
+   Admin login: admin@greenmargin.demo /  Admin@2026
 
    NOTE: BrokerKnow_KE_Demo is cloned from BrokerKnow_Clean, which carries the
    22 hardened FKs (FK_Client_Branch/Class/Commission/Residency/EntityType,
@@ -19,7 +19,7 @@ GO
 /* ---- Idempotency: clear prior demo rows (children -> parents) ------ */
 DELETE FROM ClientBalances WHERE client_DPA_ = 1001;
 DELETE FROM Payment        WHERE Payment_DPA_ IN (5001, 5002, 5003);
-DELETE FROM PortalUsers    WHERE Email IN ('demo@axis-kenya.demo', 'admin@axis-kenya.demo');
+DELETE FROM PortalUsers    WHERE Email IN ('demo@greenmargin.demo', 'admin@greenmargin.demo', 'demo@axis-kenya.demo', 'admin@axis-kenya.demo');
 DELETE FROM MarketQuotes   WHERE SecurityDpa BETWEEN 1 AND 6;
 DELETE FROM Client         WHERE Client_DPA_ = 1001;
 DELETE FROM Security       WHERE Security_DPA_ BETWEEN 1 AND 6;
@@ -149,7 +149,7 @@ INSERT INTO PortalUsers
  (Email, PasswordHash, FirstName, LastName, Role, Status, Active, CreatedAt,
   ApprovedAt, ClientDpa, MustChangePassword, PasswordChangedAt, Phone, CdsNumber)
 VALUES
- ('demo@axis-kenya.demo',
+ ('demo@greenmargin.demo',
   '$2a$11$vldeisofY8uqVfUkn7vjDuXqWQpYiU/Hn.TqjpY897cfLWBAP3W5O',  -- Demo@2026
   'Wanjiku', 'Kamau', 'Client', 'Approved', 1, SYSUTCDATETIME(),
   SYSUTCDATETIME(), 1001, 0, SYSUTCDATETIME(), '+254 712 345 678', 'KE-CDS-100123');
@@ -160,7 +160,7 @@ INSERT INTO PortalUsers
  (Email, PasswordHash, FirstName, LastName, Role, Status, Active, CreatedAt,
   ApprovedAt, ClientDpa, MustChangePassword, PasswordChangedAt, Phone)
 VALUES
- ('admin@axis-kenya.demo',
+ ('admin@greenmargin.demo',
   '$2a$11$ZvOoeM2CRMdhffyo6.A35uiZofi4oeXfk34tCU1vUab3X.YkzfULe',  -- Admin@2026
   'David', 'Otieno', 'Administrators', 'Approved', 1, SYSUTCDATETIME(),
   SYSUTCDATETIME(), NULL, 0, SYSUTCDATETIME(), '+254 733 654 321');

@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useAuth } from "../../context/AuthContext";
+import { loginPath } from "../../lib/api";
 
 export default function UserDropdown() {
   const [isOpen, setIsOpen] = useState(false);
@@ -61,7 +62,7 @@ export default function UserDropdown() {
               onClick={() => {
                 closeDropdown();
                 logout();
-                window.location.href = "/login";
+                window.location.href = loginPath();
               }}
               className="mt-2 flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800"
             >
