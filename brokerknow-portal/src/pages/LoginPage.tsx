@@ -25,18 +25,7 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="flex min-h-screen flex-col bg-background">
-      {/* Non-production builds (VITE_ENV_LABEL) show a warning ribbon so a test
-          login is unmistakable. Renders nothing in production. */}
-      {brand.envLabel && (
-        <div
-          role="status"
-          className="w-full bg-amber-400 px-3 py-1 text-center text-[11px] font-bold uppercase tracking-[0.18em] text-amber-950"
-        >
-          ⚠ {brand.envLabel} environment — data here is not live
-        </div>
-      )}
-      <div className="flex flex-1">
+    <div className="flex min-h-screen bg-background">
       {/* Brand panel — TEAL wash differentiates the CLIENT portal from the
           staff back-office (which uses a green wash). Same layout, different
           shade, so users can tell the two sign-ins apart at a glance. */}
@@ -67,10 +56,15 @@ export default function LoginPage() {
           </p>
         </div>
 
-        {/* Headline */}
+        {/* Headline — split on the em-dash so the brand title sits on two
+            clean lines (e.g. "Cedar Capital" / "Malawi's Digital Broker"). */}
         <div className="relative max-w-md">
           <h1 className="font-display text-4xl font-bold leading-tight text-white">
-            {brand.loginHeadline}
+            {brand.loginHeadline.split(/\s*\u2014\s*/).map((line, i) => (
+              <span key={i} className="block">
+                {line}
+              </span>
+            ))}
           </h1>
           <p className="mt-4 text-sm font-semibold uppercase tracking-[0.12em] text-[#99f6e4]">
             {brand.loginServices}
@@ -84,8 +78,17 @@ export default function LoginPage() {
         </p>
       </div>
 
-      {/* Form panel */}
-      <div className="flex w-full flex-col items-center justify-center px-4 py-10 lg:w-1/2">
+      {/* Form panel — the TEST ribbon sits at the top of THIS (white) side only */}
+      <div className="flex w-full flex-col lg:w-1/2">
+        {brand.envLabel && (
+          <div
+            role="status"
+            className="w-full bg-amber-400 px-3 py-1 text-center text-[11px] font-bold uppercase tracking-[0.18em] text-amber-950"
+          >
+            ⚠ {brand.envLabel} environment — data here is not live
+          </div>
+        )}
+        <div className="flex flex-1 flex-col items-center justify-center px-4 py-10">
         <div className="w-full max-w-lg">
           {/* Client brand, above the Sign in card */}
           <div className="mb-8 flex flex-col items-center text-center">
