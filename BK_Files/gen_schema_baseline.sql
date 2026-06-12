@@ -104,7 +104,9 @@ SELECT 'CREATE ' + CASE WHEN i.is_unique=1 THEN 'UNIQUE ' ELSE '' END + i.type_d
   + ISNULL(' INCLUDE (' + STUFF((SELECT ', ' + QUOTENAME(c.name)
            FROM sys.index_columns ix JOIN sys.columns c ON c.object_id=ix.object_id AND c.column_id=ix.column_id
            WHERE ix.object_id=i.object_id AND ix.index_id=i.index_id AND ix.is_included_column=1 ORDER BY ix.index_column_id
-           FOR XML PATH(''), TYPE).value('.','nvarchar(max)'),1,2,'') + ')','') + ';' + CHAR(13)+CHAR(10) + 'GO'
+           FOR XML PATH(''), TYPE).value('.','nvarchar(max)'),1,2,'') + ')','')
+  + CASE WHEN i.has_filter = 1 THEN ' WHERE ' + i.filter_definition ELSE '' END   -- filtered-index predicate
+  + ';' + CHAR(13)+CHAR(10) + 'GO'
 FROM sys.indexes i
 JOIN sys.tables t ON t.object_id=i.object_id
 WHERE t.schema_id=SCHEMA_ID('dbo') AND i.is_primary_key=0 AND i.type IN (1,2) AND i.is_unique_constraint=0

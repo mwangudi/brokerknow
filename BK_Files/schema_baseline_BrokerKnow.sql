@@ -2093,9 +2093,9 @@ CREATE NONCLUSTERED INDEX [IX_PortalPaymentRequests_Status_CreatedAt] ON [dbo].[
 GO
 CREATE UNIQUE NONCLUSTERED INDEX [IX_PortalRefreshTokens_Token] ON [dbo].[PortalRefreshTokens] ([Token]);
 GO
-CREATE UNIQUE NONCLUSTERED INDEX [IX_PortalUsers_Email] ON [dbo].[PortalUsers] ([Email]);
+CREATE UNIQUE NONCLUSTERED INDEX [IX_PortalUsers_Email] ON [dbo].[PortalUsers] ([Email]) WHERE ([Email] IS NOT NULL AND [Email]<>'');
 GO
-CREATE UNIQUE NONCLUSTERED INDEX [IX_PortalUsers_Username] ON [dbo].[PortalUsers] ([Username]);
+CREATE UNIQUE NONCLUSTERED INDEX [IX_PortalUsers_Username] ON [dbo].[PortalUsers] ([Username]) WHERE ([Username] IS NOT NULL);
 GO
 CREATE NONCLUSTERED INDEX [IX_PriceImportBatches_QuoteDate_Exchange] ON [dbo].[PriceImportBatches] ([QuoteDate], [Exchange]);
 GO
