@@ -25,7 +25,18 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="flex min-h-screen bg-background">
+    <div className="flex min-h-screen flex-col bg-background">
+      {/* Non-production builds (VITE_ENV_LABEL) show a warning ribbon so a test
+          login is unmistakable. Renders nothing in production. */}
+      {brand.envLabel && (
+        <div
+          role="status"
+          className="w-full bg-amber-400 px-3 py-1 text-center text-[11px] font-bold uppercase tracking-[0.18em] text-amber-950"
+        >
+          ⚠ {brand.envLabel} environment — data here is not live
+        </div>
+      )}
+      <div className="flex flex-1">
       {/* Brand panel — TEAL wash differentiates the CLIENT portal from the
           staff back-office (which uses a green wash). Same layout, different
           shade, so users can tell the two sign-ins apart at a glance. */}
@@ -166,6 +177,7 @@ export default function LoginPage() {
             </div>
           </div>
         </div>
+      </div>
       </div>
     </div>
   );

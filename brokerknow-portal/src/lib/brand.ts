@@ -31,4 +31,8 @@ export const brand = {
   /** Optional hero photo on the login brand panel (path under /public).
    *  Empty string = no photo, the panel falls back to the brand wash. */
   loginPhoto: (import.meta.env.VITE_LOGIN_PHOTO as string) ?? "",
+  /** Non-empty (e.g. "TEST") marks a NON-production build: shows a warning
+   *  ribbon on the login page and prefixes the browser tab title. Empty in
+   *  production so live builds are unchanged. */
+  envLabel: (import.meta.env.VITE_ENV_LABEL as string) || "",
 } as const;
