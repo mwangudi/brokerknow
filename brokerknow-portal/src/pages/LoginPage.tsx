@@ -4,11 +4,15 @@ import { useAuth } from "../context/AuthContext";
 import { brand } from "../lib/brand";
 
 export default function LoginPage() {
-  const { login, loading } = useAuth();
+  const { login, verifyOtp, loading } = useAuth();
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const [step, setStep] = useState<"credentials" | "otp">("credentials");
+  const [otpToken, setOtpToken] = useState("");
+  const [otpCode, setOtpCode] = useState("");
+  const [otpHint, setOtpHint] = useState("");
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
@@ -16,8 +20,29 @@ export default function LoginPage() {
     const result = await login(email, password);
     if (result.error) {
       setError(result.error);
+    } else if (result.otpRequired) {
+      setOtpToken(result.otpToken || "");
+      setOtpHint(result.otpHint || "your email");
+      setOtpCode("");
+      setStep("otp");
     } else if (result.requiresPasswordChange) {
-      // Temp password / monthly rotation — send straight to the change form.
+      navigate("/change-password", { replace: true });
+    } else {
+      navigate("/", { replace: true });
+    }
+  }
+
+  async function handleVerifyOtp(e: FormEvent) {
+    e.preventDefault();
+    if (!otpCode.trim()) {
+      setError("Enter the code we sent you.");
+      return;
+    }
+    setError("");
+    const result = await verifyOtp(otpToken, otpCode.trim());
+    if (result.error) {
+      setError(result.error);
+    } else if (result.requiresPasswordChange) {
       navigate("/change-password", { replace: true });
     } else {
       navigate("/", { replace: true });
@@ -102,6 +127,58 @@ export default function LoginPage() {
             </p>
           </div>
 
+          {step === "otp" ? (
+          <form
+            onSubmit={handleVerifyOtp}
+            className="rounded-2xl border border-outline-variant bg-surface-container-lowest p-10 shadow-[0px_4px_12px_rgba(15,23,42,0.03)]"
+          >
+            <h2 className="font-display text-2xl font-semibold text-primary">
+              Verify it&apos;s you
+            </h2>
+            <p className="mb-7 mt-1 text-sm text-on-surface-variant">
+              We sent a one-time code to{" "}
+              <span className="font-medium text-on-surface">{otpHint}</span>. Enter
+              it below to finish signing in.
+            </p>
+
+            {error && (
+              <div className="mb-4 rounded-lg border border-axis-error/30 bg-axis-error/5 p-3 text-sm text-axis-error">
+                {error}
+              </div>
+            )}
+
+            <div className="mb-6">
+              <label className="mb-1.5 block text-[11px] font-semibold uppercase tracking-wide text-on-surface-variant">
+                Verification code
+              </label>
+              <input
+                type="text"
+                inputMode="numeric"
+                autoComplete="one-time-code"
+                value={otpCode}
+                onChange={(e) => setOtpCode(e.target.value.replace(/[^0-9]/g, "").slice(0, 6))}
+                className="w-full rounded-lg border border-outline-variant bg-surface-container-lowest px-4 py-3 text-center text-2xl tracking-[0.5em] text-on-surface focus:border-secondary focus:outline-none focus:ring-1 focus:ring-secondary"
+                placeholder="••••••"
+                autoFocus
+              />
+            </div>
+
+            <button
+              type="submit"
+              disabled={loading}
+              className="w-full rounded-lg bg-primary py-3 text-base font-semibold uppercase tracking-wide text-on-primary transition-opacity hover:opacity-90 disabled:opacity-50"
+            >
+              {loading ? "Verifying…" : "Verify & sign in"}
+            </button>
+            <button
+              type="button"
+              onClick={() => { setStep("credentials"); setOtpCode(""); setError(""); }}
+              className="mt-3 w-full text-center text-sm text-on-surface-variant hover:underline"
+            >
+              Back to sign in
+            </button>
+          </form>
+          ) : (
           <form
             onSubmit={handleSubmit}
             className="rounded-2xl border border-outline-variant bg-surface-container-lowest p-10 shadow-[0px_4px_12px_rgba(15,23,42,0.03)]"
@@ -165,6 +242,7 @@ export default function LoginPage() {
               </Link>
             </p>
           </form>
+          )}
 
           {/* Vendor lockup — Built by Martens Africa. On the white panel where
               the dark navy/red logo reads naturally (no white chip). */}

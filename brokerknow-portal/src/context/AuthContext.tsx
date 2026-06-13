@@ -20,7 +20,9 @@ interface AuthState {
   user: User | null;
   token: string | null;
   loading: boolean;
-  login: (email: string, password: string) => Promise<{ error?: string; requiresPasswordChange?: boolean }>;
+  login: (email: string, password: string) => Promise<{ error?: string; requiresPasswordChange?: boolean; otpRequired?: boolean; otpToken?: string; otpHint?: string }>;
+  /** Completes a two-step login by verifying the emailed one-time passcode. */
+  verifyOtp: (otpToken: string, code: string) => Promise<{ error?: string; requiresPasswordChange?: boolean }>;
   register: (data: RegisterData) => Promise<{ error?: string; message?: string }>;
   logout: () => void;
   /** Marks the password change as completed and refreshes the cached user. */
@@ -81,21 +83,41 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setLoading(true);
     try {
       const r = await api.post("/auth/login", { email, password, audience: "portal" });
-      const { accessToken, refreshToken, user: u, requiresPasswordChange } = r.data;
-      // Reflect the server's policy decision on the cached user object.
-      const userWithFlag: User = { ...u, mustChangePassword: !!requiresPasswordChange };
-      localStorage.setItem("portal_token", accessToken);
-      localStorage.setItem("portal_refresh", refreshToken);
-      localStorage.setItem("portal_user", JSON.stringify(userWithFlag));
-      setToken(accessToken);
-      setUser(userWithFlag);
-      return { requiresPasswordChange: !!requiresPasswordChange };
+      if (r.data?.otpRequired) {
+        return { otpRequired: true, otpToken: r.data.otpToken as string, otpHint: r.data.channelHint as string };
+      }
+      return applyAuth(r.data);
     } catch (err: any) {
       return { error: err.response?.data?.error || "Login failed." };
     } finally {
       setLoading(false);
     }
   }, []);
+
+  const verifyOtp = useCallback(async (otpToken: string, code: string) => {
+    setLoading(true);
+    try {
+      const r = await api.post("/auth/login/verify-otp", { otpToken, code });
+      return applyAuth(r.data);
+    } catch (err: any) {
+      return { error: err.response?.data?.error || "Verification failed." };
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  // Persist the issued tokens + user and flip the context into the signed-in
+  // state. Shared by direct login and post-OTP verification.
+  function applyAuth(data: any) {
+    const { accessToken, refreshToken, user: u, requiresPasswordChange } = data;
+    const userWithFlag: User = { ...u, mustChangePassword: !!requiresPasswordChange };
+    localStorage.setItem("portal_token", accessToken);
+    localStorage.setItem("portal_refresh", refreshToken);
+    localStorage.setItem("portal_user", JSON.stringify(userWithFlag));
+    setToken(accessToken);
+    setUser(userWithFlag);
+    return { requiresPasswordChange: !!requiresPasswordChange };
+  }
 
   const register = useCallback(async (data: RegisterData) => {
     setLoading(true);
@@ -154,7 +176,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   return (
-    <AuthContext.Provider value={{ user, token, loading, login, register, logout, markPasswordChanged }}>
+    <AuthContext.Provider value={{ user, token, loading, login, verifyOtp, register, logout, markPasswordChanged }}>
       {children}
     </AuthContext.Provider>
   );

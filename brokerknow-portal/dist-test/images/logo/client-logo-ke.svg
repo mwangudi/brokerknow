@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="360" height="96" viewBox="0 0 360 96" role="img" aria-label="Green Margin Capital">
+  <title>Green Margin Capital</title>
+  <!-- Emblem: ascending margin / growth motif on a green tile -->
+  <g transform="translate(8,12)">
+    <rect x="0" y="0" width="72" height="72" rx="14" fill="#0d3b2e"/>
+    <g transform="translate(14,12)">
+      <rect x="0"  y="32" width="9" height="16" rx="2" fill="#34d399"/>
+      <rect x="13" y="24" width="9" height="24" rx="2" fill="#34d399"/>
+      <rect x="26" y="14" width="9" height="34" rx="2" fill="#6ee7b7"/>
+      <path d="M2 30 L20 16 L31 22 L44 6" fill="none" stroke="#ecfdf5" stroke-width="3"
+            stroke-linecap="round" stroke-linejoin="round"/>
+      <path d="M44 6 L44 16 M44 6 L34 6" fill="none" stroke="#ecfdf5" stroke-width="3"
+            stroke-linecap="round" stroke-linejoin="round"/>
+    </g>
+  </g>
+  <!-- Wordmark -->
+  <g transform="translate(96,0)" font-family="Segoe UI, Helvetica, Arial, sans-serif">
+    <text x="0" y="40" font-size="25" font-weight="700" fill="#0d3b2e" letter-spacing="0.3">GREEN <tspan fill="#0f9d63">MARGIN</tspan></text>
+    <text x="1" y="62" font-size="19" font-weight="600" fill="#0d3b2e" letter-spacing="5">CAPITAL</text>
+    <text x="2" y="80" font-size="11" font-weight="500" fill="#5b6b66" letter-spacing="1.2">NAIROBI SECURITIES EXCHANGE</text>
+  </g>
+</svg>
