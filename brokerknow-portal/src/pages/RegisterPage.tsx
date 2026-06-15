@@ -15,6 +15,7 @@ interface FormState {
   // Personal
   firstName: string;
   lastName: string;
+  idDocumentType: string;
   idNumber: string;
   cdsNumber: string;
   dateOfBirth: string;
@@ -51,6 +52,7 @@ const EMPTY: FormState = {
   clientKind: null,
   firstName: "",
   lastName: "",
+  idDocumentType: "National ID",
   idNumber: "",
   cdsNumber: "",
   dateOfBirth: "",
@@ -292,6 +294,7 @@ export default function RegisterPage() {
       officePhone: form.officePhone || undefined,
       homePhone: form.homePhone || undefined,
       idNumber: form.idNumber || undefined,
+      idDocumentType: form.idDocumentType || undefined,
       cdsNumber: form.cdsNumber || undefined,
       dateOfBirth: form.dateOfBirth || undefined,
       physicalAddress: form.physicalAddress || undefined,
@@ -410,13 +413,26 @@ export default function RegisterPage() {
                 placeholder="e.g. CSD-000123"
                 hint={isExisting ? "Optional — helps admin match your existing account." : undefined}
               />
+              <div>
+                <label className="mb-1.5 block text-sm font-medium text-gray-700">
+                  ID document type {!isExisting && <span className="text-red-500">*</span>}
+                </label>
+                <select
+                  value={form.idDocumentType}
+                  onChange={(e) => set("idDocumentType", e.target.value)}
+                  className="w-full rounded-lg border border-gray-300 px-4 py-3 text-base focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20"
+                >
+                  <option value="National ID">National ID</option>
+                  <option value="Passport">Passport</option>
+                </select>
+              </div>
               <Field
-                label="ID / Passport number"
+                label={form.idDocumentType === "Passport" ? "Passport number" : "National ID number"}
                 required={!isExisting}
                 value={form.idNumber}
                 error={errors.idNumber}
                 onChange={(v) => set("idNumber", v)}
-                placeholder="National ID or Passport no."
+                placeholder={form.idDocumentType === "Passport" ? "Passport no." : "National ID no."}
               />
               <div>
                 <label className="mb-1.5 block text-sm font-medium text-gray-700">
@@ -581,9 +597,13 @@ export default function RegisterPage() {
 // ─── Layout ─────────────────────────────────────────────────────────
 function Shell({ children }: { children: ReactNode }) {
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-gray-50 to-brand-25 px-4 py-12">
+    <div className="flex min-h-screen items-start justify-center bg-gradient-to-br from-gray-50 to-brand-25 px-3 py-6 sm:items-center sm:px-4 sm:py-12">
       <div className="w-full max-w-5xl">
         <div className="mb-6 text-center">
+          <h1 className="text-2xl font-bold text-gray-900 sm:text-3xl">Open your {brand.name} account</h1>
+          <p className="mt-1 text-sm text-gray-500 sm:text-base">
+            Complete the application below — it only takes a few minutes.
+          </p>
         </div>
         {children}
       </div>
@@ -640,11 +660,11 @@ function ChoiceCard({
     <button
       type="button"
       onClick={onClick}
-      className="rounded-xl border border-gray-200 bg-white p-5 text-left transition hover:border-brand-400 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-brand-500/30"
+      className="rounded-xl border border-gray-200 bg-white p-6 text-left transition hover:border-brand-400 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-brand-500/30"
     >
-      <h3 className="mb-1 text-sm font-semibold text-gray-900">{title}</h3>
-      <p className="text-xs text-gray-500">{description}</p>
-      <span className="mt-3 inline-flex items-center gap-1 text-xs font-medium text-brand-600">
+      <h3 className="mb-1 text-base font-semibold text-gray-900">{title}</h3>
+      <p className="text-sm text-gray-500">{description}</p>
+      <span className="mt-3 inline-flex items-center gap-1 text-sm font-medium text-brand-600">
         Continue →
       </span>
     </button>
@@ -685,9 +705,9 @@ function Summary({ form }: { form: FormState }) {
   return (
     <dl className="divide-y divide-gray-100 rounded-lg border border-gray-200">
       {rows.map((r) => (
-        <div key={r.label} className="grid grid-cols-3 gap-3 px-4 py-2.5 text-sm">
+        <div key={r.label} className="grid grid-cols-1 gap-1 px-4 py-2.5 text-sm sm:grid-cols-3 sm:gap-3">
           <dt className="text-gray-500">{r.label}</dt>
-          <dd className="col-span-2 font-medium text-gray-800">{r.value}</dd>
+          <dd className="font-medium text-gray-800 sm:col-span-2">{r.value}</dd>
         </div>
       ))}
     </dl>
@@ -727,7 +747,7 @@ function Field({
         placeholder={placeholder}
         autoComplete="off"
         aria-invalid={error ? "true" : "false"}
-        className={`w-full rounded-lg border px-4 py-2.5 text-sm focus:outline-none focus:ring-2 ${
+        className={`w-full rounded-lg border px-4 py-3 text-base focus:outline-none focus:ring-2 ${
           error
             ? "border-red-300 focus:border-red-500 focus:ring-red-500/20"
             : "border-gray-300 focus:border-brand-500 focus:ring-brand-500/20"

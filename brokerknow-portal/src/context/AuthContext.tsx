@@ -37,6 +37,7 @@ interface RegisterData {
   officePhone?: string;
   homePhone?: string;
   idNumber?: string;
+  idDocumentType?: string;
   cdsNumber?: string;
   dateOfBirth?: string;
   physicalAddress?: string;
@@ -127,7 +128,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const fd = new FormData();
       const scalarKeys = [
         "email", "firstName", "lastName", "phone", "officePhone", "homePhone",
-        "idNumber", "cdsNumber", "dateOfBirth", "physicalAddress",
+        "idNumber", "idDocumentType", "cdsNumber", "dateOfBirth", "physicalAddress",
         "postalAddress", "contactPerson",
       ] as const;
       for (const k of scalarKeys) {
