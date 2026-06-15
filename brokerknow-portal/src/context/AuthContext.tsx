@@ -40,6 +40,11 @@ interface RegisterData {
   idDocumentType?: string;
   cdsNumber?: string;
   dateOfBirth?: string;
+  // Account-type intake. accountType = Individual|Joint|ITF. The joint/ITF
+  // details travel as JSON strings the back office reads at approval time.
+  accountType?: string;
+  jointApplicants?: string;
+  itfBeneficiary?: string;
   physicalAddress?: string;
   postalAddress?: string;
   contactPerson?: string;
@@ -128,7 +133,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const fd = new FormData();
       const scalarKeys = [
         "email", "firstName", "lastName", "phone", "officePhone", "homePhone",
-        "idNumber", "idDocumentType", "cdsNumber", "dateOfBirth", "physicalAddress",
+        "idNumber", "idDocumentType", "cdsNumber", "dateOfBirth", "accountType",
+        "jointApplicants", "itfBeneficiary", "physicalAddress",
         "postalAddress", "contactPerson",
       ] as const;
       for (const k of scalarKeys) {

@@ -3,10 +3,35 @@ import { Link } from "react-router";
 import { useAuth } from "../context/AuthContext";
 import api from "../lib/api";
 import DatePicker from "../components/form/DatePicker";
+import SearchSelect from "../components/form/SearchSelect";
 import { brand } from "../lib/brand";
 
 // ─── Types ──────────────────────────────────────────────────────────
 type ClientKind = "existing" | "new" | null;
+
+const ID_TYPE_OPTIONS = [
+  { value: "National ID", label: "National ID" },
+  { value: "Passport", label: "Passport" },
+];
+
+const ACCOUNT_TYPE_OPTIONS = [
+  { value: "Individual", label: "Individual" },
+  { value: "Joint", label: "Joint (more than one holder)" },
+  { value: "ITF", label: "In Trust For (e.g. a minor child)" },
+];
+
+interface JointApplicant {
+  fullName: string;
+  idDocumentType: string;
+  idNumber: string;
+  relationship: string;
+}
+
+interface ItfBeneficiary {
+  fullName: string;
+  dateOfBirth: string;
+  relationship: string;
+}
 
 interface FormState {
   // Branch flag
@@ -19,6 +44,11 @@ interface FormState {
   idNumber: string;
   cdsNumber: string;
   dateOfBirth: string;
+
+  // Account type & joint / in-trust-for intake
+  accountType: string;
+  jointApplicants: JointApplicant[];
+  itfBeneficiary: ItfBeneficiary;
 
   // Contact
   email: string;
@@ -56,6 +86,9 @@ const EMPTY: FormState = {
   idNumber: "",
   cdsNumber: "",
   dateOfBirth: "",
+  accountType: "Individual",
+  jointApplicants: [],
+  itfBeneficiary: { fullName: "", dateOfBirth: "", relationship: "" },
   email: "",
   phone: "",
   officePhone: "",
@@ -116,6 +149,18 @@ function validateStep(step: number, form: FormState): Errors {
 
     if (!isExisting && !form.idNumber.trim())
       e.idNumber = "ID / Passport number is required.";
+
+    // Joint / In-Trust-For intake validation.
+    if (form.accountType === "Joint") {
+      const named = form.jointApplicants.filter((j) => j.fullName.trim());
+      if (named.length === 0)
+        e.jointApplicants = "Add at least one joint account holder.";
+    } else if (form.accountType === "ITF") {
+      if (!form.itfBeneficiary.fullName.trim())
+        e.itfBeneficiary = "Beneficiary full name is required for an In-Trust-For account.";
+      else if (!form.itfBeneficiary.relationship.trim())
+        e.itfBeneficiary = "State your relationship to the beneficiary.";
+    }
   }
 
   // Step 2 — Contact
@@ -297,6 +342,15 @@ export default function RegisterPage() {
       idDocumentType: form.idDocumentType || undefined,
       cdsNumber: form.cdsNumber || undefined,
       dateOfBirth: form.dateOfBirth || undefined,
+      accountType: form.accountType || undefined,
+      jointApplicants:
+        form.accountType === "Joint" && form.jointApplicants.some((j) => j.fullName.trim())
+          ? JSON.stringify(form.jointApplicants.filter((j) => j.fullName.trim()))
+          : undefined,
+      itfBeneficiary:
+        form.accountType === "ITF" && form.itfBeneficiary.fullName.trim()
+          ? JSON.stringify(form.itfBeneficiary)
+          : undefined,
       physicalAddress: form.physicalAddress || undefined,
       postalAddress: form.postalAddress || undefined,
       contactPerson: form.contactPerson || undefined,
@@ -413,19 +467,14 @@ export default function RegisterPage() {
                 placeholder="e.g. CSD-000123"
                 hint={isExisting ? "Optional — helps admin match your existing account." : undefined}
               />
-              <div>
-                <label className="mb-1.5 block text-sm font-medium text-gray-700">
-                  ID document type {!isExisting && <span className="text-red-500">*</span>}
-                </label>
-                <select
-                  value={form.idDocumentType}
-                  onChange={(e) => set("idDocumentType", e.target.value)}
-                  className="w-full rounded-lg border border-gray-300 px-4 py-3 text-base focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20"
-                >
-                  <option value="National ID">National ID</option>
-                  <option value="Passport">Passport</option>
-                </select>
-              </div>
+              <SearchSelect
+                label="ID document type"
+                required={!isExisting}
+                value={form.idDocumentType}
+                onChange={(v) => set("idDocumentType", v)}
+                options={ID_TYPE_OPTIONS}
+                searchPlaceholder="Search ID type…"
+              />
               <Field
                 label={form.idDocumentType === "Passport" ? "Passport number" : "National ID number"}
                 required={!isExisting}
@@ -449,6 +498,168 @@ export default function RegisterPage() {
                 )}
               </div>
             </div>
+
+            {!isExisting && (
+              <div className="mt-6 border-t border-gray-100 pt-6">
+                <h3 className="mb-1 text-base font-semibold text-gray-900">Account type</h3>
+                <p className="mb-4 text-sm text-gray-500">
+                  Choose how this account will be held. Joint accounts have more than one holder; an
+                  In Trust For (ITF) account is opened on behalf of someone else, such as a minor child.
+                </p>
+                <div className="max-w-md">
+                  <SearchSelect
+                    label="Account will be held as"
+                    value={form.accountType}
+                    onChange={(v) =>
+                      setForm((prev) => ({
+                        ...prev,
+                        accountType: v,
+                        jointApplicants:
+                          v === "Joint" && prev.jointApplicants.length === 0
+                            ? [{ fullName: "", idDocumentType: "National ID", idNumber: "", relationship: "" }]
+                            : prev.jointApplicants,
+                      }))
+                    }
+                    options={ACCOUNT_TYPE_OPTIONS}
+                    searchPlaceholder="Search account type…"
+                  />
+                </div>
+
+                {form.accountType === "Joint" && (
+                  <div className="mt-4">
+                    <div className="mb-2 flex items-center justify-between">
+                      <h4 className="text-sm font-semibold text-gray-800">Joint account holders</h4>
+                      <button
+                        type="button"
+                        onClick={() =>
+                          set("jointApplicants", [
+                            ...form.jointApplicants,
+                            { fullName: "", idDocumentType: "National ID", idNumber: "", relationship: "" },
+                          ])
+                        }
+                        className="rounded-lg border border-brand-300 px-3 py-1.5 text-sm font-medium text-brand-700 hover:bg-brand-50"
+                      >
+                        + Add holder
+                      </button>
+                    </div>
+                    {errors.jointApplicants && (
+                      <p className="mb-2 text-xs text-red-600">{errors.jointApplicants}</p>
+                    )}
+                    <div className="space-y-4">
+                      {form.jointApplicants.map((j, idx) => (
+                        <div key={idx} className="rounded-xl border border-gray-200 p-4">
+                          <div className="mb-2 flex items-center justify-between">
+                            <span className="text-xs font-semibold uppercase tracking-wide text-gray-500">
+                              Holder {idx + 1}
+                            </span>
+                            <button
+                              type="button"
+                              onClick={() =>
+                                set(
+                                  "jointApplicants",
+                                  form.jointApplicants.filter((_, i) => i !== idx),
+                                )
+                              }
+                              className="text-sm font-medium text-red-600 hover:underline"
+                            >
+                              Remove
+                            </button>
+                          </div>
+                          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                            <Field
+                              label="Full name"
+                              value={j.fullName}
+                              onChange={(v) => {
+                                const next = [...form.jointApplicants];
+                                next[idx] = { ...next[idx], fullName: v };
+                                set("jointApplicants", next);
+                              }}
+                              placeholder="e.g. Mary Banda"
+                            />
+                            <SearchSelect
+                              label="ID document type"
+                              value={j.idDocumentType}
+                              onChange={(v) => {
+                                const next = [...form.jointApplicants];
+                                next[idx] = { ...next[idx], idDocumentType: v };
+                                set("jointApplicants", next);
+                              }}
+                              options={ID_TYPE_OPTIONS}
+                              searchPlaceholder="Search ID type…"
+                            />
+                            <Field
+                              label={j.idDocumentType === "Passport" ? "Passport number" : "National ID number"}
+                              value={j.idNumber}
+                              onChange={(v) => {
+                                const next = [...form.jointApplicants];
+                                next[idx] = { ...next[idx], idNumber: v };
+                                set("jointApplicants", next);
+                              }}
+                              placeholder={j.idDocumentType === "Passport" ? "Passport no." : "National ID no."}
+                            />
+                            <Field
+                              label="Relationship"
+                              value={j.relationship}
+                              onChange={(v) => {
+                                const next = [...form.jointApplicants];
+                                next[idx] = { ...next[idx], relationship: v };
+                                set("jointApplicants", next);
+                              }}
+                              placeholder="e.g. Spouse"
+                            />
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {form.accountType === "ITF" && (
+                  <div className="mt-4 rounded-xl border border-gray-200 p-4">
+                    <h4 className="mb-1 text-sm font-semibold text-gray-800">Beneficiary (e.g. minor child)</h4>
+                    <p className="mb-3 text-xs text-gray-500">
+                      You are opening this account in trust for the person below.
+                    </p>
+                    {errors.itfBeneficiary && (
+                      <p className="mb-2 text-xs text-red-600">{errors.itfBeneficiary}</p>
+                    )}
+                    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                      <Field
+                        label="Beneficiary full name"
+                        required
+                        value={form.itfBeneficiary.fullName}
+                        onChange={(v) =>
+                          set("itfBeneficiary", { ...form.itfBeneficiary, fullName: v })
+                        }
+                        placeholder="e.g. Junior Banda"
+                      />
+                      <div>
+                        <label className="mb-1.5 block text-sm font-medium text-gray-700">
+                          Beneficiary date of birth
+                        </label>
+                        <DatePicker
+                          value={form.itfBeneficiary.dateOfBirth}
+                          onChange={(v) =>
+                            set("itfBeneficiary", { ...form.itfBeneficiary, dateOfBirth: v })
+                          }
+                          placeholder="Pick date of birth"
+                          maxDate={new Date()}
+                        />
+                      </div>
+                      <Field
+                        label="Your relationship to beneficiary"
+                        required
+                        value={form.itfBeneficiary.relationship}
+                        onChange={(v) =>
+                          set("itfBeneficiary", { ...form.itfBeneficiary, relationship: v })
+                        }
+                        placeholder="e.g. Parent / Guardian"
+                      />
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
           </div>
         )}
 
@@ -674,9 +885,10 @@ function ChoiceCard({
 function Summary({ form }: { form: FormState }) {
   const isExisting = form.clientKind === "existing";
   const rows: { label: string; value: string }[] = [
-    { label: "Account type", value: isExisting ? "Existing CSD client" : "New applicant" },
+    { label: "Applicant", value: isExisting ? "Existing CSD client" : "New applicant" },
     { label: "Name", value: `${form.firstName} ${form.lastName}`.trim() || "—" },
     { label: "CSD number", value: form.cdsNumber || "—" },
+    { label: "ID type", value: form.idDocumentType || "—" },
     { label: "ID / Passport", value: form.idNumber || "—" },
     { label: "Date of birth", value: form.dateOfBirth || "—" },
     { label: "Email", value: form.email || "—" },
@@ -685,6 +897,30 @@ function Summary({ form }: { form: FormState }) {
     { label: "Home phone", value: form.homePhone || "—" },
   ];
   if (!isExisting) {
+    const accountTypeLabel =
+      ACCOUNT_TYPE_OPTIONS.find((o) => o.value === form.accountType)?.label ?? form.accountType;
+    rows.push({ label: "Account held as", value: accountTypeLabel || "—" });
+    if (form.accountType === "Joint") {
+      const holders = form.jointApplicants.filter((j) => j.fullName.trim());
+      rows.push({
+        label: "Joint holders",
+        value: holders.length
+          ? holders
+              .map((j) => `${j.fullName}${j.relationship ? ` (${j.relationship})` : ""}`)
+              .join(", ")
+          : "—",
+      });
+    }
+    if (form.accountType === "ITF") {
+      rows.push({
+        label: "Beneficiary",
+        value: form.itfBeneficiary.fullName
+          ? `${form.itfBeneficiary.fullName}${
+              form.itfBeneficiary.relationship ? ` (${form.itfBeneficiary.relationship})` : ""
+            }`
+          : "—",
+      });
+    }
     rows.push(
       { label: "Postal address", value: form.postalAddress || "—" },
       { label: "Physical address", value: form.physicalAddress || "—" },
