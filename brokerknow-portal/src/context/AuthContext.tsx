@@ -55,6 +55,9 @@ interface RegisterData {
   proofOfAddress?: File;
   sourceOfFunds?: File;
   otherDocuments?: File[];
+  // One ID document per joint account holder, in the same order as the
+  // jointApplicants JSON so the server can map files to holders.
+  jointIdDocuments?: File[];
 }
 
 const AuthContext = createContext<AuthState | null>(null);
@@ -149,6 +152,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (data.sourceOfFunds) fd.append("sourceOfFunds", data.sourceOfFunds, data.sourceOfFunds.name);
       if (data.otherDocuments) {
         for (const f of data.otherDocuments) fd.append("otherDocuments", f, f.name);
+      }
+      if (data.jointIdDocuments) {
+        for (const f of data.jointIdDocuments) fd.append("jointIdDocuments", f, f.name);
       }
       // Pass undefined so axios fills in multipart/form-data with the
       // correct boundary; explicit \"multipart/form-data\" would drop it.

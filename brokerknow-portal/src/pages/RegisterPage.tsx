@@ -25,6 +25,7 @@ interface JointApplicant {
   idDocumentType: string;
   idNumber: string;
   relationship: string;
+  idDocument: File | null;
 }
 
 interface ItfBeneficiary {
@@ -155,6 +156,8 @@ function validateStep(step: number, form: FormState): Errors {
       const named = form.jointApplicants.filter((j) => j.fullName.trim());
       if (named.length === 0)
         e.jointApplicants = "Add at least one joint account holder.";
+      else if (named.some((j) => !j.idDocument))
+        e.jointApplicants = "Attach an ID document for each joint account holder.";
     } else if (form.accountType === "ITF") {
       if (!form.itfBeneficiary.fullName.trim())
         e.itfBeneficiary = "Beneficiary full name is required for an In-Trust-For account.";
@@ -345,7 +348,18 @@ export default function RegisterPage() {
       accountType: form.accountType || undefined,
       jointApplicants:
         form.accountType === "Joint" && form.jointApplicants.some((j) => j.fullName.trim())
-          ? JSON.stringify(form.jointApplicants.filter((j) => j.fullName.trim()))
+          ? JSON.stringify(
+              form.jointApplicants
+                .filter((j) => j.fullName.trim())
+                .map(({ idDocument: _idDocument, ...rest }) => rest),
+            )
+          : undefined,
+      jointIdDocuments:
+        form.accountType === "Joint"
+          ? form.jointApplicants
+              .filter((j) => j.fullName.trim())
+              .map((j) => j.idDocument)
+              .filter((f): f is File => !!f)
           : undefined,
       itfBeneficiary:
         form.accountType === "ITF" && form.itfBeneficiary.fullName.trim()
@@ -516,7 +530,7 @@ export default function RegisterPage() {
                         accountType: v,
                         jointApplicants:
                           v === "Joint" && prev.jointApplicants.length === 0
-                            ? [{ fullName: "", idDocumentType: "National ID", idNumber: "", relationship: "" }]
+                            ? [{ fullName: "", idDocumentType: "National ID", idNumber: "", relationship: "", idDocument: null }]
                             : prev.jointApplicants,
                       }))
                     }
@@ -527,6 +541,11 @@ export default function RegisterPage() {
 
                 {form.accountType === "Joint" && (
                   <div className="mt-4">
+                    <div className="mb-3 rounded-lg border border-brand-200 bg-brand-50 p-3 text-sm text-brand-800">
+                      <span className="font-semibold">{`${form.firstName} ${form.lastName}`.trim() || "You"}</span>{" "}
+                      (the person registering) will be the primary contact person and the only login holder for
+                      this joint account. Add each additional holder and their KYC below.
+                    </div>
                     <div className="mb-2 flex items-center justify-between">
                       <h4 className="text-sm font-semibold text-gray-800">Joint account holders</h4>
                       <button
@@ -534,7 +553,7 @@ export default function RegisterPage() {
                         onClick={() =>
                           set("jointApplicants", [
                             ...form.jointApplicants,
-                            { fullName: "", idDocumentType: "National ID", idNumber: "", relationship: "" },
+                            { fullName: "", idDocumentType: "National ID", idNumber: "", relationship: "", idDocument: null },
                           ])
                         }
                         className="rounded-lg border border-brand-300 px-3 py-1.5 text-sm font-medium text-brand-700 hover:bg-brand-50"
@@ -606,6 +625,18 @@ export default function RegisterPage() {
                                 set("jointApplicants", next);
                               }}
                               placeholder="e.g. Spouse"
+                            />
+                          </div>
+                          <div className="mt-3">
+                            <FileSlot
+                              label="ID document (National ID or Passport copy)"
+                              required
+                              file={j.idDocument}
+                              onChange={(f) => {
+                                const next = [...form.jointApplicants];
+                                next[idx] = { ...next[idx], idDocument: f };
+                                set("jointApplicants", next);
+                              }}
                             />
                           </div>
                         </div>
@@ -903,10 +934,19 @@ function Summary({ form }: { form: FormState }) {
     if (form.accountType === "Joint") {
       const holders = form.jointApplicants.filter((j) => j.fullName.trim());
       rows.push({
+        label: "Primary contact / login",
+        value: `${form.firstName} ${form.lastName}`.trim() || "—",
+      });
+      rows.push({
         label: "Joint holders",
         value: holders.length
           ? holders
-              .map((j) => `${j.fullName}${j.relationship ? ` (${j.relationship})` : ""}`)
+              .map(
+                (j) =>
+                  `${j.fullName}${j.relationship ? ` (${j.relationship})` : ""}${
+                    j.idDocument ? " — ID attached" : " — ID missing"
+                  }`,
+              )
               .join(", ")
           : "—",
       });
