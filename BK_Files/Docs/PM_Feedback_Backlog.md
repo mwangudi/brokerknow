@@ -61,6 +61,24 @@ Source: `BK_Files/Docs/Testing Comments 2.docx`. Triaged into themes. Numbers re
 - J4. When linking a client, replace scroll with **search**. ✅ shipped
 - J5. Deposit screen: allow upload of proof of deposit. ✅ shipped
 
+## K. Account Opening (received 2026-06-15)
+
+Source: PM walkthrough of the account-opening pack (`BK_Files/Docs/Acc-Opening/`) + WhatsApp clarifications. Full feature doc: `Account_Opening_Workflow.md`.
+
+- K1. Two statutory forms per client: **CSD 1** (match the RBM CSD F1 PDF format) and **Client Account Opening Form** (follow the Agreement of Mandate sequence/opening statements). ✅ shipped — both rendered as PDFs, filed on the client record at approval.
+- K2. ID field: let the user **select** ID vs Passport (not a combined "ID/Passport"). ✅ shipped — explicit selector on the internal form and on the portal (Select2-style).
+- K3. Default branch to **Blantyre** only (the only branch for now). ✅ shipped — forced server-side.
+- K4. **Joint** account option (more than one holder). ✅ shipped — additional holders on the internal form + CSD F1; portal captures additional names.
+- K5. **ITF (In Trust For)** client type (open on behalf of another, e.g. a minor). ✅ shipped — internal form + portal beneficiary capture.
+- K6. Sign-off **checkboxes** where the client agrees (terms, key facts, declaration, CSD terms). ✅ shipped — validated before supervisor approval.
+- K7. Mandatory corporate documents: **ID, Registration Cert, Bank Statement, Memorandum, Board Minutes**. ✅ shipped — enforced at approval (individual set already existed).
+- K8. **Residential Address Verification Form** — printable + filed, in the supplied A/B/C format. ✅ shipped.
+- K9. **Customer Risk Assessment** — officer ticks what applies, total auto-populates; match the rating sheet. ✅ shipped — Cedar Sections A–G with auto total + band and the High-occupation / high-risk-jurisdiction override.
+- K10. **Interim approval** by the officer, then **Supervisor** approval after a consolidated review (everything the client filled, conditions agreed, uploaded documents, risk scoring). ✅ shipped.
+- K11. On approval, the two forms are **downloadable + saved** on the client record. ✅ shipped — CSD F1, Agreement of Mandate, and Residential Verification filed under the client's Documents.
+- K12. Process applies whether set up **internally** or **by the client**. ✅ shipped — portal self-service captures intake + uploads; staff run the same internal workflow to completion.
+- K13. **(PM, WhatsApp)** Joint accounts simplified: the registrant becomes the **contact person** and the **only login holder**; additional holders are just *names + their KYC* on one application/approval. ✅ shipped — per-holder ID document upload (`joint-id-N`), registrant shown as primary contact + sole login.
+
 ---
 
 ## Suggested execution order

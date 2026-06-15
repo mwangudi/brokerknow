@@ -3,6 +3,11 @@
 This document describes the end-to-end flow for new client portal accounts:
 **Self-service registration → Admin review → Approval / Rejection → Login → Portal use**.
 
+> For what happens **after** a client exists — the CSD F1 + Agreement of Mandate
+> forms, Residential Address Verification, Customer Risk Rating and the
+> officer → supervisor approval chain — see
+> [`Account_Opening_Workflow.md`](Account_Opening_Workflow.md).
+
 ---
 
 ## 1. Architecture Overview
@@ -45,6 +50,9 @@ Two new tables added to the legacy database:
 | `DateOfBirth` | DATETIME2 | Optional, validated 18+ on SPA |
 | `PhysicalAddress`, `PostalAddress` | NVARCHAR(500) | Optional |
 | `ContactPerson` | NVARCHAR(200) | Optional next-of-kin |
+| `AccountType` | NVARCHAR(20) | `Individual` (default) / `Joint` / `ITF` |
+| `JointApplicants` | NVARCHAR(MAX) | JSON array of additional joint holders (name, ID type, ID number, relationship) |
+| `ItfBeneficiary` | NVARCHAR(MAX) | JSON for the In-Trust-For beneficiary (name, DOB, relationship) |
 | `Role` | NVARCHAR(20) | `Client` or `Admin` |
 | `Status` | NVARCHAR(20) | `Pending` → `Approved` / `Rejected` |
 | `Active` | BIT | Soft-disable toggle |
@@ -74,9 +82,20 @@ The portal Register page (`/register`) collects:
 
 | Section | Fields |
 |---|---|
-| **Personal Information** | First Name *, Last Name *, ID/Passport, CDS Number, Date of Birth, Contact Person |
+| **Personal Information** | First Name *, Last Name *, ID Document Type * (National ID / Passport, searchable Select2-style picker), ID/Passport Number, CDS Number, Date of Birth |
+| **Account Type** (new applicants) | Held as: Individual / Joint / ITF. **Joint** → add/remove holders, each with name, ID document type, ID number, relationship, **and an ID document upload (their KYC)**. **ITF (In Trust For)** → beneficiary name, DOB, relationship (e.g. a minor child) |
 | **Contact Details** | Email *, Cell Phone, Office Phone, Home Phone |
-| **Addresses** | Postal Address, Physical Address |
+| **Addresses** | Postal Address, Physical Address, Contact Person |
+| **KYC Documents** | ID document *, proof of address *, source of funds *, optional supporting docs |
+
+> **Joint accounts (PM model):** the person who registers becomes the **contact
+> person** and the **only login holder**. Additional holders are captured as
+> *names + their KYC* on the same application — they do not register separately,
+> and the whole joint account goes through **one** approval. The form states this
+> explicitly and requires an ID document for each named holder.
+
+The form is **mobile-first** (larger touch targets, single-column on phones) since
+most clients register from a phone.
 
 Validation is **inline only** (no HTML5 tooltips):
 
@@ -90,34 +109,44 @@ Validation is **inline only** (no HTML5 tooltips):
 
 ### 3.2 API endpoint
 
+The request is **multipart/form-data** (KYC files travel with the scalar fields):
+
 ```http
 POST /api/auth/register
-Content-Type: application/json
+Content-Type: multipart/form-data
 
-{
-  "email":       "client@example.com",
-  "firstName":   "John",
-  "lastName":    "Banda",
-  "phone":       "+265 999 123 456",
-  "officePhone": "+265 1 234 567",
-  "homePhone":   "+265 1 765 432",
-  "idNumber":    "ID-12345",
-  "cdsNumber":   "CDS-000123",
-  "dateOfBirth": "1985-03-12",
-  "physicalAddress": "Livingstone Towers, Blantyre",
-  "postalAddress":   "P.O. Box 999, Blantyre",
-  "contactPerson":   "Jane Banda"
-}
+email            = client@example.com
+firstName        = John
+lastName         = Banda
+idDocumentType   = National ID            # National ID | Passport
+idNumber         = ID-12345
+cdsNumber        = CDS-000123
+dateOfBirth      = 1985-03-12
+accountType      = Joint                  # Individual | Joint | ITF
+jointApplicants  = [{"fullName":"Mary Banda","idDocumentType":"National ID","idNumber":"ID-9","relationship":"Spouse"}]
+itfBeneficiary   = {"fullName":"…","dateOfBirth":"…","relationship":"…"}   # ITF only
+physicalAddress  = Livingstone Towers, Blantyre
+postalAddress    = P.O. Box 999, Blantyre
+contactPerson    = Jane Banda
+idDocument       = <file>                 # primary applicant KYC
+proofOfAddress   = <file>
+sourceOfFunds    = <file>
+jointIdDocuments = <file>, <file>         # one per named joint holder, in order
 ```
 
 Server-side behaviour:
 
-1. Validates Email, FirstName, LastName as required
-2. Lowercases email and checks for uniqueness
+1. Validates Email, FirstName, LastName as required; validates every uploaded
+   file (size + extension)
+2. Lowercases email and checks for uniqueness (and ID / CDS duplicates)
 3. Generates an unusable random password (64 random bytes, base64) and BCrypt-hashes it
-4. Inserts `PortalUser` with `Status = Pending`, `Role = Client`, `Active = true`
-5. Sends a **"Registration Received"** branded email via MailHog (best-effort; failures are logged but never block the response)
-6. Returns 200 with `{ message, userId }`
+4. Inserts `PortalUser` with `Status = Pending`, `Role = Client`, `Active = true`,
+   persisting `AccountType` + the `JointApplicants` / `ItfBeneficiary` JSON
+5. Saves KYC files under `/uploads/portal-applications/{userId}/` as
+   `{guid}__{category}__{original}`; each joint holder's ID is stored as
+   `joint-id-{n}` (1-based, in holder order)
+6. Sends a **"Registration Received"** branded email (best-effort)
+7. Returns 200 with `{ message, userId }`
 
 The user **cannot log in yet** — `/auth/login` will return:
 
@@ -141,6 +170,11 @@ The page filters by `Status` (All / Pending / Approved / Rejected) and shows for
 * Status badge (`Pending`, `Approved`, `Rejected`) + `Disabled` if `Active = false`
 * Linked client ID (once approved)
 * Registration date
+
+The detail view also surfaces the **account type**: for Joint it shows the primary
+contact / login holder plus each joint holder (name, relationship, ID), and notes
+that each holder's ID document is listed under **Documents** as `joint-id-N`; for
+ITF it shows the beneficiary (name, DOB, relationship).
 
 Action buttons per row:
 
@@ -351,6 +385,7 @@ stateDiagram-v2
 | Client portal endpoints | `BrokerKnow.Api/Controllers/PortalController.cs` |
 | Email service | `BrokerKnow.Api/Services/EmailService.cs` |
 | Portal SPA — Register | `brokerknow-portal/src/pages/RegisterPage.tsx` |
+| Portal SPA — Searchable select (ID / account type) | `brokerknow-portal/src/components/form/SearchSelect.tsx` |
 | Portal SPA — Login | `brokerknow-portal/src/pages/LoginPage.tsx` |
 | Portal SPA — Auth context | `brokerknow-portal/src/context/AuthContext.tsx` |
 | Backoffice — Users page | `brokerknow-web/src/pages/Admin/PortalUsersPage.tsx` |
