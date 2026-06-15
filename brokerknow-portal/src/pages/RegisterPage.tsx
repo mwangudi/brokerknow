@@ -310,16 +310,22 @@ export default function RegisterPage() {
     setStep((s) => Math.max(0, s - 1));
   }
 
-  async function handleSubmit(e: FormEvent) {
+  // The <form> onSubmit only ever fires on an IMPLICIT submit — the Enter key
+  // or a mobile keyboard's "Go" / "Done" / "Next" button. It must NEVER post
+  // the application; it only advances the wizard (and does nothing on the
+  // review step). The real submission requires an explicit tap on the
+  // "Submit application" button, which calls doRegister().
+  function handleSubmit(e: FormEvent) {
     e.preventDefault();
     setSubmitError("");
+    if (!isReview) void next();
+  }
 
-    // Guard against Enter-key submits from earlier steps: only the final
-    // Review step is allowed to actually post the application.
-    if (!isReview) {
-      void next();
-      return;
-    }
+  // Explicit registration — only ever invoked by the "Submit application"
+  // button's onClick on the review step. This guarantees the user always sees
+  // the application summary first and consciously submits.
+  async function doRegister() {
+    setSubmitError("");
 
     // Re-validate all relevant steps before sending.
     const all: Errors = {};
@@ -813,7 +819,8 @@ export default function RegisterPage() {
             </button>
             {isReview ? (
               <button
-                type="submit"
+                type="button"
+                onClick={doRegister}
                 disabled={loading}
                 className="rounded-lg bg-brand-600 px-6 py-2.5 text-sm font-semibold text-white hover:bg-brand-700 disabled:opacity-50"
               >
