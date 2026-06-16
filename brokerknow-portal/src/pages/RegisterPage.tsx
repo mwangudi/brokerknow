@@ -583,6 +583,36 @@ export default function RegisterPage() {
                 onClick={() => chooseKind("new")}
               />
             </div>
+
+            {/* Mandatory documents notice — shown up front so applicants can
+                gather their KYC before they start the new-client application. */}
+            <div className="mt-6 rounded-xl border border-amber-200 bg-amber-50 p-4">
+              <h3 className="flex items-center gap-2 text-sm font-semibold text-amber-900">
+                <span className="material-symbols-rounded text-base">description</span>
+                Documents you'll need (new clients)
+              </h3>
+              <p className="mt-1 text-sm text-amber-800">
+                Have clear copies (PDF or photo) ready before you start:
+              </p>
+              <ul className="mt-2 space-y-1 text-sm text-amber-800">
+                <li className="flex items-start gap-2">
+                  <span className="mt-0.5 text-amber-600">•</span>
+                  <span><span className="font-medium">National ID or Passport</span> — proof of identity</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="mt-0.5 text-amber-600">•</span>
+                  <span><span className="font-medium">Proof of address</span> — utility bill, letter from your employer, school or chief (issued within the last 3 months)</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="mt-0.5 text-amber-600">•</span>
+                  <span><span className="font-medium">Proof of source of funds</span> — recent payslip or bank statement</span>
+                </li>
+              </ul>
+              <p className="mt-2 text-xs text-amber-700">
+                Already a {brand.name} client? You're already verified — you won't be asked to re-upload these.
+              </p>
+            </div>
+
             <p className="mt-6 text-center text-sm text-gray-500">
               Already registered?{" "}
               <Link to="/login" className="font-medium text-brand-600 hover:underline">
