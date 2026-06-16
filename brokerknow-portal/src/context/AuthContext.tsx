@@ -66,6 +66,8 @@ interface RegisterData {
   proofOfAddress?: File[];
   sourceOfFunds?: File[];
   otherDocuments?: File[];
+  // A passport-style photo of the applicant (single image).
+  passportPhoto?: File;
   // One ID document per joint account holder, in the same order as the
   // jointApplicants JSON so the server can map files to holders.
   jointIdDocuments?: File[];
@@ -92,6 +94,7 @@ function buildRegisterForm(data: RegisterData): FormData {
   if (data.proofOfAddress) for (const f of data.proofOfAddress) fd.append("proofOfAddress", f, f.name);
   if (data.sourceOfFunds) for (const f of data.sourceOfFunds) fd.append("sourceOfFunds", f, f.name);
   if (data.otherDocuments) for (const f of data.otherDocuments) fd.append("otherDocuments", f, f.name);
+  if (data.passportPhoto) fd.append("passportPhoto", data.passportPhoto, data.passportPhoto.name);
   if (data.jointIdDocuments) for (const f of data.jointIdDocuments) fd.append("jointIdDocuments", f, f.name);
   return fd;
 }

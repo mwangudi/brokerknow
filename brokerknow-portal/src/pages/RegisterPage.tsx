@@ -72,6 +72,9 @@ interface FormState {
   sourceOfFunds: File[];
   otherDocuments: File[];
 
+  // Passport-style photo of the applicant (single image).
+  passportPhoto: File | null;
+
   // Client sign-off (new applicants). Ticked on the Review step.
   agreements: {
     termsAccepted: boolean;
@@ -116,6 +119,7 @@ const EMPTY: FormState = {
   proofOfAddress: [],
   sourceOfFunds: [],
   otherDocuments: [],
+  passportPhoto: null,
   agreements: {
     termsAccepted: false,
     keyFactsAccepted: false,
@@ -478,6 +482,7 @@ export default function RegisterPage() {
       proofOfAddress: form.proofOfAddress.length ? form.proofOfAddress : undefined,
       sourceOfFunds: form.sourceOfFunds.length ? form.sourceOfFunds : undefined,
       otherDocuments: form.otherDocuments.length ? form.otherDocuments : undefined,
+      passportPhoto: form.passportPhoto ?? undefined,
     };
 
     const result = resubmitToken
@@ -987,6 +992,11 @@ export default function RegisterPage() {
                 files={form.otherDocuments}
                 onChange={(files) => set("otherDocuments", files)}
               />
+              <PhotoSlot
+                label="Passport photo (recent, clear headshot)"
+                file={form.passportPhoto}
+                onChange={(f) => set("passportPhoto", f)}
+              />
             </div>
             <p className="mt-4 text-xs text-gray-500">
               You can attach more than one file per item (useful for corporates).
@@ -1218,6 +1228,7 @@ function Summary({ form }: { form: FormState }) {
         ? form.otherDocuments.map((f) => f.name).join(", ")
         : "—",
     },
+    { label: "Passport photo", value: form.passportPhoto?.name ?? "—" },
   );
   return (
     <dl className="divide-y divide-gray-100 rounded-lg border border-gray-200">
@@ -1343,6 +1354,67 @@ function FileSlot({
           Click to choose a file
         </label>
       )}
+      {err && <p className="mt-1 text-xs text-red-600">{err}</p>}
+    </div>
+  );
+}
+
+function PhotoSlot({
+  label,
+  file,
+  onChange,
+}: {
+  label: string;
+  file: File | null;
+  onChange: (f: File | null) => void;
+}) {
+  const [err, setErr] = useState<string | null>(null);
+  const [preview, setPreview] = useState<string | null>(null);
+  useEffect(() => {
+    if (!file) { setPreview(null); return; }
+    const url = URL.createObjectURL(file);
+    setPreview(url);
+    return () => URL.revokeObjectURL(url);
+  }, [file]);
+  function pick(f: File | null) {
+    if (!f) { onChange(null); setErr(null); return; }
+    const lower = f.name.toLowerCase();
+    const isImage = [".jpg", ".jpeg", ".png", ".gif", ".webp"].some((e) => lower.endsWith(e));
+    if (!isImage) { setErr("Passport photo must be an image (JPG, PNG, GIF or WEBP)."); return; }
+    if (f.size > MAX_FILE_BYTES) { setErr(`${f.name} exceeds the 10 MB limit.`); return; }
+    setErr(null);
+    onChange(f);
+  }
+  return (
+    <div className="rounded-lg border border-gray-200 bg-gray-50 p-3">
+      <div className="mb-2 text-sm font-medium text-gray-700">{label}</div>
+      <div className="flex items-center gap-3">
+        <div className="flex h-24 w-20 shrink-0 items-center justify-center overflow-hidden rounded-md border border-gray-300 bg-white">
+          {preview ? (
+            <img src={preview} alt="Passport preview" className="h-full w-full object-cover" />
+          ) : (
+            <span className="material-symbols-rounded text-3xl text-gray-300">person</span>
+          )}
+        </div>
+        <div className="min-w-0">
+          {file ? (
+            <div className="text-sm">
+              <div className="truncate font-medium text-gray-800">{file.name}</div>
+              <button type="button" onClick={() => pick(null)} className="mt-1 text-xs font-medium text-red-600 hover:underline">Remove</button>
+            </div>
+          ) : (
+            <label className="inline-flex cursor-pointer items-center rounded-md border border-dashed border-gray-300 bg-white px-3 py-2 text-sm text-gray-500 hover:border-brand-400 hover:text-brand-600">
+              <input
+                type="file"
+                className="sr-only"
+                accept="image/*"
+                onChange={(e) => pick(e.target.files?.[0] ?? null)}
+              />
+              Choose a photo
+            </label>
+          )}
+        </div>
+      </div>
       {err && <p className="mt-1 text-xs text-red-600">{err}</p>}
     </div>
   );

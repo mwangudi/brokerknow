@@ -25,6 +25,7 @@ export default function ProfilePage() {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [photoUrl, setPhotoUrl] = useState<string | null>(null);
 
   useEffect(() => {
     api
@@ -34,6 +35,20 @@ export default function ProfilePage() {
         setError(err.response?.data?.error || "Failed to load profile."),
       )
       .finally(() => setLoading(false));
+  }, []);
+
+  // Load the passport photo (if any) as an authenticated blob.
+  useEffect(() => {
+    let revoke: string | null = null;
+    api
+      .get("/portal/profile/photo", { responseType: "blob" })
+      .then((r) => {
+        const url = URL.createObjectURL(r.data as Blob);
+        revoke = url;
+        setPhotoUrl(url);
+      })
+      .catch(() => setPhotoUrl(null));
+    return () => { if (revoke) URL.revokeObjectURL(revoke); };
   }, []);
 
   if (loading) {
@@ -66,8 +81,12 @@ export default function ProfilePage() {
           </div>
           <div className="relative flex flex-col justify-between gap-6 md:flex-row md:items-center">
             <div className="flex items-center gap-5">
-              <div className="flex h-20 w-20 shrink-0 items-center justify-center rounded-full border-4 border-surface bg-primary-container text-2xl font-bold text-on-primary-fixed">
-                {(profile.clientName?.[0] ?? "C").toUpperCase()}
+              <div className="flex h-20 w-20 shrink-0 items-center justify-center overflow-hidden rounded-full border-4 border-surface bg-primary-container text-2xl font-bold text-on-primary-fixed">
+                {photoUrl ? (
+                  <img src={photoUrl} alt={profile.clientName} className="h-full w-full object-cover" />
+                ) : (
+                  (profile.clientName?.[0] ?? "C").toUpperCase()
+                )}
               </div>
               <div className="min-w-0">
                 <div className="mb-1 flex flex-wrap items-center gap-2">
