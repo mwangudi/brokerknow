@@ -24,6 +24,8 @@ interface AuthState {
   /** Completes a two-step login by verifying the emailed one-time passcode. */
   verifyOtp: (otpToken: string, code: string) => Promise<{ error?: string; requiresPasswordChange?: boolean }>;
   register: (data: RegisterData) => Promise<{ error?: string; message?: string }>;
+  /** Resubmit a returned application via its emailed token. */
+  resubmit: (token: string, data: RegisterData) => Promise<{ error?: string; message?: string }>;
   logout: () => void;
   /** Marks the password change as completed and refreshes the cached user. */
   markPasswordChanged: () => void;
@@ -59,6 +61,30 @@ interface RegisterData {
   // One ID document per joint account holder, in the same order as the
   // jointApplicants JSON so the server can map files to holders.
   jointIdDocuments?: File[];
+}
+
+// Build the multipart body shared by register + resubmit (KYC files travel
+// with the scalar fields). Files are optional on resubmit (originals stay on
+// file unless replaced).
+function buildRegisterForm(data: RegisterData): FormData {
+  const fd = new FormData();
+  const scalarKeys = [
+    "email", "firstName", "lastName", "phone", "officePhone", "homePhone",
+    "idNumber", "idDocumentType", "cdsNumber", "dateOfBirth", "accountType",
+    "jointApplicants", "itfBeneficiary", "agreements", "physicalAddress",
+    "postalAddress", "contactPerson",
+  ] as const;
+  for (const k of scalarKeys) {
+    const v = data[k];
+    if (v !== undefined && v !== null && v !== "") fd.append(k, String(v));
+  }
+  fd.append("isExistingClient", String(!!data.isExistingClient));
+  if (data.idDocument) fd.append("idDocument", data.idDocument, data.idDocument.name);
+  if (data.proofOfAddress) fd.append("proofOfAddress", data.proofOfAddress, data.proofOfAddress.name);
+  if (data.sourceOfFunds) fd.append("sourceOfFunds", data.sourceOfFunds, data.sourceOfFunds.name);
+  if (data.otherDocuments) for (const f of data.otherDocuments) fd.append("otherDocuments", f, f.name);
+  if (data.jointIdDocuments) for (const f of data.jointIdDocuments) fd.append("jointIdDocuments", f, f.name);
+  return fd;
 }
 
 const AuthContext = createContext<AuthState | null>(null);
@@ -134,29 +160,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     try {
       // KYC documents must travel as multipart so the server can persist
       // them under /uploads/portal-applications/{userId}/.
-      const fd = new FormData();
-      const scalarKeys = [
-        "email", "firstName", "lastName", "phone", "officePhone", "homePhone",
-        "idNumber", "idDocumentType", "cdsNumber", "dateOfBirth", "accountType",
-        "jointApplicants", "itfBeneficiary", "agreements", "physicalAddress",
-        "postalAddress", "contactPerson",
-      ] as const;
-      for (const k of scalarKeys) {
-        const v = data[k];
-        if (v !== undefined && v !== null && v !== "") fd.append(k, String(v));
-      }
-      // Always send the existing-client flag so the server can relax the KYC
-      // upload + duplicate-client checks for returning clients.
-      fd.append("isExistingClient", String(!!data.isExistingClient));
-      if (data.idDocument) fd.append("idDocument", data.idDocument, data.idDocument.name);
-      if (data.proofOfAddress) fd.append("proofOfAddress", data.proofOfAddress, data.proofOfAddress.name);
-      if (data.sourceOfFunds) fd.append("sourceOfFunds", data.sourceOfFunds, data.sourceOfFunds.name);
-      if (data.otherDocuments) {
-        for (const f of data.otherDocuments) fd.append("otherDocuments", f, f.name);
-      }
-      if (data.jointIdDocuments) {
-        for (const f of data.jointIdDocuments) fd.append("jointIdDocuments", f, f.name);
-      }
+      const fd = buildRegisterForm(data);
       // Pass undefined so axios fills in multipart/form-data with the
       // correct boundary; explicit \"multipart/form-data\" would drop it.
       const r = await api.post("/auth/register", fd, {
@@ -165,6 +169,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       return { message: r.data.message };
     } catch (err: any) {
       return { error: err.response?.data?.error || "Registration failed." };
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  const resubmit = useCallback(async (token: string, data: RegisterData) => {
+    setLoading(true);
+    try {
+      const fd = buildRegisterForm(data);
+      const r = await api.post(`/auth/resubmit/${encodeURIComponent(token)}`, fd, {
+        headers: { "Content-Type": undefined as unknown as string },
+      });
+      return { message: r.data.message };
+    } catch (err: any) {
+      return { error: err.response?.data?.error || "Resubmission failed." };
     } finally {
       setLoading(false);
     }
@@ -190,7 +209,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   return (
-    <AuthContext.Provider value={{ user, token, loading, login, verifyOtp, register, logout, markPasswordChanged }}>
+    <AuthContext.Provider value={{ user, token, loading, login, verifyOtp, register, resubmit, logout, markPasswordChanged }}>
       {children}
     </AuthContext.Provider>
   );

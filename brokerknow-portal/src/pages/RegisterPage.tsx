@@ -1,5 +1,5 @@
-import { useMemo, useState, type FormEvent, type ReactNode } from "react";
-import { Link } from "react-router";
+import { useEffect, useMemo, useState, type FormEvent, type ReactNode } from "react";
+import { Link, useSearchParams } from "react-router";
 import { useAuth } from "../context/AuthContext";
 import api from "../lib/api";
 import DatePicker from "../components/form/DatePicker";
@@ -118,7 +118,7 @@ const EMPTY: FormState = {
 };
 
 // ─── Per-step validation ────────────────────────────────────────────
-function validateStep(step: number, form: FormState): Errors {
+function validateStep(step: number, form: FormState, resubmitMode = false): Errors {
   const e: Errors = {};
   const isExisting = form.clientKind === "existing";
 
@@ -204,8 +204,9 @@ function validateStep(step: number, form: FormState): Errors {
 
   // Documents step — new applicants only (existing clients are already KYC'd
   // so they have no upload step). For new applicants it's step 4. FIU / Cedar
-  // Capital require ID + proof of address + proof of source of funds.
-  if (!isExisting && step === 4) {
+  // Capital require ID + proof of address + proof of source of funds. On a
+  // resubmit the originals stay on file, so uploads are optional.
+  if (!isExisting && step === 4 && !resubmitMode) {
     const missing: string[] = [];
     if (!form.idDocument) missing.push("National ID / Passport");
     if (!form.proofOfAddress) missing.push("Proof of address");
@@ -218,12 +219,70 @@ function validateStep(step: number, form: FormState): Errors {
 
 // ─── Component ──────────────────────────────────────────────────────
 export default function RegisterPage() {
-  const { register, loading } = useAuth();
+  const { register, resubmit, loading } = useAuth();
+  const [searchParams] = useSearchParams();
   const [form, setForm] = useState<FormState>(EMPTY);
   const [step, setStep] = useState(0);
   const [errors, setErrors] = useState<Errors>({});
   const [submitError, setSubmitError] = useState("");
   const [success, setSuccess] = useState("");
+
+  // Reject → resubmit: when the page is opened from the emailed link
+  // (/register?resubmit=<token>), pull the applicant's saved data and reopen
+  // the form pre-filled so they can fix and resubmit it.
+  const resubmitToken = searchParams.get("resubmit");
+  const [resubmitReason, setResubmitReason] = useState<string | null>(null);
+  const [prefilling, setPrefilling] = useState<boolean>(!!resubmitToken);
+  const [prefillError, setPrefillError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!resubmitToken) return;
+    let cancelled = false;
+    setPrefilling(true);
+    api.get(`/auth/resubmit/${encodeURIComponent(resubmitToken)}`)
+      .then(({ data }) => {
+        if (cancelled) return;
+        const parse = <T,>(s: string | null | undefined, fallback: T): T => {
+          if (!s) return fallback;
+          try { return JSON.parse(s) as T; } catch { return fallback; }
+        };
+        const joint = parse<Array<Partial<JointApplicant>>>(data.jointApplicants, []).map((j) => ({
+          fullName: j.fullName ?? "", idDocumentType: j.idDocumentType ?? "National ID",
+          idNumber: j.idNumber ?? "", relationship: j.relationship ?? "", idDocument: null,
+        }));
+        const itf = parse<Partial<ItfBeneficiary>>(data.itfBeneficiary, {});
+        const ag = parse<Partial<FormState["agreements"]>>(data.agreements, {});
+        setForm({
+          ...EMPTY,
+          clientKind: data.isExistingClient ? "existing" : "new",
+          firstName: data.firstName ?? "", lastName: data.lastName ?? "",
+          idDocumentType: "National ID",
+          idNumber: data.idNumber ?? "", cdsNumber: data.cdsNumber ?? "",
+          dateOfBirth: data.dateOfBirth ? String(data.dateOfBirth).slice(0, 10) : "",
+          accountType: data.accountType ?? "Individual",
+          jointApplicants: joint,
+          itfBeneficiary: {
+            fullName: itf.fullName ?? "", dateOfBirth: itf.dateOfBirth ?? "", relationship: itf.relationship ?? "",
+          },
+          email: data.email ?? "", phone: data.phone ?? "",
+          officePhone: data.officePhone ?? "", homePhone: data.homePhone ?? "",
+          postalAddress: data.postalAddress ?? "", physicalAddress: data.physicalAddress ?? "",
+          contactPerson: data.contactPerson ?? "",
+          agreements: {
+            termsAccepted: !!ag.termsAccepted, keyFactsAccepted: !!ag.keyFactsAccepted,
+            declarationAccepted: !!ag.declarationAccepted, csdTermsAccepted: !!ag.csdTermsAccepted,
+          },
+        });
+        setResubmitReason(typeof data.rejectionReason === "string" ? data.rejectionReason : "");
+        setStep(1);
+      })
+      .catch((err) => {
+        if (cancelled) return;
+        setPrefillError(err.response?.data?.error || "This link is invalid or has expired.");
+      })
+      .finally(() => { if (!cancelled) setPrefilling(false); });
+    return () => { cancelled = true; };
+  }, [resubmitToken]);
   // True while we ask the API whether the ID/CDS/email is already registered.
   const [checking, setChecking] = useState(false);
 
@@ -344,7 +403,7 @@ export default function RegisterPage() {
     // Re-validate all relevant steps before sending.
     const all: Errors = {};
     for (let s = 1; s < lastStep; s++) {
-      Object.assign(all, validateStep(s, form));
+      Object.assign(all, validateStep(s, form, !!resubmitToken));
     }
     if (Object.keys(all).length) {
       setErrors(all);
@@ -364,7 +423,7 @@ export default function RegisterPage() {
       }
     }
 
-    const result = await register({
+    const payload: Parameters<typeof register>[0] = {
       email: form.email,
       firstName: form.firstName,
       lastName: form.lastName,
@@ -404,7 +463,11 @@ export default function RegisterPage() {
       proofOfAddress: form.proofOfAddress ?? undefined,
       sourceOfFunds: form.sourceOfFunds ?? undefined,
       otherDocuments: form.otherDocuments.length ? form.otherDocuments : undefined,
-    });
+    };
+
+    const result = resubmitToken
+      ? await resubmit(resubmitToken, payload)
+      : await register(payload);
 
     if (result.error) {
       setSubmitError(result.error);
@@ -441,6 +504,38 @@ export default function RegisterPage() {
     );
   }
 
+  // ── Resubmit link: invalid/expired ──────────────────────────────
+  if (prefillError) {
+    return (
+      <Shell>
+        <div className="rounded-2xl border border-red-200 bg-white p-8 text-center shadow-sm">
+          <h2 className="mb-2 text-xl font-semibold text-gray-900">Link not valid</h2>
+          <p className="mb-6 text-gray-600">{prefillError}</p>
+          <p className="mb-6 text-sm text-gray-500">
+            Your resubmit link may have expired or already been used. Please contact us, or start a fresh application.
+          </p>
+          <Link
+            to="/register"
+            className="inline-block rounded-lg bg-brand-600 px-6 py-2.5 text-sm font-semibold text-white hover:bg-brand-700"
+          >
+            Start a new application
+          </Link>
+        </div>
+      </Shell>
+    );
+  }
+
+  // ── Resubmit link: loading the saved application ────────────────
+  if (prefilling) {
+    return (
+      <Shell>
+        <div className="rounded-2xl border border-gray-200 bg-white p-8 text-center shadow-sm">
+          <p className="text-gray-600">Loading your application…</p>
+        </div>
+      </Shell>
+    );
+  }
+
   return (
     <Shell>
       <form
@@ -449,6 +544,17 @@ export default function RegisterPage() {
         className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm sm:p-8"
       >
         <Stepper steps={steps} current={step} />
+
+        {resubmitToken && (
+          <div className="mb-4 rounded-lg border border-amber-300 bg-amber-50 p-3 text-sm text-amber-800">
+            <p className="font-semibold">Your application was returned for changes.</p>
+            {resubmitReason ? (
+              <p className="mt-1">{resubmitReason}</p>
+            ) : (
+              <p className="mt-1">Please review your details, make the needed changes, and resubmit.</p>
+            )}
+          </div>
+        )}
 
         {submitError && (
           <div className="mb-4 rounded-lg bg-red-50 p-3 text-sm text-red-700">
