@@ -31,6 +31,15 @@ export const brand = {
   /** Optional hero photo on the login brand panel (path under /public).
    *  Empty string = no photo, the panel falls back to the brand wash. */
   loginPhoto: (import.meta.env.VITE_LOGIN_PHOTO as string) ?? "",
+  /** Agreement documents shown (reproduced inline) on the registration
+   *  sign-off step. Default to the bundled Cedar PDFs under /public/legal;
+   *  white-label tenants override the paths via VITE_DOC_* at build time.
+   *  An empty value hides that document's inline reader. */
+  agreementDocs: {
+    terms: (import.meta.env.VITE_DOC_TERMS as string) ?? "/legal/terms-and-conditions.pdf",
+    keyFacts: (import.meta.env.VITE_DOC_KEYFACTS as string) ?? "/legal/key-facts-statement.pdf",
+    csd: (import.meta.env.VITE_DOC_CSD as string) ?? "/legal/csd-terms.pdf",
+  },
   /** Non-empty (e.g. "TEST") marks a NON-production build: shows a warning
    *  ribbon on the login page and prefixes the browser tab title. Empty in
    *  production so live builds are unchanged. */

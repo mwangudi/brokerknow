@@ -239,6 +239,8 @@ export default function RegisterPage() {
   const [errors, setErrors] = useState<Errors>({});
   const [submitError, setSubmitError] = useState("");
   const [success, setSuccess] = useState("");
+  // Which agreement document is expanded inline on the review step.
+  const [openDoc, setOpenDoc] = useState<string | null>(null);
 
   // Reject → resubmit: when the page is opened from the emailed link
   // (/register?resubmit=<token>), pull the applicant's saved data and reopen
@@ -1018,30 +1020,61 @@ export default function RegisterPage() {
               <div className="mt-6 border-t border-gray-100 pt-6">
                 <h3 className="mb-1 text-base font-semibold text-gray-900">Confirmations</h3>
                 <p className="mb-4 text-sm text-gray-500">
-                  Please read and tick each box to confirm before submitting your application.
+                  Please read each document and tick to confirm before submitting your application.
                 </p>
                 {errors.agreements && (
                   <p className="mb-3 text-sm text-red-600">{errors.agreements}</p>
                 )}
                 <div className="space-y-3">
                   {([
-                    ["termsAccepted", "I have read and agree to the Terms and Conditions."],
-                    ["keyFactsAccepted", "I acknowledge and accept the Key Facts Statement."],
-                    ["declarationAccepted", "I confirm the information I have provided is true and complete (Declaration)."],
-                    ["csdTermsAccepted", "I agree to the CSD account terms and the Stockbrokers Mandate."],
-                  ] as const).map(([key, label]) => (
-                    <label key={key} className="flex cursor-pointer items-start gap-3 rounded-lg border border-gray-200 p-3 text-sm hover:border-brand-300">
-                      <input
-                        type="checkbox"
-                        className="mt-0.5 h-5 w-5 shrink-0"
-                        checked={form.agreements[key]}
-                        onChange={(e) =>
-                          set("agreements", { ...form.agreements, [key]: e.target.checked })
-                        }
-                      />
-                      <span className="text-gray-700">{label}</span>
-                    </label>
-                  ))}
+                    ["termsAccepted", "I have read and agree to the Terms and Conditions.", brand.agreementDocs.terms],
+                    ["keyFactsAccepted", "I acknowledge and accept the Key Facts Statement.", brand.agreementDocs.keyFacts],
+                    ["declarationAccepted", "I confirm the information I have provided is true and complete (Declaration).", ""],
+                    ["csdTermsAccepted", "I agree to the CSD account terms and the Stockbrokers Mandate.", brand.agreementDocs.csd],
+                  ] as const).map(([key, label, doc]) => {
+                    const open = openDoc === key;
+                    return (
+                      <div key={key} className="rounded-lg border border-gray-200">
+                        <label className="flex cursor-pointer items-start gap-3 p-3 text-sm hover:border-brand-300">
+                          <input
+                            type="checkbox"
+                            className="mt-0.5 h-5 w-5 shrink-0"
+                            checked={form.agreements[key]}
+                            onChange={(e) =>
+                              set("agreements", { ...form.agreements, [key]: e.target.checked })
+                            }
+                          />
+                          <span className="flex-1 text-gray-700">{label}</span>
+                          {doc && (
+                            <button
+                              type="button"
+                              onClick={(e) => { e.preventDefault(); setOpenDoc(open ? null : key); }}
+                              className="shrink-0 text-xs font-medium text-brand-600 hover:underline"
+                            >
+                              {open ? "Hide document" : "Read document"}
+                            </button>
+                          )}
+                        </label>
+                        {doc && open && (
+                          <div className="border-t border-gray-100 p-3">
+                            <iframe
+                              src={`${doc}#view=FitH`}
+                              title={label}
+                              className="h-[60vh] w-full rounded-md border border-gray-200"
+                            />
+                            <a
+                              href={doc}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="mt-2 inline-flex items-center gap-1 text-xs font-medium text-brand-600 hover:underline"
+                            >
+                              Open in a new tab ↗
+                            </a>
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
                 </div>
               </div>
             )}
