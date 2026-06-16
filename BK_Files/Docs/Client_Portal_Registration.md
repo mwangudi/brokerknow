@@ -31,6 +31,41 @@ flowchart LR
     B -->|Use protected /api/portal/*| C
 ```
 
+### Registration journey (end to end)
+
+```mermaid
+flowchart TD
+    A([Prospect opens portal /register]) --> B{Which best describes you?}
+    B -->|Already a client, just need a login| EX[Existing-client wizard]
+    B -->|New client| NW[New-client wizard]
+
+    NW --> N1[Account type: Individual / Joint / ITF]
+    N1 --> N2[Personal: ID type selector National ID or Passport]
+    N2 --> N3[Contact and Addresses]
+    N3 --> N4[Documents: KYC upload]
+    N4 --> N5[Review plus sign-off boxes: Terms, Key Facts, Declaration, CSD]
+
+    EX --> SUB([Tap Submit application])
+    N5 --> SUB
+    SUB --> P[(PortalUser - Pending)]
+    P --> RV{Admin review: Portal Registrations}
+
+    RV -->|Existing client| S1[Single admin approves]
+    RV -->|New self-service| OF[Officer: Interim approve plus A-G risk]
+    OF --> IA[(InterimApproved)]
+    IA --> SV[Supervisor: Final approve by a different admin]
+
+    RV -->|Needs changes| RET[Return for changes plus reason]
+    SV -->|Needs changes| RET
+    RET --> RJ[(Rejected - secure token)]
+    RJ --> RE[Applicant reopens form pre-filled and fixes it]
+    RE --> SUB
+
+    S1 --> AP[(Approved - temp password)]
+    SV --> AP
+    AP --> LG([Client logs in, forced password change])
+```
+
 ---
 
 ## 2. Database Schema
@@ -398,20 +433,20 @@ The statement endpoints reuse the same `BuildStatementAsync` helper as the admin
 ```mermaid
 stateDiagram-v2
     [*] --> Pending: Self-register / Submit
-    Pending --> InterimApproved: Officer interim + A–G risk (new self-service client)
-    Pending --> Approved: Single approve (existing-client login)
-    InterimApproved --> Approved: Supervisor final approve (different admin — maker ≠ checker)
+    Pending --> InterimApproved: Officer interim + risk
+    Pending --> Approved: Single approve
+    InterimApproved --> Approved: Final approve by different admin
     Pending --> Rejected: Return for changes
     InterimApproved --> Rejected: Return for changes
-    Rejected --> Pending: Applicant updates & resubmits via emailed link
+    Rejected --> Pending: Update and resubmit via emailed link
     Approved --> Disabled: deactivate
     Disabled --> Approved: activate
     Approved --> [*]: Login enabled
 ```
 
 * **Pending** — registered, awaiting review. Cannot log in yet.
-* **InterimApproved** — officer recorded the risk rating + interim approval; awaiting a **different** admin's final approval.
-* **Approved** — login works. Can be temporarily disabled.
+* **InterimApproved** — officer recorded the A–G risk rating + interim approval (new self-service client); awaiting a **different** admin's final approval (maker ≠ checker).
+* **Approved** — single approve is used for existing-client login requests; login works and can be temporarily disabled.
 * **Rejected** — returned for changes; the applicant can update and resubmit via the emailed token, which moves it back to **Pending**.
 * **Disabled** (`Active = false` overlay) — login refused regardless of `Status`.
 
