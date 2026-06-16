@@ -67,6 +67,14 @@ interface FormState {
   proofOfAddress: File | null;
   sourceOfFunds: File | null;
   otherDocuments: File[];
+
+  // Client sign-off (new applicants). Ticked on the Review step.
+  agreements: {
+    termsAccepted: boolean;
+    keyFactsAccepted: boolean;
+    declarationAccepted: boolean;
+    csdTermsAccepted: boolean;
+  };
 }
 
 type Errors = Partial<Record<keyof FormState | "documents", string>>;
@@ -101,6 +109,12 @@ const EMPTY: FormState = {
   proofOfAddress: null,
   sourceOfFunds: null,
   otherDocuments: [],
+  agreements: {
+    termsAccepted: false,
+    keyFactsAccepted: false,
+    declarationAccepted: false,
+    csdTermsAccepted: false,
+  },
 };
 
 // ─── Per-step validation ────────────────────────────────────────────
@@ -340,6 +354,16 @@ export default function RegisterPage() {
       return;
     }
 
+    // New applicants must tick every sign-off confirmation.
+    if (!isExisting) {
+      const a = form.agreements;
+      if (!a.termsAccepted || !a.keyFactsAccepted || !a.declarationAccepted || !a.csdTermsAccepted) {
+        setErrors((prev) => ({ ...prev, agreements: "Please tick all confirmations to submit your application." }));
+        setSubmitError("Please tick all confirmations to submit your application.");
+        return;
+      }
+    }
+
     const result = await register({
       email: form.email,
       firstName: form.firstName,
@@ -371,6 +395,7 @@ export default function RegisterPage() {
         form.accountType === "ITF" && form.itfBeneficiary.fullName.trim()
           ? JSON.stringify(form.itfBeneficiary)
           : undefined,
+      agreements: isExisting ? undefined : JSON.stringify(form.agreements),
       physicalAddress: form.physicalAddress || undefined,
       postalAddress: form.postalAddress || undefined,
       contactPerson: form.contactPerson || undefined,
@@ -804,6 +829,38 @@ export default function RegisterPage() {
               Please confirm your details below. You can go back to fix anything.
             </p>
             <Summary form={form} />
+
+            {!isExisting && (
+              <div className="mt-6 border-t border-gray-100 pt-6">
+                <h3 className="mb-1 text-base font-semibold text-gray-900">Confirmations</h3>
+                <p className="mb-4 text-sm text-gray-500">
+                  Please read and tick each box to confirm before submitting your application.
+                </p>
+                {errors.agreements && (
+                  <p className="mb-3 text-sm text-red-600">{errors.agreements}</p>
+                )}
+                <div className="space-y-3">
+                  {([
+                    ["termsAccepted", "I have read and agree to the Terms and Conditions."],
+                    ["keyFactsAccepted", "I acknowledge and accept the Key Facts Statement."],
+                    ["declarationAccepted", "I confirm the information I have provided is true and complete (Declaration)."],
+                    ["csdTermsAccepted", "I agree to the CSD account terms and the Stockbrokers Mandate."],
+                  ] as const).map(([key, label]) => (
+                    <label key={key} className="flex cursor-pointer items-start gap-3 rounded-lg border border-gray-200 p-3 text-sm hover:border-brand-300">
+                      <input
+                        type="checkbox"
+                        className="mt-0.5 h-5 w-5 shrink-0"
+                        checked={form.agreements[key]}
+                        onChange={(e) =>
+                          set("agreements", { ...form.agreements, [key]: e.target.checked })
+                        }
+                      />
+                      <span className="text-gray-700">{label}</span>
+                    </label>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
         )}
 

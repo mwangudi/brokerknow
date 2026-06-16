@@ -45,6 +45,7 @@ interface RegisterData {
   accountType?: string;
   jointApplicants?: string;
   itfBeneficiary?: string;
+  agreements?: string;
   physicalAddress?: string;
   postalAddress?: string;
   contactPerson?: string;
@@ -137,7 +138,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const scalarKeys = [
         "email", "firstName", "lastName", "phone", "officePhone", "homePhone",
         "idNumber", "idDocumentType", "cdsNumber", "dateOfBirth", "accountType",
-        "jointApplicants", "itfBeneficiary", "physicalAddress",
+        "jointApplicants", "itfBeneficiary", "agreements", "physicalAddress",
         "postalAddress", "contactPerson",
       ] as const;
       for (const k of scalarKeys) {
