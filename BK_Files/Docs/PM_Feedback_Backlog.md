@@ -40,7 +40,7 @@ Source: `BK_Files/Docs/Testing Comments 2.docx`. Triaged into themes. Numbers re
 - F4. Allow delete/reverse a Contract Note (very-high-permission action). Confirm whether already implemented. ✅ shipped — full Maker/Checker reversal flow: a maker raises a reversal from ViewContract → it queues in `/contracts/approvals`; a different approver (ADMINISTRATORS / MANAGEMENT / SIGNATORIES / OPERATIONS) approves or rejects. Guards: cannot reverse a contract already linked to a settlement voucher, cannot double-request, maker ≠ checker. Pending PM acceptance test.
 
 ## G. Payments & Receipts
-- G1. Maker/Checker workflow: one role creates, another approves; covers reverse/delete too. ✅ shipped — Maker/Checker queues for both cash movements (`/accounts/payment-approvals`) and contract reversals (`/contracts/approvals`). A maker raises create/delete; a different user in an approver role (ADMINISTRATORS / MANAGEMENT / SIGNATORIES / OPERATIONS) approves. No real Payment/Contract row changes until approval; maker ≠ checker enforced server-side. Roles derive from legacy Groups via login. Pending PM sign-off on the approver role set.
+- G1. Maker/Checker workflow: one role creates, another approves; covers reverse/delete too. ✅ shipped, then **scoped down (2026-06-16)** — see **L14**. Internal back-office Add Payment / Add Receipt now post **directly** (no second approver). The Maker/Checker queue stays **only** for external agent/client cash requests and contract-note reversals.
 - G2. Receipt: Bank field should list **internal ledger accounts only**. ✅ shipped
 - G3. Payment: when `EntityType = Client` → auto-pick "Client Payout"; `Agent` → "Agent Commission Payout"; etc. ✅ shipped
 - G4. **Bug**: payment allowed > client balance. Repro: client 448 (Dr Kennedy Malisita). Enforce balance check. [bug — investigate] ✅ shipped
@@ -84,6 +84,38 @@ Source: PM walkthrough of the account-opening pack (`BK_Files/Docs/Acc-Opening/`
 
 ---
 
+## L. Account-Opening Refinements, Operations & Fixes (received & shipped 2026-06-16)
+
+Source: PM testing session on 2026-06-16 (registration walkthrough + screenshots) and follow-up WhatsApp clarifications. All items below are **live on PROD + TEST + cedartest** unless noted. Full technical detail lives in `Client_Portal_Registration.md` and `Account_Opening_Workflow.md`.
+
+### Authentication
+- **L1. Self-service "Forgot password?"** (resolves the parked **C1**). ✅ shipped — on both the client portal and the back-office login. The user enters their email, receives a **6-digit code** (valid 15 minutes), then sets a new password. Security: no account enumeration (the same "if that email is registered, we've sent a code" message always shows), 5-attempt lock, the new password can't match the old one, and all existing sessions are signed out on a successful reset. Codes are delivered by the same email transport used for approvals.
+
+### New-client registration — intake refinements
+- **L2. Mandatory documents listed up front.** ✅ shipped — the first screen of the new-client application lists exactly what to have ready (ID/Passport, proof of address, proof of source of funds) so applicants gather them before starting. The back-office *Add new client* form shows the same reminder.
+- **L3. Account type is now the first item** on the application, and a **Corporate** type was added. ✅ shipped — Step 1 leads with *Account will be held as*: **Individual / Joint / In Trust For / Corporate**. (Corporate is also selectable on the back-office *Add new client* form.)
+- **L4. Contact Person and Next of Kin are now separate people.** ✅ shipped — they used to be one field. *Contact Person* is the day-to-day contact; *Next of Kin* is captured separately **with their own phone number and physical address**.
+- **L5. ITF wording clarified.** ✅ shipped — "In Trust For" is labelled and explained as opening an account on another person's behalf, most often a **parent/guardian registering for a minor child**.
+- **L6. Multiple files per upload field.** ✅ shipped — each document slot (ID, proof of address, source of funds, supporting docs) now accepts **several files**, which corporates need for their multi-document packs.
+- **L7. Residential-address proof options updated.** ✅ shipped — removed "bank statement" from the address-proof guidance and added **letter from employer, letter from school, letter from chief** (alongside utility bill / lease).
+- **L8. Passport photo.** ✅ shipped — the applicant can attach a passport-style photo at registration (portal and back office). It is **displayed on the client's profile**, shown to staff on the review screen, and **embedded on the printed Account Opening / Application form**.
+- **L9. Agreement documents reproduced at sign-off.** ✅ shipped — at the confirmation step each agreement the client ticks (**Terms & Conditions**, **Key Facts Statement**, **CSD terms / Stockbrokers Mandate**) has a *Read document* button that shows the **actual Cedar PDF inline**, plus an open-in-new-tab link. (The *Declaration* remains a self-attestation with no external document.) The documents are the live Cedar forms from `BK_Files/Docs/Acc-Opening/`.
+- **L10. Registration "Documents you'll need" heading + icon fix.** ✅ shipped — the heading is title-cased ("Documents You'll Need") and the box was moved onto the application screen (Step 1). Also fixed a display glitch where a missing icon font made the literal words "description"/"person" appear; these now render as proper icons.
+
+### Workflow — review assignment & reporting
+- **L11. Online registrations shared between two reviewers (round-robin).** ✅ shipped — online client registrations are **distributed evenly** between an admin-chosen set of client-service reviewers (the back office picks them via the *Reviewers* button on Portal Registrations). Each new online registration is auto-assigned to the next reviewer in rotation; staff can also reassign any one manually. A **Channel** (Online / Walk-in) and **Reviewer** column were added, with filters.
+- **L12. New-clients report.** ✅ shipped — a report listing new clients with **Online vs Walk-in**, when each was registered, **who created / reviewed / approved** them and the **timestamps**. Exportable as **CSV and a branded PDF**. (Walk-in = keyed in by staff via *Add new client*; Online = client self-registered.)
+
+### Back-office
+- **L13. "Add new client" from the back office.** ✅ shipped — staff can register a client on their behalf (walk-in / phoned-in). It lands as **Pending** and flows through the **same review and approval** pipeline as a self-service registration; KYC uploads are optional and can be attached later.
+- **L14. Approvals removed for internal payments & receipts** (revises **G1**). ✅ shipped — per the client, back-office staff now **post payments and receipts directly** with no second approver. The system still blocks a payment that exceeds a client's available balance (server-side). The **Maker/Checker approval queue remains** for the **external** path only — agent/client portal cash requests (agent/client is the maker, a Management/Admin user the checker) and **contract-note reversals** are unchanged.
+
+### Fixes
+- **L15. "String or binary data would be truncated" on approval.** ✅ fixed — approving a client with *Create new client* could fail when a registration CDS/ID value was longer than the legacy client columns. Values are now safely trimmed to fit and a clear message replaces the raw database error. Covered by an automated regression test.
+
+---
+
+
 ## Suggested execution order
 1. Quick UI wins (A1, A2, B1, B2, D1, D6, E1, E2, E3, E4, F1, H2) — visible to PM fast, low risk.
 2. **Bugs** (C2 portal profile load, G4 over-payment) — fix before adding features.
@@ -96,5 +128,6 @@ Source: PM walkthrough of the account-opening pack (`BK_Files/Docs/Acc-Opening/`
 
 Items needing PM input:
 - F3 — live with a real signature; **resolved**: kept out of git (real person's signature), reference copies in `BK_Files/Docs/`, restore step in `Ops_Runbook.md §5.4`.
-- C1 OTP channel (email? SMS?) — admin-driven reset already shipped; self-service delivery parked
-- F4 / G1 — built; need PM acceptance test + confirmation the approver role set (ADMINISTRATORS / MANAGEMENT / SIGNATORIES / OPERATIONS) is correct
+- C1 OTP channel — **resolved (2026-06-16, L1)**: self-service "Forgot password?" now emails a 6-digit code on portal + back office (admin-driven reset also still available).
+- F4 — contract-note reversal Maker/Checker built; **still requires approval** (kept by client decision). Needs PM acceptance test.
+- G1 — **revised (2026-06-16, L14)**: internal payments/receipts post directly (no approver); Maker/Checker remains for external agent/client cash requests + contract reversals only.
