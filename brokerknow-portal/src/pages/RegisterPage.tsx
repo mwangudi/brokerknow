@@ -4,6 +4,7 @@ import { useAuth } from "../context/AuthContext";
 import api from "../lib/api";
 import DatePicker from "../components/form/DatePicker";
 import SearchSelect from "../components/form/SearchSelect";
+import Icon from "../components/ui/Icon";
 import { brand } from "../lib/brand";
 
 // ─── Types ──────────────────────────────────────────────────────────
@@ -18,6 +19,7 @@ const ACCOUNT_TYPE_OPTIONS = [
   { value: "Individual", label: "Individual" },
   { value: "Joint", label: "Joint (more than one holder)" },
   { value: "ITF", label: "In Trust For (e.g. a minor child)" },
+  { value: "Corporate", label: "Corporate (company / institution)" },
 ];
 
 interface JointApplicant {
@@ -606,35 +608,6 @@ export default function RegisterPage() {
               />
             </div>
 
-            {/* Mandatory documents notice — shown up front so applicants can
-                gather their KYC before they start the new-client application. */}
-            <div className="mt-6 rounded-xl border border-amber-200 bg-amber-50 p-4">
-              <h3 className="flex items-center gap-2 text-sm font-semibold text-amber-900">
-                <span className="material-symbols-rounded text-base">description</span>
-                Documents you'll need (new clients)
-              </h3>
-              <p className="mt-1 text-sm text-amber-800">
-                Have clear copies (PDF or photo) ready before you start:
-              </p>
-              <ul className="mt-2 space-y-1 text-sm text-amber-800">
-                <li className="flex items-start gap-2">
-                  <span className="mt-0.5 text-amber-600">•</span>
-                  <span><span className="font-medium">National ID or Passport</span> — proof of identity</span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <span className="mt-0.5 text-amber-600">•</span>
-                  <span><span className="font-medium">Proof of address</span> — utility bill, letter from your employer, school or chief (issued within the last 3 months)</span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <span className="mt-0.5 text-amber-600">•</span>
-                  <span><span className="font-medium">Proof of source of funds</span> — recent payslip or bank statement</span>
-                </li>
-              </ul>
-              <p className="mt-2 text-xs text-amber-700">
-                Already a {brand.name} client? You're already verified — you won't be asked to re-upload these.
-              </p>
-            </div>
-
             <p className="mt-6 text-center text-sm text-gray-500">
               Already registered?{" "}
               <Link to="/login" className="font-medium text-brand-600 hover:underline">
@@ -655,6 +628,67 @@ export default function RegisterPage() {
                 ? "Provide your name so our team can locate your existing account. CSD number is optional but helps us match you faster."
                 : "Please fill in your personal details."}
             </p>
+
+            {/* Account type — a top item so applicants choose how the account
+                is held before entering their details. */}
+            {!isExisting && (
+              <div className="mb-6">
+                <h3 className="mb-1 text-base font-semibold text-gray-900">Account type</h3>
+                <p className="mb-4 text-sm text-gray-500">
+                  Choose how this account will be held. A Joint account has more than one holder; an
+                  In Trust For (ITF) account is opened by someone on another person's behalf — most
+                  often a parent or guardian registering for a minor child; a Corporate account is
+                  held by a company or institution.
+                </p>
+                <div className="max-w-md">
+                  <SearchSelect
+                    label="Account will be held as"
+                    value={form.accountType}
+                    onChange={(v) =>
+                      setForm((prev) => ({
+                        ...prev,
+                        accountType: v,
+                        jointApplicants:
+                          v === "Joint" && prev.jointApplicants.length === 0
+                            ? [{ fullName: "", idDocumentType: "National ID", idNumber: "", relationship: "", idDocument: null }]
+                            : prev.jointApplicants,
+                      }))
+                    }
+                    options={ACCOUNT_TYPE_OPTIONS}
+                    searchPlaceholder="Search account type…"
+                  />
+                </div>
+              </div>
+            )}
+
+            {/* Documents you'll need — moved here from the landing page so it
+                appears on the first screen of the actual application. */}
+            {!isExisting && (
+              <div className="mb-6 rounded-xl border border-amber-200 bg-amber-50 p-4">
+                <h3 className="flex items-center gap-2 text-sm font-semibold text-amber-900">
+                  <Icon name="description" size={18} />
+                  Documents You'll Need
+                </h3>
+                <p className="mt-1 text-sm text-amber-800">
+                  Have clear copies (PDF or photo) ready before you start:
+                </p>
+                <ul className="mt-2 space-y-1 text-sm text-amber-800">
+                  <li className="flex items-start gap-2">
+                    <span className="mt-0.5 text-amber-600">•</span>
+                    <span><span className="font-medium">National ID or Passport</span> — proof of identity</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <span className="mt-0.5 text-amber-600">•</span>
+                    <span><span className="font-medium">Proof of address</span> — utility bill, letter from your employer, school or chief (issued within the last 3 months)</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <span className="mt-0.5 text-amber-600">•</span>
+                    <span><span className="font-medium">Proof of source of funds</span> — recent payslip or bank statement</span>
+                  </li>
+                </ul>
+              </div>
+            )}
+
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <Field label="First name" required value={form.firstName}
                 error={errors.firstName} onChange={(v) => set("firstName", v)}
@@ -702,33 +736,8 @@ export default function RegisterPage() {
               </div>
             </div>
 
-            {!isExisting && (
+            {!isExisting && (form.accountType === "Joint" || form.accountType === "ITF") && (
               <div className="mt-6 border-t border-gray-100 pt-6">
-                <h3 className="mb-1 text-base font-semibold text-gray-900">Account type</h3>
-                <p className="mb-4 text-sm text-gray-500">
-                  Choose how this account will be held. Joint accounts have more than one holder; an
-                  In Trust For (ITF) account is opened by someone on another person's behalf —
-                  most often a parent or guardian registering for their minor child.
-                </p>
-                <div className="max-w-md">
-                  <SearchSelect
-                    label="Account will be held as"
-                    value={form.accountType}
-                    onChange={(v) =>
-                      setForm((prev) => ({
-                        ...prev,
-                        accountType: v,
-                        jointApplicants:
-                          v === "Joint" && prev.jointApplicants.length === 0
-                            ? [{ fullName: "", idDocumentType: "National ID", idNumber: "", relationship: "", idDocument: null }]
-                            : prev.jointApplicants,
-                      }))
-                    }
-                    options={ACCOUNT_TYPE_OPTIONS}
-                    searchPlaceholder="Search account type…"
-                  />
-                </div>
-
                 {form.accountType === "Joint" && (
                   <div className="mt-4">
                     <div className="mb-3 rounded-lg border border-brand-200 bg-brand-50 p-3 text-sm text-brand-800">
@@ -1426,7 +1435,7 @@ function PhotoSlot({
           {preview ? (
             <img src={preview} alt="Passport preview" className="h-full w-full object-cover" />
           ) : (
-            <span className="material-symbols-rounded text-3xl text-gray-300">person</span>
+            <Icon name="person" size={30} className="text-gray-300" />
           )}
         </div>
         <div className="min-w-0">
