@@ -78,6 +78,9 @@ Source: PM walkthrough of the account-opening pack (`BK_Files/Docs/Acc-Opening/`
 - K11. On approval, the two forms are **downloadable + saved** on the client record. ✅ shipped — CSD F1, Agreement of Mandate, and Residential Verification filed under the client's Documents.
 - K12. Process applies whether set up **internally** or **by the client**. ✅ shipped — portal self-service captures intake + uploads; staff run the same internal workflow to completion.
 - K13. **(PM, WhatsApp)** Joint accounts simplified: the registrant becomes the **contact person** and the **only login holder**; additional holders are just *names + their KYC* on one application/approval. ✅ shipped — per-holder ID document upload (`joint-id-N`), registrant shown as primary contact + sole login.
+- K14. **(2026-06-16)** Self-service approval must match the internal flow: **Officer interim + risk → Supervisor final**, with **maker ≠ checker** (a different admin for each step). ✅ shipped — Portal Registrations now has *Interim approve + risk* then *Final approve*; the API blocks the same admin doing both. Existing-client login requests keep the single-step approval.
+- K15. **(2026-06-16)** Client sign-off checkboxes shown to the **client** at registration (not only on the internal form). ✅ shipped — Terms / Key Facts / Declaration / CSD ticked on the portal review step, stored on the application, and surfaced to the approver.
+- K16. **(2026-06-16)** **Reject → update → resubmit**: a returned application is not a dead end. ✅ shipped — *Return for changes* emails the applicant a single-use, 30-day secure link that reopens their form pre-filled; resubmitting sends it back to **Pending** and restarts the two-stage review.
 
 ---
 

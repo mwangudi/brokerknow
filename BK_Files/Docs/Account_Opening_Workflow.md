@@ -175,6 +175,24 @@ The full A–G breakdown (and the override) is printed on the Agreement of Manda
 4. On **approve**, the three PDFs are generated and filed on the client record, and
    the status becomes `Approved`. The forms are then downloadable from the client.
 
+**Maker ≠ checker:** the supervisor who gives the final approval must be a
+**different** officer than the one who recorded the interim approval. The API
+rejects an attempt by the same officer to do both steps.
+
+### Self-service applications (client-started)
+
+When a client starts the account through the portal, the same two-stage chain
+applies — handled in the **Portal Registrations** queue rather than the client
+record:
+
+* The client's intake (account type, ID type, joint/ITF details, KYC uploads) and
+  their **sign-off checkboxes** are captured at registration.
+* An **Officer** does the *Interim approve + risk* (A–G rating); a **different**
+  admin does the *Final approve* (maker ≠ checker).
+* If something needs fixing, the reviewer uses **Return for changes**, which emails
+  the applicant a secure link to update and resubmit (see
+  [`Client_Portal_Registration.md`](Client_Portal_Registration.md) §4.3–4.4).
+
 ---
 
 ## 10. Code Map

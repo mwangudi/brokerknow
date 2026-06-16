@@ -53,8 +53,15 @@ Two new tables added to the legacy database:
 | `AccountType` | NVARCHAR(20) | `Individual` (default) / `Joint` / `ITF` |
 | `JointApplicants` | NVARCHAR(MAX) | JSON array of additional joint holders (name, ID type, ID number, relationship) |
 | `ItfBeneficiary` | NVARCHAR(MAX) | JSON for the In-Trust-For beneficiary (name, DOB, relationship) |
+| `Agreements` | NVARCHAR(MAX) | JSON of the client's sign-off (terms, key facts, declaration, CSD) ticked on the review step |
+| `RiskAssessment` | NVARCHAR(MAX) | JSON of the officer's Customer Risk Rating (Sections A–G + total + band), recorded at interim approval |
+| `SelfRegisteredNewClient` | BIT NULL | `1` = a new client who self-registered (needs two-stage approval); `NULL` = existing-client login / staff-created (single approval) |
+| `InterimApprovedBy` | INT | Admin who gave the interim (officer) approval — drives maker ≠ checker |
+| `InterimApprovedAt` | DATETIME2 | When the interim approval was given |
+| `ResubmitToken` | NVARCHAR(128) | Single-use capability token emailed on “return for changes” so the applicant can resubmit |
+| `ResubmitTokenExpiresAt` | DATETIME2 | Expiry of the resubmit token (30 days from return) |
 | `Role` | NVARCHAR(20) | `Client` or `Admin` |
-| `Status` | NVARCHAR(20) | `Pending` → `Approved` / `Rejected` |
+| `Status` | NVARCHAR(20) | `Pending` → `InterimApproved` → `Approved` / `Rejected` |
 | `Active` | BIT | Soft-disable toggle |
 | `ClientDpa` | INT | FK to legacy `Client` table once approved |
 | `CreatedAt`, `ApprovedAt` | DATETIME2 | Audit timestamps |
@@ -87,6 +94,13 @@ The portal Register page (`/register`) collects:
 | **Contact Details** | Email *, Cell Phone, Office Phone, Home Phone |
 | **Addresses** | Postal Address, Physical Address, Contact Person |
 | **KYC Documents** | ID document *, proof of address *, source of funds *, optional supporting docs |
+| **Review — sign-off** (new applicants) | Tick to confirm: **Terms & Conditions**, **Key Facts Statement**, **Declaration**, **CSD terms / Stockbrokers Mandate**. All four are required to submit and are shown to the approver. |
+
+> **Sign-off checkboxes:** new applicants must tick all four confirmations on the
+> review step before the application can be submitted. The ticked values are
+> stored as JSON in `PortalUsers.Agreements` and surfaced to the approver during
+> review. Existing-client login requests skip this (they are not opening a new
+> account).
 
 > **Joint accounts (PM model):** the person who registers becomes the **contact
 > person** and the **only login holder**. Additional holders are captured as
@@ -178,13 +192,32 @@ ITF it shows the beneficiary (name, DOB, relationship).
 
 Action buttons per row:
 
-* **Approve** — only on Pending rows, opens modal
-* **Reject** — only on Pending rows, opens modal
+* **Interim approve + risk** — self-registered new clients (Pending): officer records the A–G Customer Risk Rating and an interim approval
+* **Final approve** — self-registered new clients (InterimApproved): a **different** admin gives the final approval (maker ≠ checker)
+* **Approve** — existing-client login requests (Pending): single-step approval
+* **Return for changes** — Pending or InterimApproved rows: emails the applicant a resubmit link (see §4.5)
 * **Disable / Enable** — toggle `Active`
 
 ### 4.2 Approval flow
 
-Clicking **Approve** opens a modal with a client-link dropdown (optional):
+**Two paths**, decided by `SelfRegisteredNewClient`:
+
+* **New self-service client (two-stage, maker ≠ checker).** An **Officer** clicks
+  *Interim approve + risk*, fills the Customer Risk Rating (Sections A–G — total
+  and band auto-populate, with the High-occupation / high-risk-jurisdiction
+  override), and records the interim approval (`Status = InterimApproved`,
+  `InterimApprovedBy/At` set). A **different** admin then clicks *Final approve*;
+  the API rejects the attempt if the same admin tries both steps.
+
+  ```http
+  POST /api/admin/portal-users/{id}/interim-approve   # officer + A–G risk
+  POST /api/admin/portal-users/{id}/approve           # different admin, final
+  ```
+
+* **Existing-client login request (single step).** One admin approves directly
+  from `Pending`.
+
+Clicking **Approve** (final) opens a modal with a client-link option:
 
 ```http
 POST /api/admin/portal-users/{id}/approve
@@ -204,23 +237,39 @@ Server-side behaviour:
 4. Sends the **"Account Approved"** email containing email + temp password + sign-in link
 5. Returns the temp password to the admin SPA so a green **Credentials Modal** appears with **Copy** buttons (for fallback if email delivery is questionable)
 
-### 4.3 Rejection flow
+### 4.3 Return for changes (resubmittable)
 
 ```http
 POST /api/admin/portal-users/{id}/reject
 Content-Type: application/json
 
-{ "reason": "Unable to verify identity documents." }
+{ "reason": "Please attach a clearer copy of your ID." }
 ```
 
-Server-side behaviour:
+Rejection is **not** a dead end — it returns the application to the applicant for
+correction. Server-side behaviour:
 
-1. Verifies user is `Pending`
-2. Sets `Status = Rejected`, stores `RejectionReason`
-3. Sends the **"Application Update"** email with the reason
-4. Returns 200
+1. Allowed from `Pending` or `InterimApproved`
+2. Sets `Status = Rejected`, stores `RejectionReason`, clears any interim approval
+3. Issues a single-use **`ResubmitToken`** (hex, 30-day expiry)
+4. Emails the applicant an **“Update & resubmit”** link `{PortalUrl}/register?resubmit=<token>`
+5. Returns `{ message, resubmitUrl }` so staff can copy/share the link if email delivery is unreliable
 
-### 4.4 Disable / Enable
+### 4.4 Resubmit (applicant, token-gated)
+
+```http
+GET  /api/auth/resubmit/{token}    # returns the saved application, pre-filled
+POST /api/auth/resubmit/{token}    # applicant submits the corrected application
+```
+
+The link reopens the registration form **pre-filled** with the saved details and
+shows the return reason. KYC re-upload is optional — the originals stay on file
+unless the applicant attaches replacements. On submit the application goes back to
+`Status = Pending`, the token is consumed (single-use), and any interim approval /
+risk rating is cleared so the two-stage flow restarts. Only `Rejected` rows with
+an unexpired token are reachable, so the endpoint cannot touch other accounts.
+
+### 4.5 Disable / Enable
 
 ```http
 POST /api/admin/portal-users/{id}/deactivate   → Active = false
@@ -271,9 +320,9 @@ All three emails share a polished branded layout:
 |---|---|---|---|
 | `POST /auth/register` succeeds | `BrokerKnow — Registration Received` | `REGISTRATION RECEIVED` | Blue |
 | `POST /admin/portal-users/{id}/approve` succeeds | `BrokerKnow — Your Account is Approved` | `ACCOUNT APPROVED` | Green |
-| `POST /admin/portal-users/{id}/reject` succeeds | `BrokerKnow — Registration Update` | `APPLICATION UPDATE` | Red |
+| `POST /admin/portal-users/{id}/reject` succeeds | `BrokerKnow — Please update your application` | `ACTION NEEDED` | Amber |
 
-The approval email contains a two-row credentials table (Email, Temporary Password in monospace), an amber security warning, and a **"Sign in to your account"** CTA button linking to `{PortalUrl}/login`.
+The approval email contains a two-row credentials table (Email, Temporary Password in monospace), an amber security warning, and a **"Sign in to your account"** CTA button linking to `{PortalUrl}/login`. The return-for-changes email carries the reason and an **"Update & resubmit"** CTA button linking to `{PortalUrl}/register?resubmit=<token>`.
 
 ### 5.3 Failure handling
 
@@ -348,18 +397,22 @@ The statement endpoints reuse the same `BuildStatementAsync` helper as the admin
 
 ```mermaid
 stateDiagram-v2
-    [*] --> Pending: Self-register
-    Pending --> Approved: Admin approves
-    Pending --> Rejected: Admin rejects
-    Approved --> Approved: Login allowed
+    [*] --> Pending: Self-register / Submit
+    Pending --> InterimApproved: Officer interim + A–G risk (new self-service client)
+    Pending --> Approved: Single approve (existing-client login)
+    InterimApproved --> Approved: Supervisor final approve (different admin — maker ≠ checker)
+    Pending --> Rejected: Return for changes
+    InterimApproved --> Rejected: Return for changes
+    Rejected --> Pending: Applicant updates & resubmits via emailed link
     Approved --> Disabled: deactivate
     Disabled --> Approved: activate
-    Rejected --> [*]: Account dormant
+    Approved --> [*]: Login enabled
 ```
 
-* **Pending** — registered but cannot log in. Can still be deleted or directly promoted via DB.
+* **Pending** — registered, awaiting review. Cannot log in yet.
+* **InterimApproved** — officer recorded the risk rating + interim approval; awaiting a **different** admin's final approval.
 * **Approved** — login works. Can be temporarily disabled.
-* **Rejected** — terminal state from the SPA's perspective. Admin can re-approve only by direct DB intervention or by adding a re-open endpoint.
+* **Rejected** — returned for changes; the applicant can update and resubmit via the emailed token, which moves it back to **Pending**.
 * **Disabled** (`Active = false` overlay) — login refused regardless of `Status`.
 
 ---
@@ -380,8 +433,10 @@ stateDiagram-v2
 |---|---|
 | Domain entity | `BrokerKnow.Domain/Entities/PortalUser.cs` |
 | EF configuration | `BrokerKnow.Infrastructure/Persistence/Configurations/PortalUserConfiguration.cs` |
-| Auth endpoints | `BrokerKnow.Api/Controllers/AuthController.cs` |
-| Admin user mgmt | `BrokerKnow.Api/Controllers/PortalUsersController.cs` |
+| Schema bootstrap (idempotent column adds) | `BrokerKnow.Api/Program.cs` |
+| Auth endpoints (register + resubmit) | `BrokerKnow.Api/Controllers/AuthController.cs` |
+| Admin user mgmt (interim/final approve, return-for-changes) | `BrokerKnow.Api/Controllers/PortalUsersController.cs` |
+| Risk-rating catalog (Sections A–G) | `BrokerKnow.Api/Controllers/AccountOpeningRiskCatalog.cs` |
 | Client portal endpoints | `BrokerKnow.Api/Controllers/PortalController.cs` |
 | Email service | `BrokerKnow.Api/Services/EmailService.cs` |
 | Portal SPA — Register | `brokerknow-portal/src/pages/RegisterPage.tsx` |
