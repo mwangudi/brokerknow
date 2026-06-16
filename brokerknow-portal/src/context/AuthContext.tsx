@@ -55,12 +55,16 @@ interface RegisterData {
   physicalAddress?: string;
   postalAddress?: string;
   contactPerson?: string;
+  nextOfKinName?: string;
+  nextOfKinPhone?: string;
+  nextOfKinAddress?: string;
   // True when an existing client is just requesting a portal login (skips KYC).
   isExistingClient?: boolean;
   // FIU / Cedar Capital KYC documents (required server-side for NEW applicants).
-  idDocument?: File;
-  proofOfAddress?: File;
-  sourceOfFunds?: File;
+  // Each category may carry several files (e.g. corporates).
+  idDocument?: File[];
+  proofOfAddress?: File[];
+  sourceOfFunds?: File[];
   otherDocuments?: File[];
   // One ID document per joint account holder, in the same order as the
   // jointApplicants JSON so the server can map files to holders.
@@ -76,16 +80,17 @@ function buildRegisterForm(data: RegisterData): FormData {
     "email", "firstName", "lastName", "phone", "officePhone", "homePhone",
     "idNumber", "idDocumentType", "cdsNumber", "dateOfBirth", "accountType",
     "jointApplicants", "itfBeneficiary", "agreements", "physicalAddress",
-    "postalAddress", "contactPerson",
+    "postalAddress", "contactPerson", "nextOfKinName", "nextOfKinPhone",
+    "nextOfKinAddress",
   ] as const;
   for (const k of scalarKeys) {
     const v = data[k];
     if (v !== undefined && v !== null && v !== "") fd.append(k, String(v));
   }
   fd.append("isExistingClient", String(!!data.isExistingClient));
-  if (data.idDocument) fd.append("idDocument", data.idDocument, data.idDocument.name);
-  if (data.proofOfAddress) fd.append("proofOfAddress", data.proofOfAddress, data.proofOfAddress.name);
-  if (data.sourceOfFunds) fd.append("sourceOfFunds", data.sourceOfFunds, data.sourceOfFunds.name);
+  if (data.idDocument) for (const f of data.idDocument) fd.append("idDocument", f, f.name);
+  if (data.proofOfAddress) for (const f of data.proofOfAddress) fd.append("proofOfAddress", f, f.name);
+  if (data.sourceOfFunds) for (const f of data.sourceOfFunds) fd.append("sourceOfFunds", f, f.name);
   if (data.otherDocuments) for (const f of data.otherDocuments) fd.append("otherDocuments", f, f.name);
   if (data.jointIdDocuments) for (const f of data.jointIdDocuments) fd.append("jointIdDocuments", f, f.name);
   return fd;

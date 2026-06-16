@@ -61,11 +61,15 @@ interface FormState {
   postalAddress: string;
   physicalAddress: string;
   contactPerson: string;
+  nextOfKinName: string;
+  nextOfKinPhone: string;
+  nextOfKinAddress: string;
 
-  // FIU / Cedar Capital KYC documents
-  idDocument: File | null;
-  proofOfAddress: File | null;
-  sourceOfFunds: File | null;
+  // FIU / Cedar Capital KYC documents. Each category accepts several files
+  // (e.g. a corporate's multiple registration documents).
+  idDocument: File[];
+  proofOfAddress: File[];
+  sourceOfFunds: File[];
   otherDocuments: File[];
 
   // Client sign-off (new applicants). Ticked on the Review step.
@@ -105,9 +109,12 @@ const EMPTY: FormState = {
   postalAddress: "",
   physicalAddress: "",
   contactPerson: "",
-  idDocument: null,
-  proofOfAddress: null,
-  sourceOfFunds: null,
+  nextOfKinName: "",
+  nextOfKinPhone: "",
+  nextOfKinAddress: "",
+  idDocument: [],
+  proofOfAddress: [],
+  sourceOfFunds: [],
   otherDocuments: [],
   agreements: {
     termsAccepted: false,
@@ -200,6 +207,8 @@ function validateStep(step: number, form: FormState, resubmitMode = false): Erro
   if (step === 3 && !isExisting) {
     if (!form.postalAddress.trim() && !form.physicalAddress.trim())
       e.postalAddress = "Provide at least one address (postal or physical).";
+    if (form.nextOfKinPhone && !PHONE_RE.test(form.nextOfKinPhone))
+      e.nextOfKinPhone = "Enter a valid phone number.";
   }
 
   // Documents step — new applicants only (existing clients are already KYC'd
@@ -208,9 +217,9 @@ function validateStep(step: number, form: FormState, resubmitMode = false): Erro
   // resubmit the originals stay on file, so uploads are optional.
   if (!isExisting && step === 4 && !resubmitMode) {
     const missing: string[] = [];
-    if (!form.idDocument) missing.push("National ID / Passport");
-    if (!form.proofOfAddress) missing.push("Proof of address");
-    if (!form.sourceOfFunds) missing.push("Proof of source of funds");
+    if (form.idDocument.length === 0) missing.push("National ID / Passport");
+    if (form.proofOfAddress.length === 0) missing.push("Proof of address");
+    if (form.sourceOfFunds.length === 0) missing.push("Proof of source of funds");
     if (missing.length) e.documents = `Please attach: ${missing.join(", ")}.`;
   }
 
@@ -268,6 +277,9 @@ export default function RegisterPage() {
           officePhone: data.officePhone ?? "", homePhone: data.homePhone ?? "",
           postalAddress: data.postalAddress ?? "", physicalAddress: data.physicalAddress ?? "",
           contactPerson: data.contactPerson ?? "",
+          nextOfKinName: data.nextOfKinName ?? "",
+          nextOfKinPhone: data.nextOfKinPhone ?? "",
+          nextOfKinAddress: data.nextOfKinAddress ?? "",
           agreements: {
             termsAccepted: !!ag.termsAccepted, keyFactsAccepted: !!ag.keyFactsAccepted,
             declarationAccepted: !!ag.declarationAccepted, csdTermsAccepted: !!ag.csdTermsAccepted,
@@ -458,10 +470,13 @@ export default function RegisterPage() {
       physicalAddress: form.physicalAddress || undefined,
       postalAddress: form.postalAddress || undefined,
       contactPerson: form.contactPerson || undefined,
+      nextOfKinName: form.nextOfKinName || undefined,
+      nextOfKinPhone: form.nextOfKinPhone || undefined,
+      nextOfKinAddress: form.nextOfKinAddress || undefined,
       isExistingClient: isExisting,
-      idDocument: form.idDocument ?? undefined,
-      proofOfAddress: form.proofOfAddress ?? undefined,
-      sourceOfFunds: form.sourceOfFunds ?? undefined,
+      idDocument: form.idDocument.length ? form.idDocument : undefined,
+      proofOfAddress: form.proofOfAddress.length ? form.proofOfAddress : undefined,
+      sourceOfFunds: form.sourceOfFunds.length ? form.sourceOfFunds : undefined,
       otherDocuments: form.otherDocuments.length ? form.otherDocuments : undefined,
     };
 
@@ -685,7 +700,8 @@ export default function RegisterPage() {
                 <h3 className="mb-1 text-base font-semibold text-gray-900">Account type</h3>
                 <p className="mb-4 text-sm text-gray-500">
                   Choose how this account will be held. Joint accounts have more than one holder; an
-                  In Trust For (ITF) account is opened on behalf of someone else, such as a minor child.
+                  In Trust For (ITF) account is opened by someone on another person's behalf —
+                  most often a parent or guardian registering for their minor child.
                 </p>
                 <div className="max-w-md">
                   <SearchSelect
@@ -814,9 +830,10 @@ export default function RegisterPage() {
 
                 {form.accountType === "ITF" && (
                   <div className="mt-4 rounded-xl border border-gray-200 p-4">
-                    <h4 className="mb-1 text-sm font-semibold text-gray-800">Beneficiary (e.g. minor child)</h4>
+                    <h4 className="mb-1 text-sm font-semibold text-gray-800">Beneficiary (the person you're registering for, e.g. your minor child)</h4>
                     <p className="mb-3 text-xs text-gray-500">
-                      You are opening this account in trust for the person below.
+                      In Trust For (ITF): you are the registered holder, opening and operating this
+                      account on behalf of the beneficiary below until they can hold it themselves.
                     </p>
                     {errors.itfBeneficiary && (
                       <p className="mb-2 text-xs text-red-600">{errors.itfBeneficiary}</p>
@@ -892,8 +909,8 @@ export default function RegisterPage() {
               Addresses & next of kin
             </h2>
             <p className="mb-6 text-sm text-gray-500">
-              Provide at least one address. The contact person will be used in case
-              we cannot reach you directly.
+              Provide at least one address. The contact person and next of kin help
+              us reach someone on your behalf if we cannot reach you directly.
             </p>
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <Field label="Postal address" value={form.postalAddress}
@@ -902,10 +919,30 @@ export default function RegisterPage() {
               <Field label="Physical address" value={form.physicalAddress}
                 onChange={(v) => set("physicalAddress", v)}
                 placeholder="Street, suburb, city" />
-              <Field label="Contact person (next of kin)" value={form.contactPerson}
+              <Field label="Contact person" value={form.contactPerson}
                 onChange={(v) => set("contactPerson", v)}
+                hint="A day-to-day contact (e.g. a PA or relative) — can be different from your next of kin."
                 placeholder="Full name + phone"
                 className="sm:col-span-2" />
+            </div>
+
+            <div className="mt-6 rounded-xl border border-gray-200 p-4">
+              <h3 className="mb-1 text-base font-semibold text-gray-900">Next of kin</h3>
+              <p className="mb-3 text-sm text-gray-500">
+                Your next of kin is a separate person we can contact in an emergency.
+              </p>
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                <Field label="Next of kin full name" value={form.nextOfKinName}
+                  onChange={(v) => set("nextOfKinName", v)}
+                  placeholder="e.g. Mary Banda" />
+                <Field label="Next of kin phone" type="tel" value={form.nextOfKinPhone}
+                  error={errors.nextOfKinPhone} onChange={(v) => set("nextOfKinPhone", v)}
+                  placeholder="+265 999 765 432" />
+                <Field label="Next of kin physical address" value={form.nextOfKinAddress}
+                  onChange={(v) => set("nextOfKinAddress", v)}
+                  placeholder="Street, suburb, city"
+                  className="sm:col-span-2" />
+              </div>
             </div>
           </div>
         )}
@@ -927,23 +964,23 @@ export default function RegisterPage() {
               </div>
             )}
             <div className="space-y-4">
-              <FileSlot
+              <MultiFileSlot
                 label="National ID or Passport"
                 required
-                file={form.idDocument}
-                onChange={(f) => set("idDocument", f)}
+                files={form.idDocument}
+                onChange={(files) => set("idDocument", files)}
               />
-              <FileSlot
-                label="Proof of residential address (utility bill, bank statement, lease)"
+              <MultiFileSlot
+                label="Proof of residential address (utility bill, lease, or a letter from your employer, school, or chief)"
                 required
-                file={form.proofOfAddress}
-                onChange={(f) => set("proofOfAddress", f)}
+                files={form.proofOfAddress}
+                onChange={(files) => set("proofOfAddress", files)}
               />
-              <FileSlot
+              <MultiFileSlot
                 label="Proof of source of funds (payslip, bank statement, business registration)"
                 required
-                file={form.sourceOfFunds}
-                onChange={(f) => set("sourceOfFunds", f)}
+                files={form.sourceOfFunds}
+                onChange={(files) => set("sourceOfFunds", files)}
               />
               <MultiFileSlot
                 label="Other supporting documents (optional)"
@@ -952,6 +989,7 @@ export default function RegisterPage() {
               />
             </div>
             <p className="mt-4 text-xs text-gray-500">
+              You can attach more than one file per item (useful for corporates).
               Accepted: PDF, images, Word, Excel, CSV, text. Maximum 10&nbsp;MB per file.
             </p>
           </div>
@@ -1165,12 +1203,15 @@ function Summary({ form }: { form: FormState }) {
       { label: "Postal address", value: form.postalAddress || "—" },
       { label: "Physical address", value: form.physicalAddress || "—" },
       { label: "Contact person", value: form.contactPerson || "—" },
+      { label: "Next of kin", value: form.nextOfKinName || "—" },
+      { label: "Next of kin phone", value: form.nextOfKinPhone || "—" },
+      { label: "Next of kin address", value: form.nextOfKinAddress || "—" },
     );
   }
   rows.push(
-    { label: "ID document", value: form.idDocument?.name ?? "—" },
-    { label: "Proof of address", value: form.proofOfAddress?.name ?? "—" },
-    { label: "Source of funds", value: form.sourceOfFunds?.name ?? "—" },
+    { label: "ID document", value: form.idDocument.length ? form.idDocument.map((f) => f.name).join(", ") : "—" },
+    { label: "Proof of address", value: form.proofOfAddress.length ? form.proofOfAddress.map((f) => f.name).join(", ") : "—" },
+    { label: "Source of funds", value: form.sourceOfFunds.length ? form.sourceOfFunds.map((f) => f.name).join(", ") : "—" },
     {
       label: "Other documents",
       value: form.otherDocuments.length
@@ -1311,10 +1352,12 @@ function MultiFileSlot({
   label,
   files,
   onChange,
+  required,
 }: {
   label: string;
   files: File[];
   onChange: (f: File[]) => void;
+  required?: boolean;
 }) {
   const [err, setErr] = useState<string | null>(null);
   function add(list: FileList | null) {
@@ -1335,7 +1378,7 @@ function MultiFileSlot({
   }
   return (
     <div className="rounded-lg border border-gray-200 bg-gray-50 p-3">
-      <div className="mb-2 text-sm font-medium text-gray-700">{label}</div>
+      <div className="mb-2 text-sm font-medium text-gray-700">{label} {required && <span className="text-red-500">*</span>}</div>
       {files.length > 0 && (
         <ul className="mb-2 space-y-1">
           {files.map((f, i) => (
