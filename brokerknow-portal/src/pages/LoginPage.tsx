@@ -4,15 +4,64 @@ import { useAuth } from "../context/AuthContext";
 import { brand } from "../lib/brand";
 
 export default function LoginPage() {
-  const { login, verifyOtp, loading } = useAuth();
+  const { login, verifyOtp, forgotPassword, resetPassword, loading } = useAuth();
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
-  const [step, setStep] = useState<"credentials" | "otp">("credentials");
+  const [step, setStep] = useState<"credentials" | "otp" | "forgot-email" | "forgot-reset">("credentials");
   const [otpToken, setOtpToken] = useState("");
   const [otpCode, setOtpCode] = useState("");
   const [otpHint, setOtpHint] = useState("");
+
+  // Forgot-password flow state.
+  const [resetToken, setResetToken] = useState("");
+  const [resetCode, setResetCode] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [notice, setNotice] = useState("");
+
+  async function handleForgotRequest(e: FormEvent) {
+    e.preventDefault();
+    setError("");
+    setNotice("");
+    if (!email.trim()) {
+      setError("Enter your email address.");
+      return;
+    }
+    const result = await forgotPassword(email.trim());
+    if (result.error) {
+      setError(result.error);
+      return;
+    }
+    setResetToken(result.token || "");
+    setNotice(result.message || "If that email is registered, we've sent a reset code.");
+    setResetCode("");
+    setNewPassword("");
+    setConfirmPassword("");
+    setStep("forgot-reset");
+  }
+
+  async function handleResetSubmit(e: FormEvent) {
+    e.preventDefault();
+    setError("");
+    if (!resetCode.trim()) {
+      setError("Enter the 6-digit code from your email.");
+      return;
+    }
+    if (newPassword !== confirmPassword) {
+      setError("The two passwords don't match.");
+      return;
+    }
+    const result = await resetPassword(resetToken, resetCode.trim(), newPassword);
+    if (result.error) {
+      setError(result.error);
+      return;
+    }
+    setNotice(result.message || "Your password has been reset. Please sign in.");
+    setStep("credentials");
+    setPassword("");
+  }
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
@@ -127,7 +176,7 @@ export default function LoginPage() {
             </p>
           </div>
 
-          {step === "otp" ? (
+          {step === "otp" && (
           <form
             onSubmit={handleVerifyOtp}
             className="rounded-2xl border border-outline-variant bg-surface-container-lowest p-10 shadow-[0px_4px_12px_rgba(15,23,42,0.03)]"
@@ -178,7 +227,133 @@ export default function LoginPage() {
               Back to sign in
             </button>
           </form>
-          ) : (
+          )}
+
+          {step === "forgot-email" && (
+          <form
+            onSubmit={handleForgotRequest}
+            className="rounded-2xl border border-outline-variant bg-surface-container-lowest p-10 shadow-[0px_4px_12px_rgba(15,23,42,0.03)]"
+          >
+            <h2 className="font-display text-2xl font-semibold text-primary">
+              Reset your password
+            </h2>
+            <p className="mb-7 mt-1 text-sm text-on-surface-variant">
+              Enter your email and we&apos;ll send you a 6-digit code to reset your password.
+            </p>
+            {error && (
+              <div className="mb-4 rounded-lg border border-axis-error/30 bg-axis-error/5 p-3 text-sm text-axis-error">
+                {error}
+              </div>
+            )}
+            <div className="mb-6">
+              <label className="mb-1.5 block text-[11px] font-semibold uppercase tracking-wide text-on-surface-variant">
+                Email
+              </label>
+              <input
+                type="email"
+                required
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="w-full rounded-lg border border-outline-variant bg-surface-container-lowest px-4 py-3 text-base text-on-surface focus:border-secondary focus:outline-none focus:ring-1 focus:ring-secondary"
+                placeholder="you@example.com"
+                autoFocus
+              />
+            </div>
+            <button
+              type="submit"
+              disabled={loading}
+              className="w-full rounded-lg bg-primary py-3 text-base font-semibold uppercase tracking-wide text-on-primary transition-opacity hover:opacity-90 disabled:opacity-50"
+            >
+              {loading ? "Sending…" : "Send reset code"}
+            </button>
+            <button
+              type="button"
+              onClick={() => { setStep("credentials"); setError(""); setNotice(""); }}
+              className="mt-3 w-full text-center text-sm text-on-surface-variant hover:underline"
+            >
+              Back to sign in
+            </button>
+          </form>
+          )}
+
+          {step === "forgot-reset" && (
+          <form
+            onSubmit={handleResetSubmit}
+            className="rounded-2xl border border-outline-variant bg-surface-container-lowest p-10 shadow-[0px_4px_12px_rgba(15,23,42,0.03)]"
+          >
+            <h2 className="font-display text-2xl font-semibold text-primary">
+              Enter your reset code
+            </h2>
+            <p className="mb-5 mt-1 text-sm text-on-surface-variant">
+              {notice || "Check your email for a 6-digit code, then choose a new password."}
+            </p>
+            {error && (
+              <div className="mb-4 rounded-lg border border-axis-error/30 bg-axis-error/5 p-3 text-sm text-axis-error">
+                {error}
+              </div>
+            )}
+            <div className="mb-4">
+              <label className="mb-1.5 block text-[11px] font-semibold uppercase tracking-wide text-on-surface-variant">
+                Reset code
+              </label>
+              <input
+                type="text"
+                inputMode="numeric"
+                autoComplete="one-time-code"
+                value={resetCode}
+                onChange={(e) => setResetCode(e.target.value.replace(/[^0-9]/g, "").slice(0, 6))}
+                className="w-full rounded-lg border border-outline-variant bg-surface-container-lowest px-4 py-3 text-center text-2xl tracking-[0.5em] text-on-surface focus:border-secondary focus:outline-none focus:ring-1 focus:ring-secondary"
+                placeholder="••••••"
+                autoFocus
+              />
+            </div>
+            <div className="mb-4">
+              <label className="mb-1.5 block text-[11px] font-semibold uppercase tracking-wide text-on-surface-variant">
+                New password
+              </label>
+              <input
+                type="password"
+                required
+                value={newPassword}
+                onChange={(e) => setNewPassword(e.target.value)}
+                className="w-full rounded-lg border border-outline-variant bg-surface-container-lowest px-4 py-3 text-base text-on-surface focus:border-secondary focus:outline-none focus:ring-1 focus:ring-secondary"
+                placeholder="••••••••"
+              />
+            </div>
+            <div className="mb-2">
+              <label className="mb-1.5 block text-[11px] font-semibold uppercase tracking-wide text-on-surface-variant">
+                Confirm new password
+              </label>
+              <input
+                type="password"
+                required
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                className="w-full rounded-lg border border-outline-variant bg-surface-container-lowest px-4 py-3 text-base text-on-surface focus:border-secondary focus:outline-none focus:ring-1 focus:ring-secondary"
+                placeholder="••••••••"
+              />
+            </div>
+            <p className="mb-6 text-[11px] text-on-surface-variant">
+              At least 8 characters with an uppercase letter, a lowercase letter and a digit.
+            </p>
+            <button
+              type="submit"
+              disabled={loading}
+              className="w-full rounded-lg bg-primary py-3 text-base font-semibold uppercase tracking-wide text-on-primary transition-opacity hover:opacity-90 disabled:opacity-50"
+            >
+              {loading ? "Resetting…" : "Reset password"}
+            </button>
+            <button
+              type="button"
+              onClick={() => { setStep("forgot-email"); setError(""); }}
+              className="mt-3 w-full text-center text-sm text-on-surface-variant hover:underline"
+            >
+              Back
+            </button>
+          </form>
+          )}
+
+          {step === "credentials" && (
           <form
             onSubmit={handleSubmit}
             className="rounded-2xl border border-outline-variant bg-surface-container-lowest p-10 shadow-[0px_4px_12px_rgba(15,23,42,0.03)]"
@@ -189,6 +364,12 @@ export default function LoginPage() {
             <p className="mb-7 mt-1 text-sm text-on-surface-variant">
               Access your institutional portal.
             </p>
+
+            {notice && (
+              <div className="mb-4 rounded-lg border border-secondary/30 bg-secondary/5 p-3 text-sm text-secondary">
+                {notice}
+              </div>
+            )}
 
             {error && (
               <div className="mb-4 rounded-lg border border-axis-error/30 bg-axis-error/5 p-3 text-sm text-axis-error">
@@ -222,6 +403,15 @@ export default function LoginPage() {
                 className="w-full rounded-lg border border-outline-variant bg-surface-container-lowest px-4 py-3 text-base text-on-surface focus:border-secondary focus:outline-none focus:ring-1 focus:ring-secondary"
                 placeholder="••••••••"
               />
+              <div className="mt-1.5 text-right">
+                <button
+                  type="button"
+                  onClick={() => { setStep("forgot-email"); setError(""); setNotice(""); }}
+                  className="text-sm font-medium text-secondary hover:underline"
+                >
+                  Forgot password?
+                </button>
+              </div>
             </div>
 
             <button

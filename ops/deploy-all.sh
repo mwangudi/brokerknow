@@ -19,9 +19,15 @@ for E in test prod; do
   tar -xzf "/tmp/api-publish-${STAMP}.tgz" -C "$ROOT/api"
   cp "/tmp/${E}-appsettings.json" "$ROOT/api/appsettings.json"
   systemctl restart "$SVC"
-  sleep 4
-  H=$(curl -s -o /dev/null -w '%{http_code}' "http://127.0.0.1:${PORT}/health")
-  echo "   $E health=$H status=$(systemctl is-active $SVC)"
+  # .NET cold start can take >4s; poll the health endpoint instead of a fixed sleep.
+  H=000
+  for _ in $(seq 1 30); do
+    H=$(curl -s -o /dev/null -w '%{http_code}' "http://127.0.0.1:${PORT}/health" || echo 000)
+    [ "$H" = "200" ] && break
+    sleep 1
+  done
+  echo "   $E health=$H status=$(systemctl is-active "$SVC" || true)"
+  [ "$H" = "200" ] || { echo "   $E HEALTH CHECK FAILED"; exit 4; }
 done
 
 # ---- Admin web ----

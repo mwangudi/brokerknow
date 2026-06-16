@@ -26,6 +26,10 @@ interface AuthState {
   register: (data: RegisterData) => Promise<{ error?: string; message?: string }>;
   /** Resubmit a returned application via its emailed token. */
   resubmit: (token: string, data: RegisterData) => Promise<{ error?: string; message?: string }>;
+  /** Request a password-reset code by email. Always returns a token for the code step. */
+  forgotPassword: (email: string) => Promise<{ error?: string; message?: string; token?: string }>;
+  /** Complete a password reset with the emailed code. */
+  resetPassword: (token: string, code: string, newPassword: string) => Promise<{ error?: string; message?: string }>;
   logout: () => void;
   /** Marks the password change as completed and refreshes the cached user. */
   markPasswordChanged: () => void;
@@ -189,6 +193,30 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }, []);
 
+  const forgotPassword = useCallback(async (resetEmail: string) => {
+    setLoading(true);
+    try {
+      const r = await api.post("/auth/forgot-password", { email: resetEmail });
+      return { message: r.data.message as string, token: r.data.token as string };
+    } catch (err: any) {
+      return { error: err.response?.data?.error || "Could not start a password reset." };
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  const resetPassword = useCallback(async (token: string, code: string, newPassword: string) => {
+    setLoading(true);
+    try {
+      const r = await api.post("/auth/reset-password", { token, code, newPassword });
+      return { message: r.data.message as string };
+    } catch (err: any) {
+      return { error: err.response?.data?.error || "Could not reset your password." };
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
   const logout = useCallback(() => {
     const refresh = localStorage.getItem("portal_refresh");
     if (refresh) api.post("/auth/logout", { refreshToken: refresh }).catch(() => {});
@@ -209,7 +237,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   return (
-    <AuthContext.Provider value={{ user, token, loading, login, verifyOtp, register, resubmit, logout, markPasswordChanged }}>
+    <AuthContext.Provider value={{ user, token, loading, login, verifyOtp, register, resubmit, forgotPassword, resetPassword, logout, markPasswordChanged }}>
       {children}
     </AuthContext.Provider>
   );
