@@ -249,6 +249,7 @@ export default function RegisterPage() {
   // the form pre-filled so they can fix and resubmit it.
   const resubmitToken = searchParams.get("resubmit");
   const [resubmitReason, setResubmitReason] = useState<string | null>(null);
+  const [resubmitAreas, setResubmitAreas] = useState<string[]>([]);
   const [prefilling, setPrefilling] = useState<boolean>(!!resubmitToken);
   const [prefillError, setPrefillError] = useState<string | null>(null);
 
@@ -294,6 +295,7 @@ export default function RegisterPage() {
           },
         });
         setResubmitReason(typeof data.rejectionReason === "string" ? data.rejectionReason : "");
+        setResubmitAreas(Array.isArray(data.rejectionAreas) ? data.rejectionAreas : []);
         setStep(1);
       })
       .catch((err) => {
@@ -572,11 +574,21 @@ export default function RegisterPage() {
         {resubmitToken && (
           <div className="mb-4 rounded-lg border border-amber-300 bg-amber-50 p-3 text-sm text-amber-800">
             <p className="font-semibold">Your application was returned for changes.</p>
-            {resubmitReason ? (
-              <p className="mt-1">{resubmitReason}</p>
-            ) : (
-              <p className="mt-1">Please review your details, make the needed changes, and resubmit.</p>
+            {resubmitAreas.length > 0 && (
+              <div className="mt-2">
+                <p className="font-medium">Please recheck these sections:</p>
+                <ul className="mt-1 list-disc pl-5">
+                  {resubmitAreas.map((a) => (
+                    <li key={a}>{a}</li>
+                  ))}
+                </ul>
+              </div>
             )}
+            {resubmitReason ? (
+              <p className="mt-2">{resubmitReason}</p>
+            ) : resubmitAreas.length === 0 ? (
+              <p className="mt-1">Please review your details, make the needed changes, and resubmit.</p>
+            ) : null}
           </div>
         )}
 
