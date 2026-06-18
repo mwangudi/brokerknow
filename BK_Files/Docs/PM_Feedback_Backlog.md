@@ -115,6 +115,53 @@ Source: PM testing session on 2026-06-16 (registration walkthrough + screenshots
 
 ---
 
+## M. Reporting, Accounting, Trading & Payments (shipped 2026-06-16 → 2026-06-18)
+
+Source: PM testing sessions and WhatsApp clarifications across **2026-06-17** and **2026-06-18**, plus a few **2026-06-16 evening** items finished after section L was written. All items are **shipped on `develop`** — built in the `brokerknow-api` / `brokerknow-web` sub-repos with the parent gitlink bumps. Compliance-report detail lives in `brokerknow-api/src/BrokerKnow.Reports/Compliance/`.
+
+### Reports
+- **M1. New accounting reports.** ✅ shipped — **Creditors**, **Debtors**, **Client Volumes**, **Chart of Accounts** and **Accounts Statement** reports were added (pages + API + branded PDFs).
+- **M2. Large Currency Report (AML).** ✅ shipped — lists every client **deposit (receipt)** and **withdrawal (payment)** at or above a reporting threshold (default **MWK 5,000,000**) over a date range, with the **bank account** the money moved through, for large cash-transaction / AML monitoring. Branded landscape PDF; **deposits are listed before payments**, with totals.
+- **M3. WHT Certificate Report.** ✅ shipped — lists every trade charged **Withholding Tax (WHT)** over a date range with the client's certificate details (**National ID, name, postal address, email, phone**) and the WHT amount due (sale-side only). The old **"CGT levy" wording was renamed to WHT** throughout the app and code.
+- **M4. Agents report matches the legacy AGENTS STATEMENT.** ✅ shipped — the agents report layout/figures now mirror the legacy *Agents Statement* the office is used to.
+- **M5. Filter Traded Levies by a single levy.** ✅ shipped — a *Filter by Levy* dropdown was added to the Traded Levies / Levies report.
+- **M6. Report PDF polish.** ✅ shipped — **Buy/Sell columns** on the Contract & Settlement schedules, **row numbers**, and a **first-page-only letterhead** with a "Page X of Y" footer across the report PDFs.
+
+### Accounting — Journals & Chart of Accounts
+- **M7. Chart of Accounts setup.** ✅ shipped — admins can **name and create nominal (general-ledger) accounts** from a new *Chart of Accounts* page, so journals and reports show real account names instead of "Nominal #N".
+- **M8. Journals post to the chart of accounts.** ✅ shipped — *Enter Journals* now posts against **Agent** and **Nominal / Chart-of-Accounts** entities, and a wrong entity-type mapping was corrected (**Agent = 2, Nominal = 5**).
+
+### Payments
+- **M9. Canonical payee types on Add Payment.** ✅ shipped — a payment can be made to **Client / Agent / Broker / Nominal (GL account)**, each resolved to its **real name** (e.g. the actual nominal account name, not "Nominal #N"). The **bank is optional**, and the **client's bank account is shown** on the record.
+- **M10. Client deposit approval is a single step.** ✅ shipped — approving a client's deposit now **posts the receipt directly** rather than requiring a further posting action.
+
+### Trading & CDS imports
+- **M11. CDS import creates orders only (no auto-commit).** ✅ shipped — importing a CDS trade file now **materialises the orders for review** instead of auto-committing them; the batch view shows **client + broker** columns, and there is a **Download Contract-Notes ZIP** that bundles the contract-note PDFs.
+- **M12. Contract-note ZIP naming.** ✅ shipped — PDFs in the ZIP are named **ClientName_ClientCode_BUY|SELL_CSDCode_DD-MM-YYYY**, and the **trade date** is in the ZIP filename.
+- **M13. Allocation screen improvements.** ✅ shipped — the Allocate screen shows the **client (name / code / CSD)**, defaults settlement to **T+3 business days**, and adds **client search**.
+- **M14. Contract note: total-quantity row.** ✅ shipped — the lots table on the contract note now has a **total quantity** row.
+- **M15. Duplicate-order check ignores filled/compounded orders.** ✅ shipped — the duplicate-order guard no longer false-positives against orders that are already **filled or compounded**.
+- **M16. Broker registration polish.** ✅ shipped — the *Register broker* link on a CDS import no longer 404s (it opens the **new-broker form pre-filled with the code**), and **broker / participant codes up to 20 chars** are accepted.
+
+### Client records
+- **M17. Client bank accounts.** ✅ shipped — a **bank account** can be captured at registration, and a read-only **Bank Accounts** section was added to the client view.
+- **M18. Wider CSD number.** ✅ shipped — client **CSD numbers up to 50 characters** are now stored (previously capped at 20, which truncated real CSD codes); CDS-import reconciliation is also tolerant of shared CSD numbers.
+
+### Onboarding polish
+- **M19. Application reference code.** ✅ shipped — every registration gets a **REG-NNNNNN** reference, shown on the approval / return-for-changes **emails** and on screen.
+- **M20. Per-area return-for-changes.** ✅ shipped — when returning an application, the reviewer can **tick which areas need fixing** (ID, address, source of funds, personal details, CDS); the flagged areas appear in the **email** and in the portal **resubmit banner** so the applicant knows exactly what to correct.
+- **M21. Existing-account linking is client self-service.** ✅ shipped — linking an existing account is now done by the client, with the application reference shown.
+
+### Statements & UI (finished 2026-06-16, after section L was written)
+- **M22. Statement sort toggle.** ✅ shipped — the client statement (admin + portal) has a **Newest / Oldest** toggle; it defaults to **oldest-first (chronological)**, and the header shows the client code as **C-#####** to distinguish duplicate-named clients.
+- **M23. Currency separators + sortable headers.** ✅ shipped — thousands separators on report/journal figures and **sortable column headers** across reports and journals.
+- **M24. Sort indicators render as chevrons.** ✅ shipped — fixed header sort icons that were falling back to a round circle; they now show proper **up/down chevrons**.
+
+### Ops / data
+- **M25. Repeatable Cedar CSD importer.** ✅ shipped — a re-runnable script (`BK_Files`) that reads the *Updated CSD* spreadsheet and **widens, snapshots, applies and verifies** client CSD numbers, so the office can re-apply CSD codes after a migration.
+
+---
+
 
 ## Suggested execution order
 1. Quick UI wins (A1, A2, B1, B2, D1, D6, E1, E2, E3, E4, F1, H2) — visible to PM fast, low risk.
