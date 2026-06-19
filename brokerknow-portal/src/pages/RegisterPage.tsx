@@ -81,6 +81,7 @@ interface FormState {
   agreements: {
     termsAccepted: boolean;
     keyFactsAccepted: boolean;
+    mandateAccepted: boolean;
     declarationAccepted: boolean;
     csdTermsAccepted: boolean;
   };
@@ -125,6 +126,7 @@ const EMPTY: FormState = {
   agreements: {
     termsAccepted: false,
     keyFactsAccepted: false,
+    mandateAccepted: false,
     declarationAccepted: false,
     csdTermsAccepted: false,
   },
@@ -291,6 +293,7 @@ export default function RegisterPage() {
           nextOfKinAddress: data.nextOfKinAddress ?? "",
           agreements: {
             termsAccepted: !!ag.termsAccepted, keyFactsAccepted: !!ag.keyFactsAccepted,
+            mandateAccepted: !!ag.mandateAccepted,
             declarationAccepted: !!ag.declarationAccepted, csdTermsAccepted: !!ag.csdTermsAccepted,
           },
         });
@@ -438,7 +441,7 @@ export default function RegisterPage() {
     // New applicants must tick every sign-off confirmation.
     if (!isExisting) {
       const a = form.agreements;
-      if (!a.termsAccepted || !a.keyFactsAccepted || !a.declarationAccepted || !a.csdTermsAccepted) {
+      if (!a.termsAccepted || !a.keyFactsAccepted || !a.mandateAccepted || !a.declarationAccepted || !a.csdTermsAccepted) {
         setErrors((prev) => ({ ...prev, agreements: "Please tick all confirmations to submit your application." }));
         setSubmitError("Please tick all confirmations to submit your application.");
         return;
@@ -1050,8 +1053,15 @@ export default function RegisterPage() {
                   {([
                     ["termsAccepted", "I have read and agree to the Terms and Conditions.", brand.agreementDocs.terms],
                     ["keyFactsAccepted", "I acknowledge and accept the Key Facts Statement.", brand.agreementDocs.keyFacts],
+                    ["mandateAccepted",
+                      form.accountType === "Corporate"
+                        ? "I have read and agree to the Agreement of Mandate (Corporate Client)."
+                        : "I have read and agree to the Agreement of Mandate (Private Client).",
+                      form.accountType === "Corporate"
+                        ? brand.agreementDocs.mandateCorporate
+                        : brand.agreementDocs.mandatePrivate],
                     ["declarationAccepted", "I confirm the information I have provided is true and complete (Declaration).", ""],
-                    ["csdTermsAccepted", "I agree to the CSD account terms and the Stockbrokers Mandate.", brand.agreementDocs.csd],
+                    ["csdTermsAccepted", "I agree to the CSD account terms.", brand.agreementDocs.csd],
                   ] as const).map(([key, label, doc]) => {
                     const open = openDoc === key;
                     return (

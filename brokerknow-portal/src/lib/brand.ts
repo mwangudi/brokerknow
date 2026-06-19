@@ -39,6 +39,10 @@ export const brand = {
     terms: (import.meta.env.VITE_DOC_TERMS as string) ?? "/legal/terms-and-conditions.pdf",
     keyFacts: (import.meta.env.VITE_DOC_KEYFACTS as string) ?? "/legal/key-facts-statement.pdf",
     csd: (import.meta.env.VITE_DOC_CSD as string) ?? "/legal/csd-terms.pdf",
+    /** Agreement of Mandate — shown by client type: corporate accounts get the
+     *  corporate mandate, all others get the private-client mandate. */
+    mandatePrivate: (import.meta.env.VITE_DOC_MANDATE_PRIVATE as string) ?? "/legal/mandate-private.pdf",
+    mandateCorporate: (import.meta.env.VITE_DOC_MANDATE_CORPORATE as string) ?? "/legal/mandate-corporate.pdf",
   },
   /** Non-empty (e.g. "TEST") marks a NON-production build: shows a warning
    *  ribbon on the login page and prefixes the browser tab title. Empty in
