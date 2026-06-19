@@ -5,6 +5,7 @@ import { useMarketToday } from "../hooks/useMarketToday";
 import Icon from "../components/ui/Icon";
 import OrderTabs from "../components/orders/OrderTabs";
 import { brand } from "../lib/brand";
+import { secTypeLabel } from "../lib/secType";
 
 interface LookupOption {
   value: number;
@@ -346,7 +347,7 @@ export default function PlaceOrderPage() {
                   <option value="">— Select —</option>
                   {options?.orderSecTypes.map((o) => (
                     <option key={o.value} value={o.value}>
-                      {o.label}
+                      {secTypeLabel(o.label)}
                     </option>
                   ))}
                 </select>

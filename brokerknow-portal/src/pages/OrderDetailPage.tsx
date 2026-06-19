@@ -3,6 +3,7 @@ import { Link, useParams } from "react-router";
 import api from "../lib/api";
 import Icon from "../components/ui/Icon";
 import { brand } from "../lib/brand";
+import { secTypeLabel } from "../lib/secType";
 
 interface OrderItem {
   security: string;
@@ -163,7 +164,7 @@ export default function OrderDetailPage() {
           })}
         />
         <Detail label="Side" value={order.orderType} />
-        <Detail label="Security Type" value={order.secType} />
+        <Detail label="Security Type" value={secTypeLabel(order.secType)} />
         <Detail label="Status" value={order.status} />
         <Detail label="Reference" value={order.orderRef || "—"} />
         <div className="sm:col-span-2 lg:col-span-3">
