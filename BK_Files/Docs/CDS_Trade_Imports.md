@@ -423,6 +423,38 @@ to `MatchStatus = "Ignored"`, preserving the reason in `MatchNotes`. Ignored
 rows are hidden from "View Unmatched" but remain visible under "View Imported"
 for audit.
 
+### 5.6 No-auto-commit, bulk contract notes & import polish *(2026‑06‑18)*
+
+When a trade comes off the exchange file with **no matching open order**
+(`UnmatchReason == "NoPendingOrder"`), the operator can **materialise** the
+missing order from the staged row. This split into two endpoints so the created
+order can be **reviewed before it becomes a contract**:
+
+| Method | Route | Effect |
+| --- | --- | --- |
+| `POST` | `/api/imports/cds-trades/{id}/materialize` | **Create the order only** — inserts the missing `tbOrder` + `OrdDetail` (already executed: released, not on hold) and points the row at it, leaving the row **Ready to commit**. **This is the default — no auto-commit.** |
+| `POST` | `/api/imports/cds-trades/{id}/materialize-and-commit` | Create the order **and** immediately commit it to a `Lot` / `Contract` in one step (the previous one-click behaviour, kept for when no review is wanted). |
+| `GET` | `/api/imports/cds-trades/batches/{batchId}/contract-notes.zip` | Download **all committed** contract notes in the batch as a single ZIP. |
+
+- **Why split them.** Materialising a missing order used to commit it in the same
+  action; operators wanted to sanity-check the created order first. `/materialize`
+  now stops at the order, so the row flows back through the normal **Commit** path
+  (§5.1) where the guard rails (§5.2) still apply.
+- **Batch view** now shows **client** and **broker** columns so the operator can
+  see who each row belongs to before committing.
+- **Bulk contract notes ZIP.** Only **committed** rows are included
+  (`MatchStatus == "Matched"` with a `MatchedContractDpa`). Each PDF is named
+  `ClientName_ClientCode_BUY|SELL_CSDCode_DD-MM-YYYY.pdf` (trade date; duplicate
+  names get a ` (2)` suffix), and the archive is
+  `Contract Notes_DD-MM-YYYY_batchN.zip` (earliest trade date in the batch).
+- **Broker registration.** The *Register broker* prompt on an `UnknownBroker` row
+  now opens the **new-broker form pre-filled with the code** (`/brokers/new?code=…`)
+  instead of 404-ing, and broker **participant codes up to 20 characters** are accepted.
+- **Client CSD matching.** `Client.ClientCdsNo` was **widened to 50 characters**
+  (was capped at 20, which truncated real CSD codes), and reconciliation is now
+  **tolerant of shared CSD numbers** so a CSD code held against more than one
+  client no longer breaks matching.
+
 ---
 
 ## 6. Schema reference

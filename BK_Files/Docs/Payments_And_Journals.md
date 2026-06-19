@@ -63,15 +63,22 @@ Two enumerated dimensions appear in nearly every payment/balance query:
 | 1 | Receipt (money received) | Receipt |
 | 2 | Payment (money paid out)  | Payment |
 
-| `EntityType_DPA_` | Counterparty | Notes |
-| --- | --- | --- |
-| 1 | Client | Affects client balance/credit |
-| 3 | Broker | Used for broker payouts on Purchase settlement |
-| 5 | Agent  | Agent commission disbursements |
-| 6 | Levy   | Pass-through accounts (e.g. CGT, MSE) |
+| `EntityType_DPA_` | Counterparty | Resolves to | Notes |
+| --- | --- | --- | --- |
+| 1 | Client | `Client.ClientName` | Affects client balance / credit |
+| 2 | Agent  | `Agent.AgentName` | Agent commission disbursements |
+| 3 | Broker | `Broker.BrokerName` | Broker payouts on Purchase settlement |
+| 5 | Nominal (GL / chart-of-accounts) | `Account.AccountName` (friendly name via `NominalAccount`) | General-ledger postings — see §4.4 |
+| 6 | Levy   | legacy `Entity` master | Pass-through levy accounts (e.g. MSE) |
 
 `Entity_DPA_` is a polymorphic FK that points at the row in the relevant table
-(`Client`, `Broker`, `Agent`, `Entity`).
+(`Client`, `Agent`, `Broker`, `Account`/`NominalAccount`, or the legacy `Entity`).
+
+> **Corrected 2026‑06‑18.** Earlier builds mislabelled **Agent** as `5`; the
+> canonical mapping is **Agent = 2, Nominal = 5** (commit *"fix entity-type
+> mapping (2=Agent, 5=Nominal)"*). Payment and journal rows now resolve the
+> payer/payee **name server-side** from these tables, so grids, statements and
+> reports show the real name instead of a numeric id or `Nominal #N`.
 
 ---
 
@@ -82,6 +89,11 @@ Two enumerated dimensions appear in nearly every payment/balance query:
 **Modern:** CRUD via `POST/PUT/DELETE /api/payments`, handler
 `PaymentService`. UI pages: `/receipts` (list), `/receipts/new` (add),
 `/receipts/:id/edit` (edit).
+
+> **2026‑06‑17 — client deposits are single-approval.** When a client's portal
+> **deposit** request is approved, the receipt is now **posted directly** in that
+> one step (no separate second posting). The maker/checker queue still applies to
+> the other external cash paths; see `PM_Feedback_Backlog.md` G1 / L14.
 
 ### 2.1 Inputs (Add & Edit)
 
@@ -202,23 +214,26 @@ nor deleting is permitted — the user must reverse the settlement first
 **Legacy:** `Operations/AddPayment.asp`.
 **Modern:** UI page `brokerknow-web/src/pages/Payments/AddPayment.tsx` (route `/payments/new`); same endpoint as receipts with `PayTypeDpa = 2`.
 
-The same flow as a receipt, with three differences:
+The same flow as a receipt, with these differences:
 
 - **No auto-numbering** of receipt no (kept blank for payments).
-- The polymorphic entity is usually a **Broker** (purchase settlement) or **Agent** (commission disbursement) — but client refunds are also supported by setting `EntityTypeDpa = 1`.
-- For client refunds the balance refresh decreases `CurrentBal`; for broker/agent payouts no client balance is affected.
+- **Payee types (2026‑06‑18).** The payee can be a **Client**, **Agent**, **Broker** or **Nominal** (a GL / chart-of-accounts account), chosen with a **Payee Type** control that drives the matching dropdown (`/lookups/clients`, `/lookups/agents`, `/lookups/brokers`, `/lookups/nominal-accounts`). Each resolves to its **real name** — the nominal lookup replaces the old `Nominal #N` placeholders.
+- **Bank is optional (2026‑06‑18).** The receiving bank / bank-account is no longer mandatory on a payment; when a **Client** payee is chosen the client's **bank account on record** is shown for reference.
+- For client refunds the balance refresh decreases `CurrentBal`; for agent / broker / nominal payouts no client balance is affected.
 
-The Add Payment form mirrors Add Receipt: amount > 0, reference ≤ 20, narrative ≤ 200, plus an **Entity Type** selector (Client refund / Broker / Agent) which drives the entity dropdown. Edit and Delete follow the same rules as receipts (§2.3 and §2.4) — including the voucher-link guard on both server and UI.
+Validation otherwise mirrors Add Receipt: amount > 0, reference ≤ 20, narrative ≤ 200. Edit and Delete follow the same rules as receipts (§2.3 and §2.4) — including the voucher-link guard on both server and UI.
 
 ```mermaid
 flowchart LR
     Trigger[Approved payment request] --> Form[Add Payment page\n/payments/new]
-    Form -->|EntityType: Broker| BPay[POST /api/payments\nPayTypeDpa=2, EntityTypeDpa=3]
-    Form -->|EntityType: Agent| APay[POST /api/payments\nPayTypeDpa=2, EntityTypeDpa=5]
-    Form -->|EntityType: Client refund| CPay[POST /api/payments\nPayTypeDpa=2, EntityTypeDpa=1]
-    BPay --> SVC[PaymentService.CreatePaymentAsync]
+    Form -->|Payee: Client| CPay[POST /api/payments\nPayTypeDpa=2, EntityTypeDpa=1]
+    Form -->|Payee: Agent| APay[POST /api/payments\nPayTypeDpa=2, EntityTypeDpa=2]
+    Form -->|Payee: Broker| BPay[POST /api/payments\nPayTypeDpa=2, EntityTypeDpa=3]
+    Form -->|Payee: Nominal| NPay[POST /api/payments\nPayTypeDpa=2, EntityTypeDpa=5]
+    CPay --> SVC[PaymentService.CreatePaymentAsync]
     APay --> SVC
-    CPay --> SVC
+    BPay --> SVC
+    NPay --> SVC
     SVC --> PMT[(INSERT Payment)]
     CPay --> Refresh[Refresh ClientBalance]
 ```
@@ -293,6 +308,29 @@ sequenceDiagram
 A `ReleaseJournalAsync` endpoint exists for the legacy "post" step
 (currently it just stamps audit columns; expand it when GL posting/locking is
 introduced).
+
+### 4.4 Chart of Accounts (nominal / GL accounts) *(new — 2026‑06‑17)*
+
+Journals and Nominal payments post against **nominal accounts** (`EntityTypeDpa = 5`).
+The legacy `dbo.Entity` master can't hold friendly names for them (its global PK
+collides with the nominal ids), so the app keeps an alias table
+**`dbo.NominalAccount`** (`EntityDpa`, `AccountName`, `AccountCode`,
+`OpeningBalance`, `UpdatedAt`). Naming an account here makes it appear by name in
+the **Chart of Accounts** report, the **Accounts Statement** and the journal /
+payment **account pickers** instead of `Nominal #N`.
+
+Admin endpoints — [`ChartOfAccountsController`](../../brokerknow-api/src/BrokerKnow.Api/Controllers/ChartOfAccountsController.cs),
+`[RequireArea(Accounting)]` + `[RequirePage("journals")]`:
+
+| Verb | Route | Purpose |
+| --- | --- | --- |
+| GET | `/api/chart-of-accounts/nominal` | List nominal accounts — every id that **carries a posting** (journal or payment, EntityType 5) plus any **named** alias, with `name`, `code`, `openingBalance`, a computed `balance` (opening + journal net `credit − debit` + payment net `in − out`), and `named` / `hasPostings` flags |
+| POST | `/api/chart-of-accounts/nominal` | Create a named account; the server allocates a fresh `EntityDpa` above the max of journals, payments, existing aliases and the legacy `Entity` master so it can't collide |
+| PUT | `/api/chart-of-accounts/nominal/{entityDpa}` | Rename / set code / opening balance (creates the alias row if missing) |
+| DELETE | `/api/chart-of-accounts/nominal/{entityDpa}` | Clear the alias — the account reverts to `Nominal #N` (postings untouched) |
+
+> The matching read-only picker is `GET /api/lookups/nominal-accounts` (real
+> names for the *Nominal* payee / journal line).
 
 ---
 
