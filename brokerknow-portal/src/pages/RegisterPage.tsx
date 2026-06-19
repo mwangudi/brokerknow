@@ -245,6 +245,9 @@ export default function RegisterPage() {
   const [success, setSuccess] = useState("");
   // Which agreement document is expanded inline on the review step.
   const [openDoc, setOpenDoc] = useState<string | null>(null);
+  // Agreement keys whose document the applicant has opened to read. The matching
+  // confirmation checkbox stays disabled until the document has been opened.
+  const [readDocs, setReadDocs] = useState<Record<string, boolean>>({});
 
   // Reject → resubmit: when the page is opened from the emailed link
   // (/register?resubmit=<token>), pull the applicant's saved data and reopen
@@ -1064,25 +1067,50 @@ export default function RegisterPage() {
                     ["csdTermsAccepted", "I agree to the CSD account terms.", brand.agreementDocs.csd],
                   ] as const).map(([key, label, doc]) => {
                     const open = openDoc === key;
+                    const mustRead = !!doc;
+                    // Already-accepted (e.g. prefilled on resubmit) counts as read.
+                    const hasRead = !mustRead || !!readDocs[key] || form.agreements[key];
+                    const markRead = () => setReadDocs((r) => ({ ...r, [key]: true }));
                     return (
                       <div key={key} className="rounded-lg border border-gray-200">
-                        <label className="flex cursor-pointer items-start gap-3 p-3 text-sm hover:border-brand-300">
+                        <label
+                          className={`flex items-start gap-3 p-3 text-sm ${
+                            hasRead ? "cursor-pointer hover:border-brand-300" : "cursor-not-allowed"
+                          }`}
+                        >
                           <input
                             type="checkbox"
-                            className="mt-0.5 h-5 w-5 shrink-0"
+                            className="mt-0.5 h-5 w-5 shrink-0 disabled:cursor-not-allowed disabled:opacity-40"
                             checked={form.agreements[key]}
+                            disabled={!hasRead}
                             onChange={(e) =>
                               set("agreements", { ...form.agreements, [key]: e.target.checked })
                             }
                           />
-                          <span className="flex-1 text-gray-700">{label}</span>
+                          <span className={`flex-1 ${hasRead ? "text-gray-700" : "text-gray-400"}`}>
+                            {label}
+                            {mustRead && !hasRead && (
+                              <span className="mt-0.5 block text-xs font-medium text-amber-600">
+                                Open the document to read it before you can tick this box.
+                              </span>
+                            )}
+                            {mustRead && hasRead && (
+                              <span className="mt-0.5 block text-xs font-medium text-emerald-600">
+                                Document opened — you can now confirm.
+                              </span>
+                            )}
+                          </span>
                           {doc && (
                             <button
                               type="button"
-                              onClick={(e) => { e.preventDefault(); setOpenDoc(open ? null : key); }}
+                              onClick={(e) => {
+                                e.preventDefault();
+                                markRead();
+                                setOpenDoc(open ? null : key);
+                              }}
                               className="shrink-0 text-xs font-medium text-brand-600 hover:underline"
                             >
-                              {open ? "Hide document" : "Read document"}
+                              {open ? "Hide document" : hasRead ? "View again" : "Read document"}
                             </button>
                           )}
                         </label>
@@ -1097,6 +1125,7 @@ export default function RegisterPage() {
                               href={doc}
                               target="_blank"
                               rel="noopener noreferrer"
+                              onClick={markRead}
                               className="mt-2 inline-flex items-center gap-1 text-xs font-medium text-brand-600 hover:underline"
                             >
                               Open in a new tab ↗

@@ -6,6 +6,12 @@
  * by overriding these VITE_* vars at build time in an .env file — no code
  * changes per client. See .env.production / .env.drc.
  */
+
+/** Version tag appended to the bundled legal PDF URLs. Bump this whenever the
+ *  PDFs under /public/legal change so browsers refetch instead of serving a
+ *  stale (previously scanned) cached copy. */
+const DOC_V = "20260619";
+
 export const brand = {
   /** Client/company display name shown in the sidebar, login and copy. */
   name: (import.meta.env.VITE_BRAND_NAME as string) || "Cedar Capital",
@@ -36,13 +42,13 @@ export const brand = {
    *  white-label tenants override the paths via VITE_DOC_* at build time.
    *  An empty value hides that document's inline reader. */
   agreementDocs: {
-    terms: (import.meta.env.VITE_DOC_TERMS as string) ?? "/legal/terms-and-conditions.pdf",
-    keyFacts: (import.meta.env.VITE_DOC_KEYFACTS as string) ?? "/legal/key-facts-statement.pdf",
-    csd: (import.meta.env.VITE_DOC_CSD as string) ?? "/legal/csd-terms.pdf",
+    terms: (import.meta.env.VITE_DOC_TERMS as string) ?? `/legal/terms-and-conditions.pdf?v=${DOC_V}`,
+    keyFacts: (import.meta.env.VITE_DOC_KEYFACTS as string) ?? `/legal/key-facts-statement.pdf?v=${DOC_V}`,
+    csd: (import.meta.env.VITE_DOC_CSD as string) ?? `/legal/csd-terms.pdf?v=${DOC_V}`,
     /** Agreement of Mandate — shown by client type: corporate accounts get the
      *  corporate mandate, all others get the private-client mandate. */
-    mandatePrivate: (import.meta.env.VITE_DOC_MANDATE_PRIVATE as string) ?? "/legal/mandate-private.pdf",
-    mandateCorporate: (import.meta.env.VITE_DOC_MANDATE_CORPORATE as string) ?? "/legal/mandate-corporate.pdf",
+    mandatePrivate: (import.meta.env.VITE_DOC_MANDATE_PRIVATE as string) ?? `/legal/mandate-private.pdf?v=${DOC_V}`,
+    mandateCorporate: (import.meta.env.VITE_DOC_MANDATE_CORPORATE as string) ?? `/legal/mandate-corporate.pdf?v=${DOC_V}`,
   },
   /** Non-empty (e.g. "TEST") marks a NON-production build: shows a warning
    *  ribbon on the login page and prefixes the browser tab title. Empty in
