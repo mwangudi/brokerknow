@@ -14,6 +14,8 @@ interface User {
   /** True when the current password is temporary or has expired. */
   mustChangePassword?: boolean;
   passwordChangedAt?: string | null;
+  /** Remaining "Not now" deferrals for a required change (server-capped at 3). */
+  passwordChangeSkipsRemaining?: number;
 }
 
 interface AuthState {
@@ -33,6 +35,12 @@ interface AuthState {
   logout: () => void;
   /** Marks the password change as completed and refreshes the cached user. */
   markPasswordChanged: () => void;
+  /**
+   * Defers a required password change ("Not now"). The server counts the
+   * deferrals and refuses past the cap (3). Resolves with the remaining count;
+   * rejects when no deferrals are left.
+   */
+  deferPasswordChange: () => Promise<number>;
 }
 
 interface RegisterData {
@@ -158,7 +166,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   // state. Shared by direct login and post-OTP verification.
   function applyAuth(data: any) {
     const { accessToken, refreshToken, user: u, requiresPasswordChange } = data;
-    const userWithFlag: User = { ...u, mustChangePassword: !!requiresPasswordChange };
+    const userWithFlag: User = {
+      ...u,
+      mustChangePassword: !!requiresPasswordChange,
+      passwordChangeSkipsRemaining: data.passwordChangeSkipsRemaining ?? 0,
+    };
     localStorage.setItem("portal_token", accessToken);
     localStorage.setItem("portal_refresh", refreshToken);
     localStorage.setItem("portal_user", JSON.stringify(userWithFlag));
@@ -244,8 +256,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     });
   }, []);
 
+  const deferPasswordChange = useCallback(async () => {
+    const r = await api.post("/auth/defer-password-change");
+    const remaining: number = r.data?.skipsRemaining ?? 0;
+    setUser((prev) => {
+      if (!prev) return prev;
+      const next = { ...prev, mustChangePassword: false, passwordChangeSkipsRemaining: remaining };
+      localStorage.setItem("portal_user", JSON.stringify(next));
+      return next;
+    });
+    return remaining;
+  }, []);
+
   return (
-    <AuthContext.Provider value={{ user, token, loading, login, verifyOtp, register, resubmit, forgotPassword, resetPassword, logout, markPasswordChanged }}>
+    <AuthContext.Provider value={{ user, token, loading, login, verifyOtp, register, resubmit, forgotPassword, resetPassword, logout, markPasswordChanged, deferPasswordChange }}>
       {children}
     </AuthContext.Provider>
   );

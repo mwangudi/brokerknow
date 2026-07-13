@@ -12,7 +12,7 @@ import { useAuth } from "../context/AuthContext";
  * access token), so we just hit POST /auth/change-password.
  */
 export default function ChangePasswordPage() {
-  const { user, token, markPasswordChanged } = useAuth();
+  const { user, token, markPasswordChanged, deferPasswordChange } = useAuth();
   const navigate = useNavigate();
   const [current, setCurrent] = useState("");
   const [next, setNext] = useState("");
@@ -47,16 +47,28 @@ export default function ChangePasswordPage() {
     }
   }
 
-  // Escape hatch: continue without changing now. The backend still accepts the
-  // (expired/temporary) password; clearing the flag stops the forced redirect.
-  // The user is reminded again on the next sign-in.
-  function handleSkip() {
-    markPasswordChanged();
-    navigate("/", { replace: true });
+  const skipsRemaining = user.passwordChangeSkipsRemaining ?? 0;
+
+  // Escape hatch: defer a forced change ("Not now"). The server counts the
+  // deferrals and refuses past the cap (3), so it can't be skipped forever.
+  // On success we clear the local flag and continue; reminded again next login.
+  async function handleSkip() {
+    setError("");
+    setSaving(true);
+    try {
+      await deferPasswordChange();
+      navigate("/", { replace: true });
+    } catch (err: any) {
+      setError(err.response?.data?.error || "You must set a new password now.");
+    } finally {
+      setSaving(false);
+    }
   }
 
   const reason = isForced
-    ? "Your password is temporary or has expired. Set a new one to continue."
+    ? skipsRemaining > 0
+      ? "Your password is temporary or has expired. Set a new one to continue."
+      : "Your password has expired and must be changed now \u2014 no more deferrals."
     : "Pick a new password.";
 
   return (
@@ -89,13 +101,26 @@ export default function ChangePasswordPage() {
             {saving ? "Updating..." : "Update password"}
           </button>
 
-          <button
-            type="button"
-            onClick={handleSkip}
-            className="mt-3 w-full rounded-lg border border-gray-300 py-2.5 text-sm font-medium text-gray-600 hover:bg-gray-50"
-          >
-            {isForced ? "Not now — continue" : "Cancel"}
-          </button>
+          {isForced ? (
+            skipsRemaining > 0 && (
+              <button
+                type="button"
+                onClick={handleSkip}
+                disabled={saving}
+                className="mt-3 w-full rounded-lg border border-gray-300 py-2.5 text-sm font-medium text-gray-600 hover:bg-gray-50 disabled:opacity-50"
+              >
+                Not now — continue ({skipsRemaining} {skipsRemaining === 1 ? "skip" : "skips"} left)
+              </button>
+            )
+          ) : (
+            <button
+              type="button"
+              onClick={() => navigate("/", { replace: true })}
+              className="mt-3 w-full rounded-lg border border-gray-300 py-2.5 text-sm font-medium text-gray-600 hover:bg-gray-50"
+            >
+              Cancel
+            </button>
+          )}
         </form>
       </div>
     </div>
