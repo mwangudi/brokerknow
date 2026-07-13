@@ -47,6 +47,14 @@ export default function ChangePasswordPage() {
     }
   }
 
+  // Escape hatch: continue without changing now. The backend still accepts the
+  // (expired/temporary) password; clearing the flag stops the forced redirect.
+  // The user is reminded again on the next sign-in.
+  function handleSkip() {
+    markPasswordChanged();
+    navigate("/", { replace: true });
+  }
+
   const reason = isForced
     ? "Your password is temporary or has expired. Set a new one to continue."
     : "Pick a new password.";
@@ -79,6 +87,14 @@ export default function ChangePasswordPage() {
             className="w-full rounded-lg bg-brand-600 py-2.5 text-sm font-semibold text-white hover:bg-brand-700 disabled:opacity-50"
           >
             {saving ? "Updating..." : "Update password"}
+          </button>
+
+          <button
+            type="button"
+            onClick={handleSkip}
+            className="mt-3 w-full rounded-lg border border-gray-300 py-2.5 text-sm font-medium text-gray-600 hover:bg-gray-50"
+          >
+            {isForced ? "Not now — continue" : "Cancel"}
           </button>
         </form>
       </div>
