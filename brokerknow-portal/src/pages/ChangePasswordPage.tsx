@@ -47,7 +47,13 @@ export default function ChangePasswordPage() {
     }
   }
 
-  const skipsRemaining = user.passwordChangeSkipsRemaining ?? 0;
+  const skipsRaw = user.passwordChangeSkipsRemaining;
+  // A session created before this field existed won't carry it (undefined). Treat
+  // "unknown" as skips-available so the button still shows on older sessions — the
+  // server still enforces the 3-deferral cap on /auth/defer-password-change; only
+  // an explicit 0 (a fresh login that used every skip) hides it.
+  const skipsKnown = typeof skipsRaw === "number";
+  const canSkip = !skipsKnown || skipsRaw > 0;
 
   // Escape hatch: defer a forced change ("Not now"). The server counts the
   // deferrals and refuses past the cap (3), so it can't be skipped forever.
@@ -66,7 +72,7 @@ export default function ChangePasswordPage() {
   }
 
   const reason = isForced
-    ? skipsRemaining > 0
+    ? canSkip
       ? "Your password is temporary or has expired. Set a new one to continue."
       : "Your password has expired and must be changed now \u2014 no more deferrals."
     : "Pick a new password.";
@@ -102,14 +108,14 @@ export default function ChangePasswordPage() {
           </button>
 
           {isForced ? (
-            skipsRemaining > 0 && (
+            canSkip && (
               <button
                 type="button"
                 onClick={handleSkip}
                 disabled={saving}
                 className="mt-3 w-full rounded-lg border border-gray-300 py-2.5 text-sm font-medium text-gray-600 hover:bg-gray-50 disabled:opacity-50"
               >
-                Not now — continue ({skipsRemaining} {skipsRemaining === 1 ? "skip" : "skips"} left)
+                Not now — continue{skipsKnown ? ` (${skipsRaw} ${skipsRaw === 1 ? "skip" : "skips"} left)` : ""}
               </button>
             )
           ) : (
