@@ -46,12 +46,16 @@ codebase on 2026-07-24 unless noted.
 - **Recommendation**: configure an `rclone` remote (DO Spaces / S3) and enable the nightly
   offsite sync. Highest value / lowest effort reliability fix. **Needs**: a bucket + credentials.
 
-### P1.3 No rate limiting on auth endpoints
+### P1.3 No rate limiting on auth endpoints  — ✅ DONE (2026-07-24)
 - **Finding**: `/auth/login`, `/auth/forgot-password`, `/auth/reset-password` have no rate
   limiting (OTP lockout at 5 attempts only partially helps, and only when OTP is enabled).
 - **Risk**: credential brute-force / reset abuse.
 - **Recommendation**: add ASP.NET rate limiting (fixed/sliding window) on `/auth/*`, and/or
   nginx `limit_req` + fail2ban. Self-contained code change.
+- **Implemented**: ASP.NET `AddRateLimiter` "auth" policy — fixed window **30 requests/min
+  per client IP** (X-Forwarded-For from nginx), 429 on exceed; `[EnableRateLimiting("auth")]`
+  on login, login/verify-otp, forgot-password, reset-password. Verified on test (single login
+  OK, burst throttled after 30, other IPs unaffected). Deployed all 4 instances.
 
 ---
 
