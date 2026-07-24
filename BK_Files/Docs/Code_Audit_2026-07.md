@@ -67,7 +67,7 @@ codebase on 2026-07-24 unless noted.
 
 ## P2 — Should fix
 
-### P2.4 MAX+1 key generation still raw in ~12 controllers
+### P2.4 MAX+1 key generation still raw in ~12 controllers  — ✅ DONE (2026-07-24)
 - **Finding**: `(await db.X.MaxAsync(x => (int?)x.Dpa) ?? 0) + 1` without locking in
   AccountManagers (Owners), Agents, Brokers, Banks, Commissions, Groups, Holidays, Levies,
   Users, PortalUsers (`tbClient`), ChartOfAccounts, and **CdsTradeImports** (BatchId +
@@ -75,6 +75,18 @@ codebase on 2026-07-24 unless noted.
 - **Risk**: concurrent inserts read the same MAX → duplicate key → PK rejects one → 500.
 - **Recommendation**: route these through the existing `LegacyKeys.NextIdAsync`
   (`BrokerKnow.Application/Common/LegacyKeys.cs`) as the money paths do.
+- **Implemented**: 16 create-paths across 14 controllers now take the key + INSERT in one
+  `CreateExecutionStrategy` + `BeginTransactionAsync` + `LegacyKeys.NextIdAsync` (UPDLOCK)
+  transaction — AccountManagers, Agents, Banks (Bank + BnkBranch), Brokers, Commissions,
+  Groups, Holidays, Levies (Levy + LevySecurity), Securities, Users, PortalUsers (Client),
+  Clients (direct), ChartOfAccounts (NominalAccount, 4-way id widened under the lock), and
+  CdsTradeImports (BatchId + tbOrder/OrdDetail in both materialize paths).
+- **Surfaced two latent bugs** (create was already broken on these, masked by the identity
+  error): `Commission`, `Groups`, `Levy`, `LevySecurity` PKs are **SQL IDENTITY** on all four
+  DBs (verified) — added `IDENTITY_INSERT` toggling (matching the existing `Users` path) so the
+  explicit MAX+1 insert succeeds; and `Commission.SystemMaintained` (NOT NULL) was never set on
+  create → now defaults to 0. Runtime-verified on test: create+delete of group/levy/commission
+  (identity) and holiday/bank/branch (non-identity) all 201. Deployed all 4 instances.
 
 ### P2.5 Money represented as `float`
 - **Finding**: e.g. `CommissionsController.SaveCommissionRequest` mixes `float`
