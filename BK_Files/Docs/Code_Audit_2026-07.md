@@ -38,13 +38,19 @@ codebase on 2026-07-24 unless noted.
   and extend the "carry-forward web-only rows" step to business tables. Decision needed before
   the next import.
 
-### P1.2 Backups are local-only
+### P1.2 Backups are local-only  — ⏳ PENDING (scheduled for go-live, Aug 2026)
 - **Finding**: nightly DB+filesystem backups (~7.4 GB, 11-day retention) live **only on the
   droplet**. `/etc/cron.d/brokerknow-backup` → `backup-nightly.sh` has an `rclone` hook that is
   not configured.
 - **Risk**: droplet loss = total data loss.
-- **Recommendation**: configure an `rclone` remote (DO Spaces / S3) and enable the nightly
-  offsite sync. Highest value / lowest effort reliability fix. **Needs**: a bucket + credentials.
+- **Status**: DEFERRED to go-live by the client (still pre-go-live; parallel run week of
+  2026-07-28, live Aug 2026). No separate server available — **decided approach** (plan in place,
+  execute at go-live):
+  1. Enable **DigitalOcean Droplet Backups** (console checkbox) — whole-droplet weekly, offsite,
+     zero setup.
+  2. Add a granular daily sync via the existing `rclone` hook to **Backblaze B2** (cheapest) or
+     **Google Drive** (free 15 GB — holds ~3 weeks at ~670 MB/night). Storage choice + credentials
+     to be provided at go-live; then wire `rclone config` + verify first upload.
 
 ### P1.3 No rate limiting on auth endpoints  — ✅ DONE (2026-07-24)
 - **Finding**: `/auth/login`, `/auth/forgot-password`, `/auth/reset-password` have no rate
@@ -78,11 +84,14 @@ codebase on 2026-07-24 unless noted.
 - **Recommendation**: standardize all rate/money fields on `decimal`; audit entities +
   request records for `float`/`double`.
 
-### P2.6 No global exception handler
+### P2.6 No global exception handler  — ✅ DONE (2026-07-24)
 - **Finding**: `Program.cs` pipeline has no `UseExceptionHandler` / `AddProblemDetails`.
 - **Risk**: inconsistent error responses; unhandled exceptions return bare 500s.
 - **Recommendation**: add `AddProblemDetails()` + `UseExceptionHandler` for consistent,
   non-leaking error payloads.
+- **Implemented**: `AddProblemDetails()` + `app.UseExceptionHandler()` (first in pipeline) →
+  RFC 7807 ProblemDetails for unhandled exceptions. Smoke-tested (test then prod: ping, auth
+  pipeline, auth guard, rate limiter, clean 404 — 0 failures) and deployed all 4 instances.
 
 ### P2.7 No monitoring / alerting
 - **Finding**: issues surface via user complaints (e.g. the 0722 session bug). Serilog logs to
