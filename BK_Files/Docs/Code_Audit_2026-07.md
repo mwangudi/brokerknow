@@ -88,13 +88,24 @@ codebase on 2026-07-24 unless noted.
   create → now defaults to 0. Runtime-verified on test: create+delete of group/levy/commission
   (identity) and holiday/bank/branch (non-identity) all 201. Deployed all 4 instances.
 
-### P2.5 Money represented as `float`
+### P2.5 Money represented as `float`  — ✅ DONE (2026-07-24)
 - **Finding**: e.g. `CommissionsController.SaveCommissionRequest` mixes `float`
   (CommissionRate, UpperSecurityCommission, BondCommission) and `decimal` (boundaries,
   minimums).
 - **Risk**: rounding drift in a financial system.
 - **Recommendation**: standardize all rate/money fields on `decimal`; audit entities +
   request records for `float`/`double`.
+- **Implemented**: fixed the actual drift in the C# booking math — every
+  `(decimal)(rate / 100)` (float division, then cast) became `((decimal)rate / 100m)`
+  (cast, then exact decimal division) across `CommissionCalculator` (3-tier bands + VAT) and
+  `ContractService` (WHT, exchange, agent, handling-VAT, user-defined levies). The legacy
+  `real` rate columns are shared with the desktop app + SQL procs, so DB storage types were
+  left unchanged (a column migration is a separate, riskier change). Added
+  `CommissionCalculatorTests` (first coverage of the money engine) and revived the whole test
+  suite (stale `IEmailService`/`IPaymentService`/`INotificationService` fakes updated to
+  current signatures; `LegacyKeys.NextIdAsync` given a non-relational fallback + the two
+  transactional test contexts ignore the in-memory `TransactionIgnoredWarning`) → **46/46
+  pass**. Deployed all 4 instances.
 
 ### P2.6 No global exception handler  — ✅ DONE (2026-07-24)
 - **Finding**: `Program.cs` pipeline has no `UseExceptionHandler` / `AddProblemDetails`.
