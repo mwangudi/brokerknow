@@ -11,6 +11,7 @@ import PlaceOrderPage from "./pages/PlaceOrderPage";
 import OrderDetailPage from "./pages/OrderDetailPage";
 import ContractsPage from "./pages/ContractsPage";
 import DocumentsPage from "./pages/DocumentsPage";
+import OfferingsPage from "./pages/OfferingsPage";
 import MarketPricesPage from "./pages/MarketPricesPage";
 import RequestPaymentPage from "./pages/RequestPaymentPage";
 import ChangePasswordPage from "./pages/ChangePasswordPage";
@@ -42,6 +43,7 @@ export default function App() {
           <Route path="orders/:id" element={<OrderDetailPage />} />
           <Route path="contracts" element={<ContractsPage />} />
           <Route path="documents" element={<DocumentsPage />} />
+          <Route path="offerings" element={<OfferingsPage />} />
           <Route path="market-prices" element={<MarketPricesPage />} />
           <Route path="request-payment" element={<RequestPaymentPage />} />
         </Route>
