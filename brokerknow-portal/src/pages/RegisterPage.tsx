@@ -13,6 +13,7 @@ type ClientKind = "existing" | "new" | null;
 const ID_TYPE_OPTIONS = [
   { value: "National ID", label: "National ID" },
   { value: "Passport", label: "Passport" },
+  { value: "Alien ID", label: "Alien ID" },
 ];
 
 const ACCOUNT_TYPE_OPTIONS = [
@@ -731,12 +732,12 @@ export default function RegisterPage() {
                 searchPlaceholder="Search ID type…"
               />
               <Field
-                label={form.idDocumentType === "Passport" ? "Passport number" : "National ID number"}
+                label={`${form.idDocumentType || "ID"} number`}
                 required={!isExisting}
                 value={form.idNumber}
                 error={errors.idNumber}
                 onChange={(v) => set("idNumber", v)}
-                placeholder={form.idDocumentType === "Passport" ? "Passport no." : "National ID no."}
+                placeholder={`${form.idDocumentType || "ID"} no.`}
               />
               <div>
                 <label className="mb-1.5 block text-sm font-medium text-gray-700">
@@ -824,14 +825,14 @@ export default function RegisterPage() {
                               searchPlaceholder="Search ID type…"
                             />
                             <Field
-                              label={j.idDocumentType === "Passport" ? "Passport number" : "National ID number"}
+                              label={`${j.idDocumentType || "ID"} number`}
                               value={j.idNumber}
                               onChange={(v) => {
                                 const next = [...form.jointApplicants];
                                 next[idx] = { ...next[idx], idNumber: v };
                                 set("jointApplicants", next);
                               }}
-                              placeholder={j.idDocumentType === "Passport" ? "Passport no." : "National ID no."}
+                              placeholder={`${j.idDocumentType || "ID"} no.`}
                             />
                             <Field
                               label="Relationship"
