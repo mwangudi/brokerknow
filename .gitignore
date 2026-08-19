@@ -42,7 +42,7 @@ BK_Files/Legacy_System/Malawi_LIVE_After_Levy/
 # CSD client import — the GENERATED apply SQL contains client ID/Passport + CSD
 # numbers in plaintext. Regenerate from the Excel with BK_Files/import_cedar_csd.py;
 # keep the generated PII out of git (the generator + verify SQL are committed).
-/BK_Files/apply_cedar_csd.sql
+/BK_Files/apply_cedar_csd*.sql
 /BK_Files/apply_csd_excel.sql
 /BK_Files/csd_from_excel.csv
 
