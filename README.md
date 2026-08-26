@@ -47,17 +47,30 @@ npm run dev
 
 ## Deployment
 
-The API runs on a DigitalOcean droplet as `systemd` unit `brokerknow-api` on port `5260` (Nginx in front, SQL Server 2022 local). Publish flow:
+Four API instances run on a single DigitalOcean droplet as separate `systemd` units,
+each with its own database (Nginx in front, SQL Server 2022 local):
+
+| Tenant | Unit | Port | Database |
+| --- | --- | --- | --- |
+| Malawi production | `brokerknow-api` | 5260 | `axis_db_prod` |
+| Malawi test | `brokerknow-api-test` | 5261 | `BrokerKnow_Malawi0612` |
+| Rwanda | `brokerknow-api-rwanda` | 5262 | `BrokerKnow_RW_Clean` |
+| Kenya | `brokerknow-api-kenya` | 5264 | `BrokerKnow_KE_Clean` |
+
+A change to shared API code needs deploying to **all four**. Publish flow:
 
 ```powershell
 cd brokerknow-api/src/BrokerKnow.Api
 dotnet publish -c Release -o publish
 cd publish; tar -czf ..\api-publish.tgz *
 scp -O ..\api-publish.tgz root@<droplet>:/tmp/
-ssh root@<droplet> '<heredoc that snapshots /opt/brokerknow, preserves appsettings.json, untars, restarts, healthchecks :5260/health>'
+ssh root@<droplet> 'bash /tmp/deploy_api_one.sh <unit> <install-dir> <port>'
 ```
 
 The droplet's production `appsettings.json` is preserved across deploys — never overwrite it with the dev copy from `publish/`.
+
+Full topology, web-bundle build matrix and the recurring data-refresh procedure are in
+[BK_Files/Docs/Ops_Runbook.md](BK_Files/Docs/Ops_Runbook.md).
 
 ## Branches
 
@@ -67,11 +80,17 @@ The droplet's production `appsettings.json` is preserved across deploys — neve
 
 ## Conventions
 
-- Soft-delete via `Deleted` flag on most tables (no `Deleted` column on `Client`).
+- Soft-delete via a `Deleted` flag on most tables, `Client` included — filter with `ISNULL(Deleted,0)=0`.
 - Contract numbers live on `Lot.ContractNumber`, not `Contract`.
 - Journal amounts use `JournalEntryDebit` / `JournalEntryCredit`.
 - All commission/levy money in **MWK**; PDF wording must match legacy Cedar Capital Contract Note format.
+- Never `git add -A` — `BK_Files/` holds client PII and a real signature that are deliberately git-ignored. Stage explicitly.
 
 ## Status
 
-See `BK_Files/Docs/` for feature docs (Levy_Setup_And_Usage, Order_Lifecycle, Payments_And_Journals, Client_Portal_Registration). New features live on `feature/*` branches and are recorded in the changelog of merged commits.
+[BK_Files/Docs/System_Status.md](BK_Files/Docs/System_Status.md) — what is live, the current
+Malawi book, and the open items.
+
+Other feature docs in `BK_Files/Docs/`: Ops_Runbook, Order_Lifecycle, Payments_And_Journals,
+Levy_Setup_And_Usage, Client_Portal_Registration, Account_Opening_Workflow, IPO_And_Rights,
+Reports, CDS_Trade_Imports.
