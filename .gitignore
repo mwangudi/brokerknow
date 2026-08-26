@@ -47,6 +47,11 @@ BK_Files/Legacy_System/Malawi_LIVE_After_Levy/
 /BK_Files/csd_from_excel.csv
 /BK_Files/CDS Numbers To *.csv
 
+# Access credentials. Anything named *.local.md holds real secrets and must
+# never be committed. The runbook documents access WITHOUT the secret values
+# and points here. See BK_Files/Docs/Ops_Runbook.md §2.
+*.local.md
+
 
 *.tgz
 

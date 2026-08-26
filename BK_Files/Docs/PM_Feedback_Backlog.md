@@ -36,7 +36,7 @@ Source: `BK_Files/Docs/Testing Comments 2.docx`. Triaged into themes. Numbers re
 ## F. Contract Notes
 - F1. Remove the descriptions after Broker Commission (the "50k, etc."). ✅ shipped
 - F2. Use the same contractual wording as legacy BK. ✅ shipped
-- F3. PM will supply a signature image — paste on Contract Note; auto-stamp Date with current timestamp. ✅ shipped — a real signature PNG is deployed at `wwwroot/signature.png` and is **live on PROD + TEST** (since 2026-06-04). The Contract Note PDF renders it in the signature block above the "Sign" line and auto-stamps `Date:` from the server clock; if the asset is ever missing it falls back to a faint "[Signature pending]" placeholder. 🔒 It is a real person's signature → **deliberately kept out of git** (git-ignored in both repos); reference copies live locally in `BK_Files/Docs/` (`Gina's Signature .pdf` + `signature.png`). Fresh-deploy restore step documented in `Ops_Runbook.md §5.4`.
+- F3. PM will supply a signature image — paste on Contract Note; auto-stamp Date with current timestamp. ✅ shipped — a real signature PNG is deployed at `wwwroot/signature.png` and is **live on PROD + TEST** (since 2026-06-04). The Contract Note PDF renders it in the signature block above the "Sign" line and auto-stamps `Date:` from the server clock; if the asset is ever missing it falls back to a faint "[Signature pending]" placeholder. 🔒 It is a real person's signature → **deliberately kept out of git** (git-ignored in both repos); reference copies live locally in `BK_Files/Docs/` (`Gina's Signature .pdf` + `signature.png`). Fresh-deploy restore step documented in `Ops_Runbook.md §7.4`.
 - F4. Allow delete/reverse a Contract Note (very-high-permission action). Confirm whether already implemented. ✅ shipped — full Maker/Checker reversal flow: a maker raises a reversal from ViewContract → it queues in `/contracts/approvals`; a different approver (ADMINISTRATORS / MANAGEMENT / SIGNATORIES / OPERATIONS) approves or rejects. Guards: cannot reverse a contract already linked to a settlement voucher, cannot double-request, maker ≠ checker. Pending PM acceptance test.
 
 ## G. Payments & Receipts
@@ -174,7 +174,7 @@ Source: PM testing sessions and WhatsApp clarifications across **2026-06-17** an
 8. C1 password reset + OTP — touches auth pipeline; size before starting.
 
 Items needing PM input:
-- F3 — live with a real signature; **resolved**: kept out of git (real person's signature), reference copies in `BK_Files/Docs/`, restore step in `Ops_Runbook.md §5.4`.
+- F3 — live with a real signature; **resolved**: kept out of git (real person's signature), reference copies in `BK_Files/Docs/`, restore step in `Ops_Runbook.md §7.4`.
 - C1 OTP channel — **resolved (2026-06-16, L1)**: self-service "Forgot password?" now emails a 6-digit code on portal + back office (admin-driven reset also still available).
 - F4 — contract-note reversal Maker/Checker built; **still requires approval** (kept by client decision). Needs PM acceptance test.
 - G1 — **revised (2026-06-16, L14)**: internal payments/receipts post directly (no approver); Maker/Checker remains for external agent/client cash requests + contract reversals only.

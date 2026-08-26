@@ -76,7 +76,138 @@ Public hostnames: `cedarcapital` (admin), `cedarclient` (portal + `/agent/`),
 
 ---
 
-## 2. Deployment
+## 2. Access — getting in from another machine
+
+> Secret values live in `BK_Files/Docs/Access_Credentials.local.md`, which is
+> git-ignored. This section deliberately contains no passwords or key material.
+> Verified against the droplet **2026-08-26**.
+
+### SSH
+
+```bash
+ssh root@46.101.6.131
+```
+
+| | |
+| --- | --- |
+| Auth | **Public key only** — `PasswordAuthentication no`, `PermitRootLogin yes` |
+| Port | 22 (open in `ufw` as profile `OpenSSH`) |
+| Key | ED25519, fingerprint `SHA256:C489SlXgJOOx/mQSb3OM+OO+ICIiqdeXabzPi8lfs+U`, comment `michael.wangudi@patasoko.co.ke` |
+| Local path | `~/.ssh/id_ed25519` |
+| Other accounts | `deploy` (uid 1000) owns the systemd units; not used interactively |
+
+> ### ⚠ There is exactly one key on this droplet
+>
+> `/root/.ssh/authorized_keys` holds **a single entry**, and password
+> authentication is off. If that private key is lost, SSH access is gone for
+> good — the only way back is the DigitalOcean web console (password reset or
+> recovery ISO).
+>
+> **Before working from a new machine, do one of these while you still have
+> access:**
+>
+> ```bash
+> # Option A — authorise a second key (preferred; keeps machines independent)
+> ssh-keygen -t ed25519 -C "laptop-2" -f ~/.ssh/id_ed25519_bk2
+> ssh root@46.101.6.131 "cat >> /root/.ssh/authorized_keys" < ~/.ssh/id_ed25519_bk2.pub
+> ssh -i ~/.ssh/id_ed25519_bk2 root@46.101.6.131 whoami   # verify BEFORE relying on it
+> ```
+>
+> ```powershell
+> # Option B — copy the existing private key to the new machine
+> #   Windows: %USERPROFILE%\.ssh\id_ed25519   (also copy the .pub)
+> #   chmod 600 on Linux/macOS, or Windows will refuse it as "too open"
+> ```
+>
+> An unused key `id_ed25519_do` (comment `do-brokerknow`) exists locally but is
+> **not** installed on the droplet — it is a ready-made candidate for Option A.
+
+### Reaching the services
+
+Everything except HTTP/HTTPS is bound to loopback, so use an SSH tunnel rather
+than opening firewall ports.
+
+| Service | Bind | Reach it from your machine |
+| --- | --- | --- |
+| API 5260 / 5261 / 5262 / 5264 | `127.0.0.1` | `ssh -L 5260:127.0.0.1:5260 root@46.101.6.131` |
+| SQL Server 1433 | `0.0.0.0`, **blocked by `ufw`** | `ssh -L 1433:127.0.0.1:1433 root@46.101.6.131` then connect SSMS to `localhost,1433` |
+| nginx 80 / 443 | public | the hostnames below |
+
+`ufw` is active and allows only `OpenSSH` and `Nginx Full`. Default incoming is
+deny. **The firewall is the only thing keeping SQL Server off the internet** —
+port 1433 itself listens on all interfaces.
+
+### Public hostnames
+
+| Host | Serves |
+| --- | --- |
+| `cedarcapital.martensafrica.com` | Malawi admin |
+| `cedarclient.martensafrica.com` | Malawi client portal, `/agent/` for agents |
+| `cedartest.martensafrica.com` | Test admin at `/admin/` |
+| `ke.martensafrica.com` | Kenya |
+| `rwandatest.martensafrica.com` | Rwanda test |
+| `booklab.localinvestors.co.ke`, `pharma.localinvestors.co.ke` | unrelated tenants on the same box |
+
+TLS is Let's Encrypt, renewed by `certbot.timer` (twice daily, healthy). nginx
+configs are in `/etc/nginx/sites-enabled/` — the BrokerKnow surfaces are all in
+the single `brokerknow` file.
+
+> The box also runs MySQL, MailHog and two Python services on ports 4000/4100 for
+> unrelated tenants. Don't assume a process on this droplet is ours.
+
+### Database access
+
+```bash
+/opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P '<pwd>' -C -d axis_db_prod -Q "SELECT 1"
+```
+
+`-C` (trust the self-signed certificate) is **required** — without it every
+connection fails. `sa` is the only SQL login; all four API instances use it.
+
+### Backups
+
+| | |
+| --- | --- |
+| Schedule | Full nightly 02:00, transaction log every 15 min (`/etc/cron.d/brokerknow-backup`) |
+| Scripts | `/usr/local/sbin/backup-nightly.sh`, `/usr/local/sbin/backup-log.sh` |
+| Destination | `/var/backups/brokerknow/{sql,fs}` — currently ~8.3 GB |
+| Retention | 14 days, rotated locally |
+| Log | `/var/log/brokerknow-backup.log` |
+
+Verify the last run with:
+
+```bash
+grep -c 'backup-nightly start' /var/log/brokerknow-backup.log
+tail -5 /var/log/brokerknow-backup.log
+```
+
+> ### ⚠ Backups are not leaving the droplet
+>
+> `backup-nightly.sh` supports an offsite `rclone sync` to DigitalOcean Spaces,
+> but **rclone is not installed and no `spaces:` remote is configured**, so every
+> night logs `Offsite SKIPPED`. Backups therefore sit on the same disk as the
+> data they protect — losing the droplet loses both. Fixing it is roughly:
+>
+> ```bash
+> apt-get install -y rclone
+> rclone config       # create an S3-compatible remote literally named "spaces"
+> /usr/local/sbin/backup-nightly.sh   # re-run; the log should show "Offsite sync ->"
+> ```
+
+### Recovering a database
+
+Full backups are ordinary `.bak` files:
+
+```bash
+ls -t /var/backups/brokerknow/sql/axis_db_prod_FULL_*.bak | head -3
+```
+
+Restore with `MOVE` to a new name rather than over the live database, then rename
+in — the same pattern the refresh cutover uses (§6).
+
+---
+
+## 3. Deployment
 
 ### Web (portal / admin)
 
@@ -136,7 +267,7 @@ script handles this. **Don't deploy without it.**
 
 ---
 
-## 3. Sensitive PowerShell quoting traps
+## 4. Sensitive PowerShell quoting traps
 
 Repeatedly bit us today:
 
@@ -155,7 +286,7 @@ Repeatedly bit us today:
 
 ---
 
-## 4. Useful one-liners
+## 5. Useful one-liners
 
 ```powershell
 # Recent API errors (PROD)
@@ -174,7 +305,7 @@ ssh root@46.101.6.131 "grep -oE 'index-[A-Za-z0-9_-]+\.(js|css)' /var/www/portal
 
 ---
 
-## 5. Malawi production data refresh (recurring)
+## 6. Malawi production data refresh (recurring)
 
 Cedar send a fresh `.rar` of the legacy Malawi database every week or two. The refresh
 **replaces `axis_db_prod` wholesale**, so anything that lives only in the app has to be
@@ -256,9 +387,9 @@ disagree are withheld for a human. See `System_Status.md` for current coverage.
 
 ---
 
-## 6. Changes shipped — 2026-06-04
+## 7. Changes shipped — 2026-06-04
 
-### 6.1 Receipts + banks dropdown empty (regression)
+### 7.1 Receipts + banks dropdown empty (regression)
 
 **Symptom.** "Banks do not pull anymore" + "Failed to save receipt" on the
 Add Receipt page.
@@ -283,7 +414,7 @@ const { data: bankAccounts } = useLookup("bank-accounts") as { ... };
 **Deployed.** Web bundle `index-Cz8CAVAA.js` to `/var/www/portal` and
 `/var/www/test-portal`. No API change.
 
-### 6.2 Add User → "Failed to save" (legacy IDENTITY column)
+### 7.2 Add User → "Failed to save" (legacy IDENTITY column)
 
 **Symptom.** Creating a user from the Users page failed silently with
 "Failed to save."
@@ -303,14 +434,14 @@ column (Cedar dev box) and necessary on legacy production-shape databases.
 
 Verified end-to-end with `POST /api/users` → 201 on both TEST and PROD.
 
-### 6.3 Users listing — newest first
+### 7.3 Users listing — newest first
 
 Changed `GET /api/users` from `OrderBy(u => u.UserName)` to
 `OrderByDescending(u => u.UserId)`. The legacy `Users` table has no
 date-added column, but `UserID` is sequential so highest ID is effectively most
 recently added.
 
-### 6.4 Contract-note signature
+### 7.4 Contract-note signature
 
 PM provided a scanned signature; saved to
 `brokerknow-api/src/BrokerKnow.Api/wwwroot/signature.png` (13.6 KB).
@@ -353,7 +484,7 @@ every contract note. Deployed to both TEST and PROD wwwroot.
 > Or set `BROKERKNOW_SIGNATURE_PATH` in the systemd unit to a stable path on the
 > droplet that the deploy never wipes.
 
-### 6.5 Deploy artefacts
+### 7.5 Deploy artefacts
 
 | Build stamp | Tarball |
 | --- | --- |

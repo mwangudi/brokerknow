@@ -78,7 +78,7 @@ several larger pieces built on top:
 
 Every refresh replaces `axis_db_prod` in full, gated on reconciliation, penny-exact
 money totals, foreign-key integrity and a smoke test, with the previous database kept
-as `axis_db_prod_pre<NNNN>` for rollback. Full procedure in `Ops_Runbook.md §5`.
+as `axis_db_prod_pre<NNNN>` for rollback. Full procedure in `Ops_Runbook.md §6`.
 
 Two things must be restored after every import, because the legacy dump does not carry
 them: **CDS numbers** and the **swapped bank-account name/number** fix.
@@ -119,16 +119,22 @@ rather than re-derived, so nothing the team corrects in the app is overwritten.
 | 8 | **Data quality on external logins** | Cedar | Agent `brownleer@africanalliance` has an email with no TLD, so mail to it can never deliver. Client login 141 (`cm105598@gmail.com`) is named "Ferren heighy" but linked to client 5833 "Wongani Evelyn Kuwali". Both left in place per instruction. |
 | 9 | **4,649 register accounts with no client** | Cedar | CDS accounts on the RBM register that match no client in Cedar's book. May be dormant, closed, or held through another broker — worth a view from Cedar. |
 | 10 | **Droplet disk hygiene** | Approval to delete | 104 old API install backups (**12 GB**) and 95 stale web-root backups (959 MB) have accumulated in `/opt` and `/var/www` — about a third of the used disk. Also 7 rollback databases; `pre0708` … `pre0810` are safe to drop. 34 GB free, so not urgent, but it grows with every deploy. |
+| 11 | **Backups never leave the droplet** | Spaces credentials | Nightly full + 15-minute log backups run correctly to `/var/backups/brokerknow` (8.3 GB, 14-day retention), but the offsite `rclone` step logs `Offsite SKIPPED` every night — rclone is not installed and no `spaces:` remote exists. Backups sit on the same disk as the data, so losing the droplet loses both. |
+| 12 | **Single SSH key, no fallback** | Your action | `/root/.ssh/authorized_keys` has one entry and password auth is disabled. Lose that key and the only way back is the DigitalOcean console. Add a second key before it bites — `Ops_Runbook.md §2` has the commands, and an unused `id_ed25519_do` key already exists locally. |
+| 13 | **`sa` password committed to git** | Decision to rotate | It appears in plaintext in six tracked files (runbook, `ops/backup-*.sh`, `ops/bootstrap-test.sh`, `ops/install-backups.sh`, `BK_Files/Demo/seed_demo_cds.sql`) and so is in history on the remote. `sa` is also the only SQL login — every API instance uses it. Rotating touches four `appsettings.json`, both backup scripts, and any helper that embeds it. |
 
 ---
 
 ## 5. Operational notes worth knowing
 
+- **Access from a new machine** is documented in `Ops_Runbook.md §2`. There is only
+  one SSH key on the droplet and no password fallback — add a spare before you need it.
+  Secret values live in `Access_Credentials.local.md`, which is git-ignored.
 - **Deploys are per-instance.** A change to shared API code needs deploying to all four
   services; a web change needs the correct bundle per root (see `Ops_Runbook.md §1`).
 - **Never `git add -A` in this repo.** `BK_Files/` holds client PII and real signatures
   that are deliberately git-ignored. Stage explicitly.
 - **The contract-note signature is not in git.** A fresh clone publishes without it and
-  contract notes silently fall back to a placeholder — see `Ops_Runbook.md §6.4`.
+  contract notes silently fall back to a placeholder — see `Ops_Runbook.md §7.4`.
 - **Rollback databases are the safety net** for anything an import drops; keep at least
   the two most recent.
