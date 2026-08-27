@@ -122,7 +122,8 @@ rather than re-derived, so nothing the team corrects in the app is overwritten.
 | 11 | **Backups never leave the droplet** | Spaces credentials | Nightly full + 15-minute log backups run correctly to `/var/backups/brokerknow` (8.3 GB, 14-day retention), but the offsite `rclone` step logs `Offsite SKIPPED` every night — rclone is not installed and no `spaces:` remote exists. Backups sit on the same disk as the data, so losing the droplet loses both. |
 | 12 | **Single SSH key, no fallback** | Your action | `/root/.ssh/authorized_keys` has one entry and password auth is disabled. Lose that key and the only way back is the DigitalOcean console. Add a second key before it bites — `Ops_Runbook.md §2` has the commands, and an unused `id_ed25519_do` key already exists locally. |
 | 13 | **`sa` password committed to git** | Decision to rotate | It appears in plaintext in six tracked files (runbook, `ops/backup-*.sh`, `ops/bootstrap-test.sh`, `ops/install-backups.sh`, `BK_Files/Demo/seed_demo_cds.sql`) and so is in history on the remote. `sa` is also the only SQL login — every API instance uses it. Rotating touches four `appsettings.json`, both backup scripts, and any helper that embeds it. |
-| 14 | **Portal logins attached to the wrong client** | Investigation | The four logins removed on 2026-08-27 were each linked to a real but unrelated client record, and one had been used. Whatever allowed that link to be made has not been traced — until it is, the same thing can happen on the next self-registration. See section 5. |
+| 14 | **Client keys collide between BrokerKnow and Axis** | Decision on approach | Root cause of the mis-linked logins, now understood (section 5). A pre-cutover guard catches recurrence, but the underlying clash remains: both systems allocate `Client_DPA_` from `MAX+1` over the same range. Options are to give app-created clients a reserved high block, or to stop creating clients in the app and require them in Axis first. Until then, portal-approved clients are lost at each refresh. |
+| 15 | **`linkExisting` has no sanity check** | Small fix | Approving a registration against an existing client verifies only that the client exists — not that the name, email or ID resembles the applicant. That is how login 141 was attached to an unrelated client. A warning on mismatch would have caught it. |
 
 ---
 
@@ -138,8 +139,41 @@ of the four had been used on 14 August. The client records themselves are genuin
 were left untouched; only the logins were deleted, with a full-row snapshot retained
 in `dbo.PortalUsers_removed_20260827`.
 
-> Whatever allowed those logins to be attached to unrelated clients has not been
-> traced — open item 14. Until it is, the same thing can recur on self-registration.
+> Whatever allowed those logins to be attached to unrelated clients has now been
+> traced — it was not a portal bug. See below.
+
+### Why they pointed at the wrong clients
+
+The links were **correct when they were made**. In the database as it stood before
+the 18 August refresh, client 5921 really was Dominic Mutinyu, 5923 really was
+Katherine, 5924 really was Ken Ross — each matching its login exactly.
+
+The refresh replaced `dbo.Client` wholesale from the legacy dump while the
+app-layer `PortalUsers` table was grafted across intact. Clients created in
+BrokerKnow take their key from `MAX(Client_DPA_)+1` **in the app database**, and
+Axis independently allocates the same numbers to different people. So after
+cutover those ids referred to Madalitso Kadzeya, Harry Kaminjolo and Mayamiko
+Kapanda, and the logins silently followed.
+
+Two consequences, both wider than the four logins:
+
+1. **Any client created in BrokerKnow but not entered in Axis is destroyed at the
+   next refresh** and its id handed to someone else. Four were lost this way
+   (5921–5924). `OnlineRegistration` is `0` on all 6,015 rows, so app-created
+   clients cannot even be identified afterwards.
+2. **The delta check could not see it** — it compares clients by `Client_DPA_`, so
+   a collision looks like a match. It reported “0 clients live-only” while three
+   were being overwritten by different people.
+
+A guard now runs before cutover — `BK_Files/refresh_identity_check.sql` compares
+identity rather than id and aborts if a client id a portal login points at would
+change person. Replayed against the 18 August data it correctly aborts and names
+all three logins.
+
+Login 141 was a different fault: it was already attached to an unrelated client
+*before* any refresh. The approval path’s `linkExisting` branch only checks that
+the chosen client exists — it never checks the client plausibly belongs to the
+applicant.
 
 ---
 

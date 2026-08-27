@@ -335,6 +335,17 @@ Supporting SQL lives in `/tmp/bk/` (`graft_app_layer_*.sql`, `migrate_*.sql`,
 | Foreign keys | 22 trusted, 0 violations (23 once the app has started — it adds one) |
 | Smoke on a throwaway instance | 20 endpoints 200, contract-note PDF valid |
 | Delta vs live | nothing live-only that matters (see below) |
+| **Client identity** | `sqlcmd -C -I -d axis_db_prod -i /tmp/bk/refresh_identity_check.sql -v BuildDb="BrokerKnow_Clean"` — **exits non-zero** if a client id that a portal login points at will refer to a different person after cutover |
+
+> ### ⚠ Why the identity gate exists
+>
+> The delta check compares clients by `Client_DPA_` only, so an id present in
+> both looks like a match even when it denotes a **different person**. Clients
+> created in BrokerKnow take their key from `MAX(Client_DPA_)+1` in the app
+> database, while Axis independently hands the same numbers to other people. At
+> the 2026-08-18 refresh that silently re-pointed three portal logins at
+> strangers (ids 5921 / 5923 / 5924) and destroyed the four app-created client
+> records. Nothing in the pipeline noticed. See `System_Status.md §5`.
 
 The cutover script re-checks logins / staff / admins / trusted FKs / client count and
 **aborts** if any guard fails. It renames `axis_db_prod` → `axis_db_prod_pre<NNNN>`
@@ -363,6 +374,11 @@ never changes.
 
 ### Known, accepted findings
 
+- **Clients created in BrokerKnow do not survive a refresh.** The legacy dump is
+  the whole of `dbo.Client`, so an app-created client is replaced by whoever Axis
+  gave that id to. Anything created through portal approval must also be entered
+  in Axis, or it is lost at the next refresh. `OnlineRegistration` is `0` on all
+  6,015 rows, so app-created clients are not even identifiable after the fact.
 - **Lots that exist only on live.** A handful of contracts are present in the legacy
   dump while their `Lot` rows are not, so those contracts lose their trade detail at
   cutover (17 at refresh #9, 5 at #10, 4 of which have survived several refreshes).
