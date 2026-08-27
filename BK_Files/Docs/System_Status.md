@@ -120,7 +120,7 @@ rather than re-derived, so nothing the team corrects in the app is overwritten.
 | 9 | **4,649 register accounts with no client** | Cedar | CDS accounts on the RBM register that match no client in Cedar's book. May be dormant, closed, or held through another broker — worth a view from Cedar. |
 | 10 | ~~**Droplet disk hygiene**~~ | **Done 2026-08-27** | 15 GB reclaimed (58% → 38% used, 48 GB free): 100 stale API install backups, 95 stale web roots, 66 deploy tarballs, apt cache, and 5 superseded rollback databases. `pre0818` and `pre0826` kept. Recurrence prevented — `ops/deploy-*.sh` now keep only the newest 3 backups per target, and journald is capped at 200 MB. |
 | 11 | **Backups never leave the droplet** | Spaces credentials | Nightly full + 15-minute log backups run correctly to `/var/backups/brokerknow` (8.3 GB, 14-day retention), but the offsite `rclone` step logs `Offsite SKIPPED` every night — rclone is not installed and no `spaces:` remote exists. Backups sit on the same disk as the data, so losing the droplet loses both. |
-| 12 | **Single SSH key, no fallback** | Your action | `/root/.ssh/authorized_keys` has one entry and password auth is disabled. Lose that key and the only way back is the DigitalOcean console. Add a second key before it bites — `Ops_Runbook.md §2` has the commands, and an unused `id_ed25519_do` key already exists locally. |
+| 12 | **Both SSH keys on one machine** | Your action | A second key (`id_ed25519_do`) was authorised and tested on 2026-08-27, so `/root/.ssh/authorized_keys` now holds two working entries. Both private keys still sit on the same laptop, so losing the machine still means losing access — keep a copy of one off-machine (password manager or another machine). Password auth remains off; the DigitalOcean console is the last resort. |
 | 13 | **`sa` password still in git history** | Decision to rewrite + rotate | Removed from all tracked files on 2026-08-27 — the ops scripts now source `/etc/brokerknow/db.conf` (root-only, mode 600) and abort loudly if it is absent. But it sat in plaintext for months, so it **remains in history on the remote**; clearing that needs `git filter-repo` and a force-push. The value should also be rotated, which touches four `appsettings.json`, `/etc/brokerknow/db.conf` and the `sa` login itself. `sa` is still the only SQL login. |
 | 14 | **Client keys collide between BrokerKnow and Axis** | Decision on approach | Root cause of the mis-linked logins, now understood (section 5). A pre-cutover guard catches recurrence, but the underlying clash remains: both systems allocate `Client_DPA_` from `MAX+1` over the same range. Options are to give app-created clients a reserved high block, or to stop creating clients in the app and require them in Axis first. Until then, portal-approved clients are lost at each refresh. |
 | 15 | **`linkExisting` has no sanity check** | Small fix | Approving a registration against an existing client verifies only that the client exists — not that the name, email or ID resembles the applicant. That is how login 141 was attached to an unrelated client. A warning on mismatch would have caught it. |
@@ -179,9 +179,9 @@ applicant.
 
 ## 6. Operational notes worth knowing
 
-- **Access from a new machine** is documented in `Ops_Runbook.md §2`. There is only
-  one SSH key on the droplet and no password fallback — add a spare before you need it.
-  Secret values live in `Access_Credentials.local.md`, which is git-ignored.
+- **Access from a new machine** is documented in `Ops_Runbook.md §2`. Two SSH keys are
+  authorised, but both private keys are on the same laptop — keep a copy of one
+  somewhere else. Secret values live in `Access_Credentials.local.md`, which is git-ignored.
 - **Deploys are per-instance.** A change to shared API code needs deploying to all four
   services; a web change needs the correct bundle per root (see `Ops_Runbook.md §1`).
 - **Never `git add -A` in this repo.** `BK_Files/` holds client PII and real signatures

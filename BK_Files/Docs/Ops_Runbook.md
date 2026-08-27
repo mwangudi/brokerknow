@@ -92,35 +92,36 @@ ssh root@46.101.6.131
 | --- | --- |
 | Auth | **Public key only** — `PasswordAuthentication no`, `PermitRootLogin yes` |
 | Port | 22 (open in `ufw` as profile `OpenSSH`) |
-| Key | ED25519, fingerprint `SHA256:C489SlXgJOOx/mQSb3OM+OO+ICIiqdeXabzPi8lfs+U`, comment `michael.wangudi@patasoko.co.ke` |
-| Local path | `~/.ssh/id_ed25519` |
+| Primary key | `~/.ssh/id_ed25519` — `SHA256:C489SlXgJOOx/mQSb3OM+OO+ICIiqdeXabzPi8lfs+U`, comment `michael.wangudi@patasoko.co.ke` |
+| Spare key | `~/.ssh/id_ed25519_do` — `SHA256:R41+1FX9+GPt2ratzTL9YU/AaIxJ/jMayoIYIaOUOSI`, comment `do-brokerknow` (authorised 2026-08-27) |
 | Other accounts | `deploy` (uid 1000) owns the systemd units; not used interactively |
 
-> ### ⚠ There is exactly one key on this droplet
+Both keys are authorised in `/root/.ssh/authorized_keys` and both have been
+tested. Use a specific one with:
+
+```bash
+ssh -i ~/.ssh/id_ed25519_do root@46.101.6.131
+```
+
+> ### ⚠ Both private keys still live on the same laptop
 >
-> `/root/.ssh/authorized_keys` holds **a single entry**, and password
-> authentication is off. If that private key is lost, SSH access is gone for
-> good — the only way back is the DigitalOcean web console (password reset or
-> recovery ISO).
+> Two authorised keys protect against one key file being lost or corrupted, but
+> **not** against losing the machine — which is the likelier event. Keep a copy of
+> at least one private key somewhere else (password manager, or another machine
+> you control). Without that, the only route back in is the DigitalOcean web
+> console.
 >
-> **Before working from a new machine, do one of these while you still have
-> access:**
+> To authorise a further key from a new machine:
 >
 > ```bash
-> # Option A — authorise a second key (preferred; keeps machines independent)
 > ssh-keygen -t ed25519 -C "laptop-2" -f ~/.ssh/id_ed25519_bk2
 > ssh root@46.101.6.131 "cat >> /root/.ssh/authorized_keys" < ~/.ssh/id_ed25519_bk2.pub
-> ssh -i ~/.ssh/id_ed25519_bk2 root@46.101.6.131 whoami   # verify BEFORE relying on it
+> ssh -i ~/.ssh/id_ed25519_bk2 root@46.101.6.131 id -un   # verify BEFORE relying on it
 > ```
 >
-> ```powershell
-> # Option B — copy the existing private key to the new machine
-> #   Windows: %USERPROFILE%\.ssh\id_ed25519   (also copy the .pub)
-> #   chmod 600 on Linux/macOS, or Windows will refuse it as "too open"
-> ```
->
-> An unused key `id_ed25519_do` (comment `do-brokerknow`) exists locally but is
-> **not** installed on the droplet — it is a ready-made candidate for Option A.
+> If the public key is copied from Windows it may carry a trailing carriage
+> return, which silently invalidates the entry. Check with
+> `grep -c $'\r' /root/.ssh/authorized_keys` and strip with `sed -i 's/\r$//'`.
 
 ### Reaching the services
 
