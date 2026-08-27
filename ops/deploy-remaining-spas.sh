@@ -9,6 +9,7 @@ deploy() {
   if [ ! -f "$tgz" ]; then echo "  SKIP $dir (missing $tgz)"; return; fi
   if [ ! -d "$dir" ]; then echo "  SKIP $dir (no such root)"; return; fi
   cp -a "$dir" "${dir}.bak-${S}"
+  ls -dt "${dir}".bak-* 2>/dev/null | tail -n +4 | xargs -r rm -rf
   rm -rf "$dir/assets" "$dir/index.html"
   tar xzf "$tgz" -C "$dir"
   chown -R www-data:www-data "$dir"

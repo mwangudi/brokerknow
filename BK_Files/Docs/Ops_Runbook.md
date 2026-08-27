@@ -23,7 +23,7 @@ Single DigitalOcean droplet hosting **four** API instances, all web bundles, and
 | SQL `sa` password | `SpringfielD##88` |
 | sqlcmd | `/opt/mssql-tools18/bin/sqlcmd` — **requires `-C`** (trust self-signed cert) |
 | Process owner | `deploy` user (systemd units run as `deploy`) |
-| Disk | 77 GB volume, ~57% used |
+| Disk | 77 GB volume, ~38% used (48 GB free) |
 
 ### API services
 

@@ -10,6 +10,8 @@ ROOT=/opt/brokerknow-test; SVC=brokerknow-api-test; PORT=5261
 echo "== API: test ($SVC on :$PORT)"
 cp "$ROOT/api/appsettings.json" "/tmp/test-appsettings.json"
 cp -ra "$ROOT/api" "$ROOT/api.bak-${STAMP}"
+# these are ~120 MB each and were never pruned; 104 had piled up by Aug 2026
+ls -dt "$ROOT"/api.bak-* 2>/dev/null | tail -n +4 | xargs -r rm -rf
 rm -rf "$ROOT/api"/*
 tar -xzf "/tmp/api-publish-${STAMP}.tgz" -C "$ROOT/api"
 cp "/tmp/test-appsettings.json" "$ROOT/api/appsettings.json"
@@ -21,6 +23,7 @@ echo "   test health=$(curl -s -o /dev/null -w '%{http_code}' http://127.0.0.1:$
 D=/var/www/test-portal
 echo "== Portal: $D"
 cp -ra "$D" "${D}.bak-${STAMP}"
+ls -dt "${D}".bak-* 2>/dev/null | tail -n +4 | xargs -r rm -rf
 rm -rf "$D"/assets "$D"/index.html "$D"/favicon.svg "$D"/favicon.png
 mkdir -p "$D"
 tar -xzf "/tmp/portal-${STAMP}.tgz" -C "$D"

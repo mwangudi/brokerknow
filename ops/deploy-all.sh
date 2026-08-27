@@ -15,6 +15,8 @@ for E in test prod; do
   echo "== API: $E ($SVC on :$PORT)"
   cp "$ROOT/api/appsettings.json" "/tmp/${E}-appsettings.json"
   cp -ra "$ROOT/api" "$ROOT/api.bak-${STAMP}"
+  # these are ~120 MB each and were never pruned; 104 had piled up by Aug 2026
+  ls -dt "$ROOT"/api.bak-* 2>/dev/null | tail -n +4 | xargs -r rm -rf
   rm -rf "$ROOT/api"/*
   tar -xzf "/tmp/api-publish-${STAMP}.tgz" -C "$ROOT/api"
   cp "/tmp/${E}-appsettings.json" "$ROOT/api/appsettings.json"
@@ -38,6 +40,7 @@ for D in /var/www/portal /var/www/test-portal; do
   echo "== Portal: $D"
   if [ -d "$D" ]; then
     cp -ra "$D" "${D}.bak-${STAMP}"
+    ls -dt "${D}".bak-* 2>/dev/null | tail -n +4 | xargs -r rm -rf
   fi
   rm -rf "$D"/assets "$D"/index.html "$D"/favicon.svg "$D"/favicon.png
   mkdir -p "$D"
