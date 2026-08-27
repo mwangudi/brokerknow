@@ -18,7 +18,10 @@ BACKUP_ROOT=/var/backups/brokerknow
 SQL_DIR=$BACKUP_ROOT/sql
 FS_DIR=$BACKUP_ROOT/fs
 KEEP_DAYS=14
-SA_PWD='SpringfielD##88'
+# Credentials are not kept in git. See Ops_Runbook.md section 2.
+DB_CONF=${BROKERKNOW_DB_CONF:-/etc/brokerknow/db.conf}
+[ -r "$DB_CONF" ] && . "$DB_CONF"
+SA_PWD="${SA_PWD:?SA_PWD not set - create $DB_CONF containing SA_PWD='...' (chmod 600, root only)}"
 TS=$(date +%Y%m%d-%H%M%S)
 
 mkdir -p "$SQL_DIR" "$FS_DIR"

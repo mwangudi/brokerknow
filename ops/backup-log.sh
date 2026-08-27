@@ -7,7 +7,10 @@ LOG=/var/log/brokerknow-backup.log
 exec >>"$LOG" 2>&1
 
 SQL_DIR=/var/backups/brokerknow/sql
-SA_PWD='SpringfielD##88'
+# Credentials are not kept in git. See Ops_Runbook.md section 2.
+DB_CONF=${BROKERKNOW_DB_CONF:-/etc/brokerknow/db.conf}
+[ -r "$DB_CONF" ] && . "$DB_CONF"
+SA_PWD="${SA_PWD:?SA_PWD not set - create $DB_CONF containing SA_PWD='...' (chmod 600, root only)}"
 TS=$(date +%Y%m%d-%H%M%S)
 
 mkdir -p "$SQL_DIR"

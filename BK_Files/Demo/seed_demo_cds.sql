@@ -2,7 +2,8 @@
 -- reconcile cleanly. Run this ONCE on the droplet before the demo:
 --
 --   ssh root@46.101.6.131
---   /opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P 'SpringfielD##88' \
+--   . /etc/brokerknow/db.conf
+--   /opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P "$SA_PWD" \
 --       -C -d BrokerKnow -i /tmp/seed_demo_cds.sql
 --
 -- Idempotent: re-running just overwrites the same six rows.

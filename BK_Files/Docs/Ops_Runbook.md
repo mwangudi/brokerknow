@@ -20,7 +20,7 @@ Single DigitalOcean droplet hosting **four** API instances, all web bundles, and
 | Hostname | `ubuntu-s-2vcpu-4gb-lon1` |
 | SSH | `ssh root@46.101.6.131` (root login — key-based) |
 | SQL Server | SQL Server 2022 (RTM-CU24-GDR) on `localhost,1433`, unit `mssql-server.service` |
-| SQL `sa` password | `SpringfielD##88` |
+| SQL `sa` password | see `Access_Credentials.local.md` (git-ignored) |
 | sqlcmd | `/opt/mssql-tools18/bin/sqlcmd` — **requires `-C`** (trust self-signed cert) |
 | Process owner | `deploy` user (systemd units run as `deploy`) |
 | Disk | 77 GB volume, ~38% used (48 GB free) |
@@ -158,11 +158,28 @@ the single `brokerknow` file.
 ### Database access
 
 ```bash
-/opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P '<pwd>' -C -d axis_db_prod -Q "SELECT 1"
+. /etc/brokerknow/db.conf
+/opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P "$SA_PWD" -C -d axis_db_prod -Q "SELECT 1"
 ```
 
 `-C` (trust the self-signed certificate) is **required** — without it every
 connection fails. `sa` is the only SQL login; all four API instances use it.
+
+The password lives in **`/etc/brokerknow/db.conf`** on the droplet (root-only,
+mode 600) and in `Access_Credentials.local.md` locally. It is not in git. The
+ops scripts source that file and abort with a clear message if it is missing,
+rather than failing as an authentication error:
+
+```bash
+DB_CONF=${BROKERKNOW_DB_CONF:-/etc/brokerknow/db.conf}
+[ -r "$DB_CONF" ] && . "$DB_CONF"
+SA_PWD="${SA_PWD:?SA_PWD not set ...}"
+```
+
+> **Still to do:** the password was committed in plaintext for months, so it
+> remains in git history on the remote. Removing it needs a history rewrite and
+> a force-push, and the value itself should be rotated — see
+> `System_Status.md` open item 13.
 
 ### Backups
 
@@ -297,7 +314,7 @@ ssh root@46.101.6.131 "journalctl -u brokerknow-api -f"
 
 # Run a SQL script against a database (note: -C is required, and the full sqlcmd path)
 C:\Windows\System32\OpenSSH\scp.exe -O .\query.sql root@46.101.6.131:/tmp/q.sql
-ssh root@46.101.6.131 "/opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P 'SpringfielD##88' -C -d axis_db_prod -W -i /tmp/q.sql"
+ssh root@46.101.6.131 "/opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P "'$SA_PWD'" -C -d axis_db_prod -W -i /tmp/q.sql"
 
 # Re-check which bundle each surface is serving
 ssh root@46.101.6.131 "grep -oE 'index-[A-Za-z0-9_-]+\.(js|css)' /var/www/portal/index.html"

@@ -7,7 +7,10 @@
 #   - Installs logrotate
 set -euo pipefail
 
-SA_PWD='SpringfielD##88'
+# Credentials are not kept in git. See Ops_Runbook.md section 2.
+DB_CONF=${BROKERKNOW_DB_CONF:-/etc/brokerknow/db.conf}
+[ -r "$DB_CONF" ] && . "$DB_CONF"
+SA_PWD="${SA_PWD:?SA_PWD not set - create $DB_CONF containing SA_PWD='...' (chmod 600, root only)}"
 
 echo '=== Install backup scripts ==='
 install -m 0750 -o root -g root /tmp/backup-nightly.sh /usr/local/sbin/backup-nightly.sh
