@@ -213,11 +213,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }, []);
 
-  const forgotPassword = useCallback(async (resetEmail: string) => {
+  const forgotPassword = useCallback(async (identifier: string) => {
     setLoading(true);
     try {
-      const r = await api.post("/auth/forgot-password", { email: resetEmail });
-      return { message: r.data.message as string, token: r.data.token as string };
+      const r = await api.post("/auth/forgot-password", { identifier });
+      return {
+        message: r.data.message as string,
+        token: (r.data.token as string | null) ?? null,
+      };
     } catch (err: any) {
       return { error: err.response?.data?.error || "Could not start a password reset." };
     } finally {

@@ -26,7 +26,7 @@ export default function LoginPage() {
     setError("");
     setNotice("");
     if (!email.trim()) {
-      setError("Enter your email address.");
+      setError("Enter your username or email address.");
       return;
     }
     const result = await forgotPassword(email.trim());
@@ -34,8 +34,13 @@ export default function LoginPage() {
       setError(result.error);
       return;
     }
-    setResetToken(result.token || "");
-    setNotice(result.message || "If that email is registered, we've sent a reset code.");
+    // No token means no code could be delivered — stay put and show why.
+    if (!result.token) {
+      setError(result.message || "Could not send a reset code.");
+      return;
+    }
+    setResetToken(result.token);
+    setNotice(result.message || "If that account exists, we've sent a reset code.");
     setResetCode("");
     setNewPassword("");
     setConfirmPassword("");
@@ -238,7 +243,8 @@ export default function LoginPage() {
               Reset your password
             </h2>
             <p className="mb-7 mt-1 text-sm text-on-surface-variant">
-              Enter your email and we&apos;ll send you a 6-digit code to reset your password.
+              Enter your username or email and we&apos;ll send a 6-digit code to the
+              email we hold for your account.
             </p>
             {error && (
               <div className="mb-4 rounded-lg border border-axis-error/30 bg-axis-error/5 p-3 text-sm text-axis-error">
@@ -247,10 +253,10 @@ export default function LoginPage() {
             )}
             <div className="mb-6">
               <label className="mb-1.5 block text-[11px] font-semibold uppercase tracking-wide text-on-surface-variant">
-                Email
+                Username or email
               </label>
               <input
-                type="email"
+                type="text"
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}

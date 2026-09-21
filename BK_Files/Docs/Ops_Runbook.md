@@ -248,7 +248,8 @@ ssh root@46.101.6.131 "grep -oE 'index-[A-Za-z0-9_-]+\.(js|css)' /var/www/portal
 
 ### API (.NET 10)
 
-Use the helper script `tmp/deploy_api.sh` (commit if it isn't already). It backs up the
+Use the helper script `ops/scripts/deploy_api.sh` (tracked in git — it used to live in
+`tmp/`, which is git-ignored, and was lost). It backs up the
 existing install, swaps in the new tarball, **preserves the existing
 `appsettings.json`** (which differs per environment — TEST/PROD have different
 connection strings) and restarts the unit.
@@ -331,18 +332,39 @@ put back afterwards. Ten refreshes done to date; #10 was 2026-08-26.
 
 ### The pipeline
 
-Driver scripts live in `/tmp` on the droplet and are **cleared on reboot** — re-derive
-them from the previous run rather than writing new ones:
+> **2026-09-19:** the old `/tmp` driver scripts and `/tmp/bk/*.sql` were gone (`/tmp` is
+> cleared and nothing was in git), so "re-derive from the previous run" no longer worked.
+> The pipeline was rebuilt and now lives in **`ops/scripts/`**, which is tracked. Copy it
+> up with `scp ops/scripts/bk_refresh_*.sh root@46.101.6.131:/tmp/bk/`.
+
+Two steps, both parameterised by the restored build database:
 
 ```bash
-sed 's/0818/0826/g; s/180826/260826/g' /tmp/ml0818_<step>.sh > /tmp/ml0826_<step>.sh
+# 1. prepare the freshly restored dump (reads live, never writes to it)
+/tmp/bk/bk_refresh_build.sh BrokerKnow_Malawi0918
+
+# 2. promote it (guards + identity gate first, auto-rollback if the API doesn't return)
+/tmp/bk/bk_refresh_cutover.sh BrokerKnow_Malawi0918 0918 CONFIRM
 ```
 
-Steps, in order: `extract` → restore → `user_diff` → `build` → `smoke` → `delta` →
-`cutover` → post-cutover fixes → `live_verify` → `cleanup`.
+`bk_refresh_build.sh` grafts the app layer, restores primary keys that `SELECT INTO`
+drops, carries CDS numbers across and re-applies the BankAcc swap fix.
 
-Supporting SQL lives in `/tmp/bk/` (`graft_app_layer_*.sql`, `migrate_*.sql`,
-`schema_baseline_BrokerKnow.sql`, `fix_swapped_bankacc_name_number.sql`).
+> **The graft list is derived at run time** — every `dbo` table present in `axis_db_prod`
+> but not in the dump. Do not go back to a hardcoded list: the June-era
+> `graft_app_layer_malawi*.sql` named only 11 tables and there are now 25, so it would
+> silently drop the IPO tables, `SupportTicket*`, `AppSettings`, `LoginOtps` and
+> `ClientCDS_backup_*`.
+
+> **Widen `ClientCDSNo` before copying CDS numbers.** The legacy schema declares it
+> `nvarchar(20)`; Axis widened it to `nvarchar(50)` and real values reach 23 characters,
+> so the carry-across fails with a truncation error. `bk_refresh_build.sh` handles this.
+
+Supporting SQL belongs in `/tmp/bk/` (`fix_swapped_bankacc_name_number.sql`,
+`refresh_identity_check.sql`); master copies are in `BK_Files/`.
+
+`RESTORE HEADERONLY` fails on this SQL Server build ("column name or number of supplied
+values does not match") — read the backup date off the archive instead.
 
 ### Gates that must pass before cutover
 
