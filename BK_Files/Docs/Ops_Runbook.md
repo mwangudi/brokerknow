@@ -328,7 +328,9 @@ ssh root@46.101.6.131 "grep -oE 'index-[A-Za-z0-9_-]+\.(js|css)' /var/www/portal
 
 Cedar send a fresh `.rar` of the legacy Malawi database every week or two. The refresh
 **replaces `axis_db_prod` wholesale**, so anything that lives only in the app has to be
-put back afterwards. Ten refreshes done to date; #10 was 2026-08-26.
+put back afterwards. Eleven refreshes done to date; #11 was 2026-09-18 (`Malawi180926v2.rar`,
+cut over 2026-09-19, rollback `axis_db_prod_pre0918`). A 2026-09-14 dump was restored
+side-by-side as `BrokerKnow_Malawi0914` but never promoted.
 
 ### The pipeline
 

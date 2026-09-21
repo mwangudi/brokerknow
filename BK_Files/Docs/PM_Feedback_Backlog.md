@@ -162,6 +162,23 @@ Source: PM testing sessions and WhatsApp clarifications across **2026-06-17** an
 
 ---
 
+# PM Feedback — September 2026
+
+## N. Auth
+- **N1. Forgot Password by username.** ✅ shipped (2026-09-19) — staff sign in with a username, so an email-only reset was unusable for them. `/auth/forgot-password` now takes an `identifier` (username **or** email), the OTP goes to whatever address is on file, and the forced change-password screen has a "Forgot your password?" link so nobody is stranded on the current-password prompt. Unknown identifiers keep the neutral response (no account enumeration).
+  - ⚠ **Blocked for most staff:** 31 of 38 portal accounts have a username but **no email address**, so they get "ask an administrator" rather than a code. Capturing staff emails is what actually unlocks self-service.
+  - ⚠ **Separate security item:** 29 of 38 accounts share one identical bcrypt hash (16 Frontoffice, 11 Operations, both Management) — same seeded password, never rotated. Worth forcing a reset before go-live.
+
+## O. Client Listing report
+- **O1. Registration date + date range.** ✅ shipped (2026-09-21) — the listing gains a **Registered** column and *Registered from / to* pickers that filter the table and carry through to the CSV. Uses the shared flatpickr `DatePicker` like every other report.
+  - Reads **`ClientRegDate`** (the legacy broker registration date, populated on every row back to 2008-11-10). *Not* `ClientDateOfRegistration`, which is a corporate account's **incorporation** date for the CSD1 form and is NULL on all 6,134 clients.
+- **O2. "Axis doesn't match the old system."** ✅ resolved (2026-09-21) — **no data was missing.** For Jan 2025 → Aug 2026, BrokerKnow listed 4,130 and the Axis export 4,116. The 14-row gap is exactly the **soft-deleted** clients: production holds 4,130 = 4,116 active + 14 deleted, and all 14 are present in Axis with `Deleted = 1`. Zero name mismatches across the 4,116 shared client codes, and nothing exists in Axis that is absent from BrokerKnow.
+  - Root cause was ours: the on-screen listing calls `IgnoreQueryFilters()` and shows deleted clients, but the CSV did not — so the same report gave two different totals, and deleted rows on screen carried no marker.
+  - Fix: the export ignores the filter too and carries a **Deleted** column plus an "Of which deleted" footer; the table shows a **Deleted** badge; an **Include deleted** toggle (default **on**, matching how BrokerKnow reports) drives both.
+  - Note for the office: several of the 14 look like genuine de-duplication rather than lost records — e.g. client 4299 *Numeri Bonwell Nkhono* duplicates the still-active 1240 (same ID document and phone, different email).
+
+---
+
 
 ## Suggested execution order
 1. Quick UI wins (A1, A2, B1, B2, D1, D6, E1, E2, E3, E4, F1, H2) — visible to PM fast, low risk.
